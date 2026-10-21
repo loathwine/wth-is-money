@@ -1,7 +1,7 @@
 // Drive the game in headless Chrome over the DevTools protocol: run JS steps, take screenshots.
 // Usage: node tools/drive.js <url> <outdir> <steps.js>
 //   steps.js exports an array of { js?: string, wait?: ms, shot?: name, key?: 'e', tap?: [x, y] }
-//   PHONE=1 emulates a 390×844 touch phone; a step with full: true screenshots the whole page.
+//   PHONE=1 emulates a 390×844 touch phone (PHONE=land: held sideways); a step with full: true screenshots the whole page.
 const { spawn } = require('child_process');
 const fs = require('fs');
 const [url, out, stepsFile] = process.argv.slice(2);
@@ -22,7 +22,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const send = (method, params = {}) => new Promise(r => { const i = ++id; pending[i] = r; ws.send(JSON.stringify({ id: i, method, params })); });
   await send('Runtime.enable'); await send('Page.enable');
   const PHONE = !!process.env.PHONE;
-  await send('Emulation.setDeviceMetricsOverride', PHONE ? { width: 390, height: 844, deviceScaleFactor: 2, mobile: true } : { width: 1400, height: 950, deviceScaleFactor: 1, mobile: false });
+  const LAND = process.env.PHONE === 'land';
+  await send('Emulation.setDeviceMetricsOverride', PHONE ? { width: LAND ? 844 : 390, height: LAND ? 390 : 844, deviceScaleFactor: 2, mobile: true } : { width: 1400, height: 950, deviceScaleFactor: 1, mobile: false });
   if (PHONE) { await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); await send('Emulation.setEmitTouchEventsForMouse', { enabled: true, configuration: 'mobile' }); }
   await send('Page.navigate', { url }); await sleep(1500);
   for (const s of steps) {

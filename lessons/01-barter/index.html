@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="phone.css">
 </head>
 <body>
 
@@ -35,7 +36,8 @@
     <div class="ticker" id="ticker"></div>
   </section>
 
-  <aside class="side">
+  <aside class="side" id="side">
+    <button class="sheet-close" id="sheet-close" aria-label="Close">▾</button>
     <nav class="tabs">
       <button class="tab on" data-tab="pack">PACK</button>
       <button class="tab" data-tab="notes">NOTEBOOK</button>
@@ -46,6 +48,15 @@
     <div class="tabpane" id="pane-village" hidden></div>
   </aside>
 </main>
+
+<!-- phones only: the controls live in a bar under the village -->
+<nav class="phonebar" id="phonebar">
+  <button data-sheet="pack"><span>🎒</span>PACK</button>
+  <button data-sheet="notes"><span>📓</span>NOTES</button>
+  <button data-sheet="village" id="pb-village" hidden><span>📈</span>VILLAGE</button>
+  <button id="pb-auto"><span>⏩</span>AUTO</button>
+  <button id="pb-home" class="home"><span>🏠</span>HOME</button>
+</nav>
 
 <!-- trade table: their stall on top, your pack at the bottom -->
 <div class="modal" id="dialog" hidden>

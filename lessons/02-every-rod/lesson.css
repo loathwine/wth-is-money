@@ -70,3 +70,17 @@ h1 { font-size: clamp(28px, 5vw, 44px); margin: 6px 0 24px; }
   .rod-card { flex-direction: column; }
   .versus { grid-template-columns: 1fr; }
 }
+
+/* phones, during a run: the game fills the screen; in portrait it asks you to turn sideways */
+.turn { display: none; }
+body.playing { overflow: hidden; }
+body.playing .game { touch-action: none; position: fixed; inset: 0; z-index: 100; background: #000; border: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: auto; }
+body.playing .game canvas { width: auto; height: auto; max-width: 100vw; max-height: 100dvh; aspect-ratio: 16 / 9; border: 0; }
+@media (orientation: landscape) { body.playing .game canvas { height: 100dvh; } }
+@media (orientation: portrait) {
+  body.playing .game canvas { width: 100vw; }
+  body.playing .turn { display: block; color: var(--muted); font-family: var(--font-pixel); font-size: 11px; margin-top: 18px; padding: 0 12px; text-align: center; }
+}
+body.playing .game-ui { display: none; }
+@media (max-width: 700px) { .long { display: none; } }
+@media (min-width: 701px) { .short { display: none; } }

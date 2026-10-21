@@ -88,17 +88,29 @@
     Chip.sfx("pop");
     Object.assign(S, { phase: "run", stone: STONES[k], y: H * 0.6, target: H * 0.6, hearts: HEARTS, t: 0, dist: 0, rocks: [], hitAt: -9, next: 1.2, end: 0, sunk: false });
     panel("");
-    if (matchMedia("(max-width: 700px)").matches) cv.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (PHONE) playMode(true);
     Chip.song(Chip.SONGS.yap);
   }
+  // Phones: the run takes over the whole screen (and asks to turn sideways); menus return to the page.
+  const PHONE = matchMedia("(max-width: 700px), (pointer: coarse) and (max-height: 500px)").matches;
+  function playMode(on) {
+    document.body.classList.toggle("playing", on);
+    const el = $("#game");
+    try {
+      if (on && el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().then(() => screen.orientation?.lock?.("landscape")).catch(() => {});
+      if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    } catch {}
+  }
   function finish() {
+    if (PHONE) playMode(false);
     const s = S.stone, sunk = S.sunk, value = sunk ? 0 : s.baskets, ok = Math.round(s.baskets * OKEEFE_SHARE);
     S.phase = "result";
     if (value > S.best) { S.best = value; try { localStorage.setItem("wth-ep02-yap-best", value); } catch {} }
     Chip.song(Chip.SONGS.mystery);
     panel(sunk ? `<h3>LOST AT SEA</h3>
         <p>The storm took your ${s.name.toLowerCase()} stone. It's on the bottom of the ocean now.</p>
-        <p>On Yap, that might not even matter. Furness heard of a family whose fortune was a stone lost in a storm generations earlier, and <b>the village still counted it</b>.</p>
+        <p class="long">On Yap, that might not even matter. Furness heard of a family whose fortune was a stone lost in a storm generations earlier, and <b>the village still counted it</b>.</p>
+        <p class="short">On Yap, a stone lost at sea <b>could still count</b> as someone's fortune.</p>
         <div class="row"><button class="btn" data-again>TRY AGAIN</button><button class="btn ghost" data-done>CONTINUE</button></div>`
       : `<h3>HOME, WITH A ${s.name} STONE</h3>
         <p>You risked your crew and your canoe. Then O'Keefe's schooner sailed past with <b>ten</b>.</p>
@@ -111,6 +123,7 @@
     ui.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); pickPanel(); };
     ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealRod(); };
     Chip.sfx(sunk ? "sad" : "chime");
+    if (PHONE) ui.scrollIntoView({ block: "center" });
   }
   function revealRod() {
     $("#rod-step").hidden = false; $("#rod-card").hidden = false;
@@ -126,8 +139,9 @@
     if (S.phase === "run" && ["arrowup", "arrowdown", "w", "s"].includes(k)) { S.keys[k] = true; e.preventDefault(); }
   });
   addEventListener("keyup", (e) => { S.keys[e.key.toLowerCase()] = false; });
-  const pointerY = (e) => { const r = cv.getBoundingClientRect(); return (e.clientY - r.top) / r.height * H; };
-  cv.addEventListener("pointerdown", (e) => { if (S.phase === "run") { S.drag = true; S.target = pointerY(e); } });
+  const pointerY = (e) => { const r = cv.getBoundingClientRect(); return Math.max(0, Math.min(H, (e.clientY - r.top) / r.height * H)); };
+  // the whole game box takes drags, so on a phone the black bars around the sea steer too
+  $("#game").addEventListener("pointerdown", (e) => { if (S.phase === "run") { S.drag = true; S.target = pointerY(e); } });
   addEventListener("pointermove", (e) => { if (S.drag && S.phase === "run") S.target = pointerY(e); });
   addEventListener("pointerup", () => { S.drag = false; });
   if (matchMedia("(pointer: coarse)").matches) $("#steer-hint").innerHTML = "Drag up and down on the sea to steer.";

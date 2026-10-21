@@ -6,7 +6,7 @@
 'use strict';
 
 const { GOODS, IDS } = Sim;
-const { STALLS, DOOR, HUT, TREES, TILE } = Art;
+const { STALLS, DOOR, HUT, TREES, STONE, TILE, PHONE } = Art;
 const $ = s => document.querySelector(s);
 const NPCS = ['mira', 'bob', 'sela', 'dov', 'rod', 'hesk'];
 const params = new URLSearchParams(location.search);
@@ -50,6 +50,8 @@ const S = {
 
 /* ---------- boot ---------- */
 const canvas = $('#world');
+canvas.width = Art.MW * TILE; canvas.height = Art.MH * TILE;
+if (PHONE) document.body.classList.add('phone');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 const bg = Art.buildBackground();
@@ -106,6 +108,7 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { S.keys[e.key.toLowerCase()] = false; });
 
 canvas.addEventListener('pointerdown', e => {
+  if (PHONE && sheetOpen()) { closeSheet(); return; }
   if (S.phase !== 'market') return;
   const r = canvas.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * canvas.width;
@@ -134,10 +137,21 @@ addEventListener('keydown', e => {
 });
 
 function showTab(t) {
+  document.querySelectorAll('.phonebar [data-sheet]').forEach(b => { b.classList.toggle('on', b.dataset.sheet === t && sheetOpen()); if (b.dataset.sheet === t) b.classList.remove('new'); });
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.tab === t); if (b.dataset.tab === t) b.classList.remove('new'); });
   for (const p of ['pack', 'notes', 'village']) $('#pane-' + p).hidden = p !== t;
   if (t === 'village') renderVillage();
 }
+
+// phones: the side panel is a sheet that slides up over the village
+const sheetOpen = () => $('#side').classList.contains('open');
+function openSheet(t) { $('#side').classList.add('open'); showTab(t); }
+function closeSheet() { $('#side').classList.remove('open'); document.querySelectorAll('.phonebar [data-sheet]').forEach(b => b.classList.remove('on')); }
+document.querySelectorAll('.phonebar [data-sheet]').forEach(b => b.onclick = () =>
+  sheetOpen() && b.classList.contains('on') ? closeSheet() : openSheet(b.dataset.sheet));
+$('#sheet-close').onclick = closeSheet;
+$('#pb-auto').onclick = () => { closeSheet(); $('#btn-auto').click(); };
+$('#pb-home').onclick = () => { closeSheet(); $('#btn-home').click(); };
 
 function nearest() {
   const p = S.p;
@@ -164,7 +178,7 @@ function solid(x, y) {
     const c = STALLS[id].counter;
     if (x > c.x - 3 && x < c.x + c.w + 3 && y > c.y - 26 && y < c.y + c.h + 3) return true;
   }
-  if (x > 15 * TILE && x < 16 * TILE + 16 && y > 6 * TILE && y < 7 * TILE + 18) return true; // standing stone
+  if (x > STONE.x - 8 && x < STONE.x + 24 && y > STONE.y - 8 && y < STONE.y + 26) return true; // standing stone
   for (const [tx, ty] of TREES) if (Math.abs(x - tx) < 5 && y > ty + 4 && y < ty + 13) return true;
   return false;
 }
@@ -334,6 +348,7 @@ function addTicker(html) {
 
 /* ---------- trade table ---------- */
 function openDialog(id) {
+  closeSheet();
   const a = S.w.byId[id];
   if (!a.present) { bubble('you', `${nm(id)} isn't here today`, true); return; }
   S.phase = 'dialog';
@@ -415,7 +430,7 @@ function renderDialog() {
     if (ok.length) {
       deal += ok.map(o => {
         const isStep = step && step.npc === npc && step.x === x && step.y === o.y;
-        return `<div class="deal-row ${isStep ? 'route' : ''}" data-y="${o.y}"><span class="terms">give <b>${o.k}</b> ${icon(o.y)} ${GOODS[o.y].name}<span class="arrow">→</span>get <b>${o.n}</b> ${icon(x)} ${gname(x, o.n)}${isStep ? ' <span class="tag">← YOUR ROUTE</span>' : ''}</span><button class="btn small" data-y="${o.y}" data-k="${o.k}" data-n="${o.n}">TRADE</button></div>`;
+        return `<div class="deal-row ${isStep ? 'route' : ''}" data-y="${o.y}"><span class="terms">give <b>${o.k}</b> ${icon(o.y)}<span class="gn"> ${GOODS[o.y].name}</span><span class="arrow">→</span>get <b>${o.n}</b> ${icon(x)}<span class="gn"> ${gname(x, o.n)}</span>${isStep ? ' <span class="tag">← <span class="long">YOUR </span>ROUTE</span>' : ''}</span><button class="btn small" data-y="${o.y}" data-k="${o.k}" data-n="${o.n}">TRADE</button></div>`;
       }).join('');
     } else {
       const wantsIt = IDS.filter(y => Q[x][y] && !Sim.count(you, y));
@@ -469,6 +484,7 @@ function bindFollow(sel) {
 function followRoute(r) {
   S.route = { target: r.target, steps: r.steps, i: 0 };
   S.plan = null;
+  closeSheet();
   if (S.phase === 'dialog') {
     const st = r.steps[0];
     if (st.npc === S.dlg.npc) { S.dlg.x = st.x; S.dlg.find = null; renderDialog(); renderRoute(); return; }
@@ -593,9 +609,11 @@ function renderTop() {
     const per = you.needs[g];
     const days = Math.floor((Sim.count(you, g) + you.acc[g]) / per);
     const bad = you.hunger[g] > 0;
-    return `<span class="need ${bad ? 'bad' : 'ok'}" data-plan="${g}" title="Click to find a way to get more. Your family uses ${per < 1 ? 'one every ' + Math.round(1 / per) + ' days' : per + ' a day'}">${icon(g, 'sm')} <b>${days}</b>&nbsp;day${days === 1 ? '' : 's'} left${bad ? ' · SHORT' : ''}</span>`;
+    return `<span class="need ${bad ? 'bad' : 'ok'}" data-plan="${g}" title="Click to find a way to get more. Your family uses ${per < 1 ? 'one every ' + Math.round(1 / per) + ' days' : per + ' a day'}">${icon(g, 'sm')} ${PHONE ? `<b>${days}d</b>` : `<b>${days}</b>&nbsp;day${days === 1 ? '' : 's'} left${bad ? ' · SHORT' : ''}`}</span>`;
   }).join('');
   $('#family').innerHTML = `<span>Family:</span>${fam}`;
+  $('#pb-village').hidden = $('#tab-village').hidden;
+  $('#pb-village').classList.toggle('new', $('#tab-village').classList.contains('new'));
   document.querySelectorAll('#family [data-plan]').forEach(b => b.onclick = () => plan(b.dataset.plan));
 }
 
@@ -620,8 +638,8 @@ function renderPack() {
 }
 
 function plan(g) {
-  showTab('pack');
-  if (NARROW()) $('.side').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (PHONE) openSheet('pack'); else showTab('pack');
+  if (NARROW() && !PHONE) $('.side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   S.plan = { g, routes: S.phase === 'market' || S.phase === 'dialog' ? Sim.findRoutes(S.w, g, 1).slice(0, 3) : [] };
   renderPack();
 }
@@ -742,14 +760,15 @@ function story(html, done, okText = 'OK') {
 function introCard() {
   return `
     <h2>Welcome to Ulm Hollow</h2>
-    <p class="big">You live in a small village on a strange little world.</p>
+    <p class="big long">You live in a small village on a strange little world.</p>
     <p>Your family raises ${icon('bog')} <b>bogwool</b>. You make 2 a day. But your family needs other things:</p>
     <ul class="night-list">
       <li>${icon('lum')} <b>1 lumfruit</b> every day, to eat</li>
-      <li>${icon('ket')} <b>1 kettlestone</b> every 3 days, for tools. Without tools you make less bogwool.</li>
+      <li>${icon('ket')} <b>1 kettlestone</b> every 3 days, for tools.<span class="long"> Without tools you make less bogwool.</span></li>
     </ul>
     <p>You make neither. But there's a market every morning, and everyone brings what they have.</p>
-    <p class="muted">Nobody will tell you what anything is worth. Walk to a stall and find out. Stuck? The 🧭 helper works out chains of swaps, just like you could with your notebook.</p>`;
+    <p class="muted long">Nobody will tell you what anything is worth. Walk to a stall and find out. Stuck? The 🧭 helper works out chains of swaps, just like you could with your notebook.</p>
+    <p class="muted short">Tap a stall to trade. Tap your family's needs at the top to find a way to get them.</p>`;
 }
 
 function nightCard(ev, autoTrades, away) {
@@ -786,7 +805,7 @@ function checkStory(then) {
       <h2>${nm(npc)} doesn't want your ${GOODS[g].name.toLowerCase()}</h2>
       <p>${nm(npc)} has something you want. But you have nothing ${nm(npc)} wants.</p>
       <p>This is the basic problem with barter. A swap only works when <b>each side wants exactly what the other has</b>. Economists call it the <i>double coincidence of wants</i>.</p>
-      <p>Your <b>NOTEBOOK</b> is keeping track of what you learn. Who <i>does</i> want what you've got?</p>`);
+      <p class="long">Your <b>NOTEBOOK</b> is keeping track of what you learn. Who <i>does</i> want what you've got?</p>`);
   }
   if (!f.indirect && f.indirectPending && S.phase === 'market') {
     const { x, y } = f.indirectPending;
@@ -795,7 +814,7 @@ function checkStory(then) {
       <h2>You just bought something you can't use</h2>
       <p>Your family has no use for ${icon(x)} <b>${GOODS[x].name.toLowerCase()}</b>. You traded for it anyway, because you think ${fans.length ? '<b>' + fans.slice(0, 2).join('</b> and <b>') + '</b>' : 'someone'} will take it for what you really need.</p>
       <p class="big">That's <b class="gold">indirect exchange</b>: taking something not to use, but to trade it on.</p>
-      <p>Keep that in mind. Everyone in Ulm Hollow is doing the same calculation, every market day.</p>`);
+      <p class="long">Keep that in mind. Everyone in Ulm Hollow is doing the same calculation, every market day.</p>`);
   }
   const top = topMoney();
   if (!f.money && w.day >= 4 && recentMoneyness(top) >= 0.5 && S.phase === 'market') {
@@ -808,18 +827,18 @@ function checkStory(then) {
     if (Sim.VILLAGERS.find(v => v.makes === top).rate < 1) why.push('nobody can make much of it');
     return fire('money', `
       <h2>Something is happening in Ulm Hollow</h2>
-      <p>Look at the new <b>VILLAGE</b> tab. More and more villagers take ${icon(top)} <b>${G.name.toLowerCase()}</b> even though they have <b>no use for it</b>. They take it because they know <i>others</i> will take it.</p>
-      <p>And every time someone accepts it, it becomes a little more useful to accept. Nobody voted. Nobody decided. It just… happened.</p>
+      <p>Look at the new <b>VILLAGE</b> <span class="long">tab</span><span class="short">button</span>. More and more villagers take ${icon(top)} <b>${G.name.toLowerCase()}</b> even though they have <b>no use for it</b>. They take it because they know <i>others</i> will take it.</p>
+      <p class="long">And every time someone accepts it, it becomes a little more useful to accept. Nobody voted. Nobody decided. It just… happened.</p>
       <p>Why ${G.name.toLowerCase()}? Everyone eats lumfruit, but it goes mushy in 3 days. Kettlestone is useful, but too heavy to carry around. ${G.name}: ${why.join(', ')}.</p>
       <p class="big">A good that people hold only to trade away again is called <b class="pen">money</b>.</p>
-      <p class="quote">"…the most saleable of goods became the ones everyone accepts in exchange." Carl Menger, <i>On the Origin of Money</i>, 1892 (paraphrased)</p>`, 'SHOW ME');
+      <p class="quote long">"…the most saleable of goods became the ones everyone accepts in exchange." Carl Menger, <i>On the Origin of Money</i>, 1892 (paraphrased)</p>`, 'SHOW ME');
   }
   if (!f.rod && w.rodDay && w.day >= w.rodDay) {
     return fire('rod', `
       <h2>News at the market</h2>
       <p class="big"><b class="pen">Rod found a cave full of pentaja.</b></p>
       <p>Rod used to dig up a pentaja every couple of days. Now he's bringing out <b>ten a day</b>.</p>
-      <p>Lucky Rod! He can buy whatever he wants now. But think about what that means for everyone else's pentaja…</p>`);
+      <p class="long">Lucky Rod! He can buy whatever he wants now. But think about what that means for everyone else's pentaja…</p>`);
   }
   if (!f.inflation && w.rodDay && w.day >= w.rodDay + 4) {
     const H = w.history;
@@ -833,7 +852,7 @@ function checkStory(then) {
       return fire('inflation', `
         <h2>Your pentaja buys less</h2>
         <p>Before Rod's cave, a lumfruit cost about <b>${a.toFixed(1)}</b> ${icon('pen', 'sm')}.<br>Now it costs about <b class="pen">${b.toFixed(1)}</b> ${icon('pen', 'sm')}.</p>
-        <p>Nothing about lumfruit changed. There are just a lot more pentaja chasing the same lumfruit.</p>
+        <p class="long">Nothing about lumfruit changed. There are just a lot more pentaja chasing the same lumfruit.</p>
         ${mine ? `<p>You're holding <b>${mine}</b> pentaja. That used to buy about ${Math.floor(mine / a)} lumfruit. Today it buys about ${Math.floor(mine / b)}.</p>` : ''}
         <p class="big">Rod didn't steal from anyone. But everyone who <b>saved</b> in pentaja just paid for his shopping.</p>`, 'OOF');
     }
@@ -843,7 +862,7 @@ function checkStory(then) {
     return fire('zir', `
       <h2>The village is quietly switching</h2>
       <p>Fewer villagers will take ${icon('pen')} pentaja now. More of them are asking for ${icon('zir')} <b class="zir">zirnet</b>.</p>
-      <p>Old Hesk still finds one every few days, cave or no cave. Nobody can suddenly make lots more zirnet. That makes it a better place to keep your savings.</p>
+      <p class="long">Old Hesk still finds one every few days, cave or no cave. Nobody can suddenly make lots more zirnet. That makes it a better place to keep your savings.</p>
       <p class="big">Money is only as good as <b>how hard it is to make more of it</b>.</p>`);
   }
   if (!f.end && w.rodDay && w.day >= w.rodDay + 10 && f.rod) {
@@ -856,9 +875,9 @@ function checkStory(then) {
         <li>4. Then Rod found a way to make lots more of it. Prices rose. Savers lost out.</li>
         <li>5. ${f.zir ? 'The village moved to something harder to make: zirnet.' : 'Nobody trusts pentaja like before. The village is looking for something harder to make.'}</li>
       </ul>
-      <p>This has happened again and again in human history: shells, beads, stones, metal. Each time, someone found a cave.</p>
+      <p class="long">This has happened again and again in human history: shells, beads, stones, metal. Each time, someone found a cave.</p>
       <p class="big">Next: <b>Every Rod in History.</b></p>
-      <p class="muted">You can keep playing. Try a different village: add <code>?seed=3</code> to the address.</p>`, 'KEEP PLAYING');
+      <p class="muted long">You can keep playing. Try a different village: add <code>?seed=3</code> to the address.</p>`, 'KEEP PLAYING');
   }
   return false;
 }

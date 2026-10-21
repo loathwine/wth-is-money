@@ -170,10 +170,22 @@ function drawPortrait(canvas, id, t = 0) {
 }
 
 /* ---------- map ---------- */
-const TILE = 16, MW = 24, MH = 14;
+// Phones get a portrait village (two columns of stalls, home at the bottom) that fills the screen.
+// ?phone=1 / ?phone=0 force either layout.
+const q = new URLSearchParams(location.search).get('phone');
+const PHONE = q != null ? q === '1' : matchMedia('(max-width: 700px)').matches;
+// On a phone the map is 14 tiles wide and as tall as the screen allows (22–28 tiles, leaving room for the trade log); the plaza
+// stays put and the grass around your hut grows or shrinks.
+const TILE = 16, MW = PHONE ? 14 : 24;
+const MH = PHONE ? Math.max(22, Math.min(28, Math.floor(MW * (innerHeight - 170) / innerWidth))) : 14;
+const B = (MH - 24) * TILE; // phone: how far the hut and its garden move down from the 24-row layout
 
 // Stalls: counter tile row + leftmost tile column. NPC stands just behind (north of) the counter.
-const STALLS = {
+const STALLS = PHONE ? {
+  mira: { tx: 2, ty: 3 }, bob:  { tx: 9, ty: 3 },
+  sela: { tx: 2, ty: 8 }, dov:  { tx: 9, ty: 8 },
+  rod:  { tx: 2, ty: 13 }, hesk: { tx: 9, ty: 13 },
+} : {
   mira: { tx: 9,  ty: 3 }, bob:  { tx: 14, ty: 3 }, sela: { tx: 19, ty: 3 },
   dov:  { tx: 9,  ty: 9 }, rod:  { tx: 14, ty: 9 }, hesk: { tx: 19, ty: 9 },
 };
@@ -184,17 +196,20 @@ for (const id in STALLS) {
   s.counter = { x: s.tx * TILE, y: s.ty * TILE + 4, w: 48, h: 12 };
   s.front = { x: s.tx * TILE + 24, y: s.ty * TILE + 26 };
 }
-const HUT = { x: 16, y: 40, w: 80, h: 72 };
-const DOOR = { x: 56, y: 124 };
-const TREES = [[20, 20], [100, 26], [24, 180], [70, 200], [112, 170], [372, 120], [120, 92]];
+const HUT = PHONE ? { x: 20, y: 282 + B, w: 80, h: 72 } : { x: 16, y: 40, w: 80, h: 72 };
+const DOOR = { x: HUT.x + 40, y: HUT.y + HUT.h + 12 };
+const TREES = PHONE ? [[200, 300], [212, 352], [140, 336], [112, 306], [130, 296]].map(([x, y]) => [x, y + B]) : [[20, 20], [100, 26], [24, 180], [70, 200], [112, 170], [372, 120], [120, 92]];
+// the glowing standing stone in the middle of the plaza
+const STONE = PHONE ? { x: 112, y: 250 } : { x: 15 * TILE + 8, y: 6 * TILE + 8 };
 
 function hash(x, y) { let h = (x * 374761393 + y * 668265263) >>> 0; h = (h ^ (h >>> 13)) * 1274126177 >>> 0; return (h ^ (h >>> 16)) / 4294967296; }
 
 function buildBackground() {
   const c = document.createElement('canvas'); c.width = MW * TILE; c.height = MH * TILE;
   const ctx = c.getContext('2d');
-  const isPlaza = (tx, ty) => tx >= 8 && ty >= 1 && ty <= 12;
-  const isPath = (tx, ty) => (ty === 8 && tx >= 3 && tx <= 6) || (tx === 6 && ty >= 6 && ty <= 8) || (ty === 6 && tx >= 6 && tx < 8);
+  const isPlaza = PHONE ? (tx, ty) => tx >= 1 && tx <= 12 && ty >= 1 && ty <= 16 : (tx, ty) => tx >= 8 && ty >= 1 && ty <= 12;
+  const isPath = PHONE ? (tx, ty) => (ty === MH - 1 && tx >= 3 && tx <= 10) || (tx === 10 && ty >= 17 && ty <= MH - 1)
+    : (tx, ty) => (ty === 8 && tx >= 3 && tx <= 6) || (tx === 6 && ty >= 6 && ty <= 8) || (ty === 6 && tx >= 6 && tx < 8);
   for (let ty = 0; ty < MH; ty++) for (let tx = 0; tx < MW; tx++) {
     const X = tx * TILE, Y = ty * TILE;
     if (isPlaza(tx, ty)) {
@@ -214,7 +229,7 @@ function buildBackground() {
     }
   }
   // plaza centrepiece: a glowing standing stone
-  const ox = 15 * TILE + 8, oy = 6 * TILE + 8;
+  const ox = STONE.x, oy = STONE.y;
   ctx.fillStyle = '#2c2440'; ctx.fillRect(ox - 8, oy + 6, 16, 4);
   ctx.fillStyle = '#5a4a86'; ctx.fillRect(ox - 4, oy - 12, 8, 20);
   ctx.fillStyle = '#7b66b5'; ctx.fillRect(ox - 4, oy - 12, 3, 20);
@@ -263,5 +278,5 @@ function drawStall(ctx, id, goods, open) {
 }
 
 window.Art = { ICONS, iconCanvas, iconURL, LOOKS, drawAlien, drawPortrait, buildBackground, drawStall, drawTree,
-  STALLS, HUT, DOOR, TREES, TILE, MW, MH };
+  STALLS, HUT, DOOR, TREES, STONE, TILE, MW, MH, PHONE };
 })();
