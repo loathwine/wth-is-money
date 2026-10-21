@@ -1,0 +1,78 @@
+/* ============================================================
+   WTH IS MONEY? — shared theme
+   Palette "Bazaar": dusk violet night, lumfruit gold, alien teal.
+   ============================================================ */
+
+:root {
+  --bg: #120d1d;
+  --bg-2: #181127;
+  --panel: #1f1733;
+  --panel-2: #2a2044;
+  --line: #3a2d5c;
+  --line-2: #4e3f78;
+  --ink: #f4ecff;
+  --muted: #ab9fcb;
+  --dim: #6c5f93;
+
+  --gold: #ffd23f;
+  --pen: #ff6fb5;
+  --zir: #4de1e8;
+  --leaf: #8fd16a;
+  --bad: #ff5a5a;
+
+  --font-pixel: "Silkscreen", "Courier New", monospace;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+
+  --px: 4px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .pixel {
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  letter-spacing: .02em;
+  line-height: 1.15;
+  margin: 0 0 .5em;
+}
+h1 { font-size: clamp(36px, 7vw, 72px); }
+h2 { font-size: 26px; }
+h3 { font-size: 18px; }
+a { color: var(--zir); }
+
+.gold { color: var(--gold); }
+.pen { color: var(--pen); }
+.zir { color: var(--zir); }
+.leaf { color: var(--leaf); }
+.muted { color: var(--muted); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-pixel); font-size: 15px;
+  color: #1a1026; background: var(--gold);
+  border: 0; padding: 12px 18px; cursor: pointer; text-decoration: none;
+  box-shadow: var(--px) var(--px) 0 #000;
+  transition: transform .08s, box-shadow .08s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line-2); box-shadow: none; }
+.btn.ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn.small { font-size: 12px; padding: 7px 11px; }
+.btn:disabled { opacity: .45; cursor: default; transform: none; }
+
+.px { image-rendering: pixelated; image-rendering: crisp-edges; }

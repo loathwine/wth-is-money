@@ -1,0 +1,72 @@
+.topbar { display: flex; align-items: center; gap: 20px; padding: 10px 18px; border-bottom: 2px solid var(--line); background: var(--bg-2); }
+.brand { color: var(--ink); text-decoration: none; font-size: 16px; }
+.ep { font-size: 13px; }
+.mute { margin-left: auto; background: none; border: 2px solid var(--line-2); color: var(--muted); padding: 4px 10px; cursor: pointer; font-size: 12px; }
+
+.chapters { display: flex; gap: 8px; padding: 12px 18px; overflow-x: auto; border-bottom: 2px solid var(--line); }
+.ch { font-size: 14px; padding: 6px 12px; border: 2px solid var(--line); color: var(--muted); text-decoration: none; white-space: nowrap; }
+.ch b { font-family: var(--font-pixel); margin-right: 4px; }
+.ch.on { border-color: var(--gold); color: var(--gold); }
+.ch.soon { opacity: .45; }
+
+.page { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+.kicker { color: var(--zir); font-size: 13px; margin: 0; }
+h1 { font-size: clamp(28px, 5vw, 44px); margin: 6px 0 24px; }
+.step { display: flex; align-items: center; gap: 12px; margin: 36px 0 12px; }
+.step h2 { margin: 0; font-size: 22px; }
+.num { width: 34px; height: 34px; display: grid; place-items: center; background: var(--gold); color: #1a1026; font-size: 16px; }
+.lead { color: var(--muted); margin: 0 0 12px; }
+.movie { width: 100%; aspect-ratio: 16 / 9; background: #000; border: 2px solid var(--line-2); }
+
+.game { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 2px solid var(--line-2); background: #000; user-select: none; -webkit-user-select: none; }
+.game canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.game-ui { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.game-ui > * { pointer-events: auto; }
+.panel {
+  background: rgba(18, 13, 29, .92); border: 2px solid var(--gold); box-shadow: 6px 6px 0 #000;
+  padding: 18px 22px; max-width: min(560px, 92%); text-align: center;
+}
+.panel h3 { font-family: var(--font-pixel); color: var(--gold); margin: 0 0 10px; font-size: clamp(16px, 2.6vw, 22px); font-weight: 400; }
+.panel p { margin: 6px 0; font-size: clamp(13px, 2vw, 16px); }
+.choices { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 12px 0 4px; }
+.choice {
+  background: var(--bg-2); border: 2px solid var(--line-2); color: var(--ink); padding: 10px 12px; cursor: pointer; font: inherit; min-width: 130px;
+}
+.choice:hover, .choice:focus-visible { border-color: var(--gold); }
+.choice .t { font-family: var(--font-pixel); font-size: 13px; color: var(--gold); display: block; margin-bottom: 4px; }
+.choice .d { font-size: 12px; color: var(--muted); display: block; }
+.row { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; text-align: left; }
+.versus div { background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; font-size: 14px; }
+.versus b { display: block; font-family: var(--font-pixel); font-weight: 400; font-size: 12px; margin-bottom: 4px; }
+.versus .bar { height: 10px; background: var(--panel); margin-top: 6px; border: 0; padding: 0; }
+.versus .bar .fill { display: block; height: 10px; background: var(--gold); }
+
+.rod-card { display: flex; gap: 18px; align-items: flex-start; background: var(--panel); border: 2px solid var(--pen); padding: 18px 20px; box-shadow: 6px 6px 0 #000; }
+.rod-card canvas { width: 80px; height: 96px; flex: none; background: var(--bg); border: 2px solid var(--line); }
+.rod-card p { margin: 0 0 10px; }
+.rod-card .big { font-size: 20px; font-weight: 700; color: var(--pen); }
+
+.sources { margin-top: 40px; color: var(--muted); font-size: 14px; }
+.sources summary { cursor: pointer; font-family: var(--font-pixel); font-size: 12px; }
+.sources a { color: var(--zir); }
+
+/* phones: the game's menus go under the canvas instead of on top of it */
+@media (max-width: 700px) {
+  .topbar { gap: 10px; padding: 8px 12px; flex-wrap: wrap; }
+  .ep { font-size: 11px; order: 3; width: 100%; }
+  .chapters { padding: 8px 12px; }
+  .page { padding: 14px 12px 60px; }
+  h1 { margin-bottom: 14px; }
+  .step { margin: 24px 0 10px; }
+  .game { aspect-ratio: auto; border: 0; background: none; }
+  .game canvas { height: auto; aspect-ratio: 16 / 9; border: 2px solid var(--line-2); background: #000; }
+  .game-ui { position: static; display: block; margin-top: 10px; }
+  .game-ui:empty { display: none; }
+  .panel { max-width: 100%; box-shadow: none; padding: 14px 12px; }
+  .choices { flex-direction: column; }
+  .choice { width: 100%; text-align: left; padding: 12px; }
+  .row .btn { flex: 1; justify-content: center; padding: 14px; }
+  .rod-card { flex-direction: column; }
+  .versus { grid-template-columns: 1fr; }
+}

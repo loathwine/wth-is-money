@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WTH Is Money?</title>
+<meta name="description" content="Interactive lessons on where money comes from, why it fails, and what makes it hard. Play it, watch it, then read the theory.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  .wrap { max-width: 980px; margin: 0 auto; padding: 72px 20px 80px; }
+  .hero p { font-size: 20px; color: #ddd3f5; max-width: 620px; }
+  .eyebrow { font-size: 13px; color: var(--muted); }
+  .path { display: grid; gap: 14px; margin-top: 48px; }
+  .ep {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 18px; align-items: center;
+    padding: 18px 20px; background: var(--panel); border: 2px solid var(--line);
+    color: var(--ink); text-decoration: none;
+  }
+  .ep .n { font-family: var(--font-pixel); font-size: 26px; color: var(--dim); }
+  .ep h3 { margin: 0 0 4px; }
+  .ep p { margin: 0; color: var(--muted); font-size: 15px; }
+  .ep .state { font-family: var(--font-pixel); font-size: 12px; color: var(--dim); }
+  .ep.live { border-color: var(--gold); box-shadow: var(--px) var(--px) 0 #000; }
+  .ep.live .n, .ep.live .state { color: var(--gold); }
+  .ep.live:hover { transform: translate(-2px, -2px); }
+  .ep:not(.live) { opacity: .65; }
+  @media (max-width: 640px) { .ep { grid-template-columns: 44px 1fr; } .ep .state { grid-column: 2; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <p class="eyebrow pixel">INTERACTIVE LESSONS · FROM BARTER TO BITCOIN</p>
+    <h1>WTH IS<br><span class="gold">MONEY?</span></h1>
+    <p>Nobody invented money. It grew out of people trading, one swap at a time. Go find out how. Then watch it break, again and again, across history.</p>
+    <a class="btn" href="lessons/01-barter/">▶ START EP 01</a>
+  </section>
+
+  <div class="path">
+    <a class="ep live" href="lessons/01-barter/">
+      <span class="n">01</span>
+      <div><h3>The Barter Market</h3><p>Trade alien goods at a village market until something strange happens: money appears on its own. Then Rod finds a cave.</p></div>
+      <span class="state">▶ PLAY</span>
+    </a>
+    <a class="ep live" href="lessons/02-every-rod/">
+      <span class="n">02</span>
+      <div><h3>Every Rod in History</h3><p>Rai stones, glass beads, wampum, cowries, Roman coins. Real moneys and how each was flooded. Chapter 1 (Yap) is up as a pilot.</p></div>
+      <span class="state">▶ PILOT</span>
+    </a>
+    <div class="ep">
+      <span class="n">03</span>
+      <div><h3>Why Gold?</h3><p>Stock-to-flow, and the one metal nobody could inflate.</p></div>
+      <span class="state">SOON</span>
+    </div>
+    <div class="ep">
+      <span class="n">04</span>
+      <div><h3>The Theory of Money and Credit</h3><p>Mises, 1912: the regression theorem, banks, and booms that bust.</p></div>
+      <span class="state">SOON</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

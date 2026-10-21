@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Barter Market · WTH Is Money?</title>
+<meta name="description" content="Trade alien goods at a village market and watch money appear on its own.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <div class="daybox pixel"><span id="day-label">DAY 1</span><span id="phase-label" class="muted"></span></div>
+  <div class="family" id="family"></div>
+</header>
+
+<main class="game">
+  <section class="world">
+    <div class="world-frame" id="world-frame">
+      <canvas id="world" class="px" width="384" height="224"></canvas>
+      <div class="overlay" id="overlay"></div>
+      <div class="route-banner" id="route-banner" hidden></div>
+    </div>
+    <div class="controls">
+      <span class="hint muted" id="hint">Walk with <b>WASD</b>/arrows or tap. Press <b>E</b> next to a stall to talk.</span>
+      <span class="spacer"></span>
+      <button class="btn ghost small" id="btn-auto" title="Let your villager trade on their own for a day">⏩ AUTO DAY</button>
+      <button class="btn small" id="btn-home">🏠 GO HOME</button>
+    </div>
+    <div class="ticker" id="ticker"></div>
+  </section>
+
+  <aside class="side">
+    <nav class="tabs">
+      <button class="tab on" data-tab="pack">PACK</button>
+      <button class="tab" data-tab="notes">NOTEBOOK</button>
+      <button class="tab" data-tab="village" id="tab-village" hidden>VILLAGE</button>
+    </nav>
+    <div class="tabpane" id="pane-pack"></div>
+    <div class="tabpane" id="pane-notes" hidden></div>
+    <div class="tabpane" id="pane-village" hidden></div>
+  </aside>
+</main>
+
+<!-- trade table: their stall on top, your pack at the bottom -->
+<div class="modal" id="dialog" hidden>
+  <div class="card trade">
+    <button class="close" data-close>✕</button>
+    <div class="trade-head">
+      <canvas class="portrait px" id="portrait" width="20" height="24"></canvas>
+      <div>
+        <h2 id="d-name"></h2>
+        <p class="say" id="d-say"></p>
+        <p class="looking" id="d-looking"></p>
+      </div>
+    </div>
+    <div class="table">
+      <div class="table-label pixel" id="d-their-label"></div>
+      <div class="cards" id="d-theirs"></div>
+      <div class="deal" id="d-deal"></div>
+      <div class="cards" id="d-mine"></div>
+      <div class="table-label pixel">YOUR PACK</div>
+    </div>
+    <div class="takes" id="d-takes"></div>
+  </div>
+</div>
+
+<!-- story / insight cards -->
+<div class="modal" id="story" hidden>
+  <div class="card story">
+    <div id="story-body"></div>
+    <div class="story-actions"><button class="btn" id="story-ok">OK</button></div>
+  </div>
+</div>
+
+<script src="sim.js"></script>
+<script src="art.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

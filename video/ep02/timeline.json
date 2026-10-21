@@ -1,0 +1,101 @@
+[
+ {
+  "id": "h1",
+  "scene": "rodcave",
+  "t0": 0.0,
+  "t1": 8.033,
+  "voice": 0.6,
+  "speech": 7.683,
+  "text": "Remember Rod? He found a cave full of pentaja... and the money of a whole village stopped working."
+ },
+ {
+  "id": "h2",
+  "scene": "montage",
+  "t0": 8.033,
+  "t1": 22.629,
+  "voice": 8.033,
+  "speech": 14.246,
+  "text": "Rod is made up. But every money in history has had a Rod. A stone wheel. A glass bead. A seashell. A silver coin. Each time, somebody found a cheaper way to make more of it."
+ },
+ {
+  "id": "h3",
+  "scene": "title",
+  "t0": 22.629,
+  "t1": 27.585,
+  "voice": 22.629,
+  "speech": 3.006,
+  "text": "This is: Every Rod in History."
+ },
+ {
+  "id": "y1",
+  "scene": "map",
+  "t0": 27.585,
+  "t1": 42.525,
+  "voice": 27.585,
+  "speech": 14.59,
+  "text": "Our first stop is Yap, a small island in the western Pacific. Yap has no good stone for making money. So for generations, Yapese sailors crossed hundreds of kilometres of open ocean, to the islands of Palau."
+ },
+ {
+  "id": "y2",
+  "scene": "quarry",
+  "t0": 42.525,
+  "t1": 56.969,
+  "voice": 42.525,
+  "speech": 14.094,
+  "text": "There, with tools made of shell, they carved limestone into great wheels with a hole in the middle. They called them rai. Then they hauled them home, on canoes and rafts. Not everyone made it back."
+ },
+ {
+  "id": "y3",
+  "scene": "prices",
+  "t0": 56.969,
+  "t1": 69.997,
+  "voice": 56.969,
+  "speech": 12.679,
+  "text": "A rai was worth what it had cost: its size, the whiteness of the stone, and how hard it had been to bring home. A stone about two feet across could buy a big pig, or fifty baskets of food."
+ },
+ {
+  "id": "y4",
+  "scene": "ledger",
+  "t0": 69.997,
+  "t1": 87.994,
+  "voice": 69.997,
+  "speech": 17.647,
+  "text": "The biggest stones were far too heavy to move. So nobody moved them. When one changed hands, everyone just remembered who owned it now. One family's fortune was a stone at the bottom of the sea, lost in a storm generations earlier. The village still counted it."
+ },
+ {
+  "id": "y6",
+  "scene": "schooner",
+  "t0": 87.994,
+  "t1": 105.917,
+  "voice": 87.994,
+  "speech": 17.573,
+  "text": "Then, in eighteen seventy-one, an Irish-American captain called David O'Keefe was shipwrecked on Yap. He came back with a sailing ship and iron tools, and made the islanders an offer: he would bring their stones home from Palau, in exchange for dried coconut."
+ },
+ {
+  "id": "y7",
+  "scene": "flood",
+  "t0": 105.917,
+  "t1": 116.057,
+  "voice": 105.917,
+  "speech": 9.79,
+  "text": "Stones that had been rare in eighteen forty became common. By nineteen twenty-nine, there were more than thirteen thousand on the island. The biggest were twelve feet across."
+ },
+ {
+  "id": "y8",
+  "scene": "discount",
+  "t0": 116.057,
+  "t1": 133.915,
+  "voice": 116.057,
+  "speech": 17.508,
+  "text": "Sound familiar? It's Rod's cave, all over again. But this time, the islanders noticed. By later accounts, O'Keefe's stones, so much easier to get, traded for LESS than the old ones that had cost lives. Yap had spotted its Rod."
+ },
+ {
+  "id": "y9",
+  "scene": "callback",
+  "t0": 133.915,
+  "t1": 148.135,
+  "voice": 133.915,
+  "speech": 12.369,
+  "text": "Just like Ulm Hollow switching from pentaja to zirnet. When money gets easy to make, people quietly stop treating it as money. Yap got lucky. As we'll see... most places didn't."
+ }
+]

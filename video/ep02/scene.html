@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EP02 · video scene</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;height:auto}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="../../lessons/01-barter/art.js"></script>
+<script src="scene.js"></script>
+<script src="scenes-yap.js"></script>
+<script>
+  // live preview: open scene.html?t=12 for a still, or ?play to run in real time (needs window.TIMELINE)
+  const q = new URLSearchParams(location.search);
+  if (!window.TIMELINE) fetch('timeline.json').then(r => r.json()).then(tl => { window.TIMELINE = tl; start(); });
+  else start();
+  function start() {
+    sceneReady.then(() => {
+      if (q.has('t')) renderFrame(+q.get('t'));
+      else if (q.has('play')) { const t0 = performance.now() - (+q.get('play') || 0) * 1000; (function f() { renderFrame((performance.now() - t0) / 1000); requestAnimationFrame(f); })(); }
+    });
+  }
+</script>
+</body>
+</html>
