@@ -10,11 +10,14 @@
 <canvas id="c" width="1920" height="1080"></canvas>
 <script src="../../lessons/01-barter/art.js"></script>
 <script src="scene.js"></script>
-<script src="scenes-yap.js"></script>
+<script src="props.js"></script>
 <script>
-  // live preview: open scene.html?t=12 for a still, or ?play to run in real time (needs window.TIMELINE)
-  const q = new URLSearchParams(location.search);
-  if (!window.TIMELINE) fetch('timeline.json').then(r => r.json()).then(tl => { window.TIMELINE = tl; start(); });
+  // scene.html?ch=yap · live preview: add &t=12 for a still, or &play to run in real time
+  const q = new URLSearchParams(location.search), CH = q.get('ch') || 'yap';
+  const tag = document.createElement('script'); tag.src = `${CH}/scenes.js`;
+  const scenes = new Promise((ok, bad) => { tag.onload = ok; tag.onerror = bad; document.body.appendChild(tag); });
+  window.sceneReady = Promise.all([window.sceneReady, scenes]).then(() => true);
+  if (!window.TIMELINE) fetch(`${CH}/timeline.json`).then(r => r.json()).then(tl => { window.TIMELINE = tl; start(); });
   else start();
   function start() {
     sceneReady.then(() => {

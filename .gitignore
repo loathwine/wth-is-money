@@ -1,9 +1,9 @@
 # video build intermediates (rebuild with video/ep02/make.sh)
-video/*/audio/
-video/*/frames/
-video/*/prev/
-video/*/out/*.wav
-video/*/out/video_only.mp4
-video/*/out/*.log
+video/*/*/audio/
+video/*/*/frames/
+video/*/*/prev/
+video/*/*/out/*.wav
+video/*/*/out/video_only.mp4
+video/*/*/out/*.log
 node_modules/
 .DS_Store

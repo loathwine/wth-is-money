@@ -1,11 +1,13 @@
 // Render the video with headless Chromium. Modes:
-//   node render.mjs frames <out.mp4> [fps]      → pipes PNG frames into ffmpeg (video only)
-//   node render.mjs stills <dir> t1 t2 ...        → PNG stills at given times
+//   CH=yap node render.mjs frames <out.mp4> [fps]      → pipes PNG frames into ffmpeg (video only)
+//   CH=yap node render.mjs stills <dir> t1 t2 ...        → PNG stills at given times
+// Needs the repo served at 127.0.0.1:8931 (or SCENE_URL).
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 const [mode, out, ...rest] = process.argv.slice(2);
-const TIMELINE = JSON.parse(fs.readFileSync(process.env.TIMELINE || "timeline.json", "utf8"));
-const URL = process.env.SCENE_URL || "http://127.0.0.1:8931/video/ep02/scene.html";
+const CH = process.env.CH || "yap";
+const TIMELINE = JSON.parse(fs.readFileSync(`${CH}/timeline.json`, "utf8"));
+const URL = process.env.SCENE_URL || `http://127.0.0.1:8931/video/ep02/scene.html?ch=${CH}`;
 const PORT = +(process.env.PORT || 9336);
 const chrome = spawn(process.env.CHROME || "google-chrome-stable", ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=/tmp/claude-1000/ep02-render-${PORT}`, "--no-sandbox", "--disable-gpu", "--window-size=1920,1080", "--hide-scrollbars", "--mute-audio", "about:blank"], { stdio: "ignore" });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

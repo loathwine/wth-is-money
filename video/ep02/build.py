@@ -1,7 +1,8 @@
 """Build the EP 02 timeline, voice track, music + sound bed and captions.
 
-usage (needs numpy):  nix-shell -p "python3.withPackages(ps: [ps.numpy])" --run "python3 build.py [narration.json] [outdir] [timeline.json]"
-outputs: timeline.json, <outdir>/voice.wav, <outdir>/bed.wav (music + sfx, already ducked under the voice), <outdir>/captions.srt
+usage (needs numpy):  nix-shell -p "python3.withPackages(ps: [ps.numpy])" --run "python3 build.py <chapter dir>"
+reads <ch>/narration.json, <ch>/audio/trim_*.wav and <ch>/cues.py (that chapter's music + sound effects)
+outputs: <ch>/timeline.json, <ch>/out/voice.wav, <ch>/out/bed.wav (music + sfx, already ducked under the voice), <ch>/out/captions.srt
 Sound cues use word(): the same even-pace word timing as scene.js, so sounds land with the visuals.
 """
 import json, os, re, sys, wave
@@ -9,10 +10,8 @@ import numpy as np
 
 SR = 24000
 LEAD, GAP = 0.6, 0.35
-NARR = sys.argv[1] if len(sys.argv) > 1 else "narration.json"
-OUT = sys.argv[2] if len(sys.argv) > 2 else "out"
-TLF = sys.argv[3] if len(sys.argv) > 3 else "timeline.json"
-AUDIO = os.environ.get("AUDIO", "audio")
+CH = sys.argv[1].rstrip("/") if len(sys.argv) > 1 else "yap"
+NARR, OUT, TLF, AUDIO = f"{CH}/narration.json", f"{CH}/out", f"{CH}/timeline.json", f"{CH}/audio"
 os.makedirs(OUT, exist_ok=True)
 
 narr = json.load(open(NARR))
@@ -26,7 +25,7 @@ for s in narr:
     t0 = t if s is not narr[0] else 0.0
     t1 = t + speech + GAP + s.get("pad", 0)
     timeline.append({"id": s["id"], "scene": s["scene"], "t0": round(t0, 3), "t1": round(t1, 3),
-                     "voice": round(t, 3), "speech": round(speech + (t - t0), 3), "text": s["text"]})
+                     "voice": round(t, 3), "speech": round(speech + (t - t0), 3), "text": s["text"], **({"dip": True} if s.get("dip") else {})})
     t = t1
 END = t
 json.dump(timeline, open(TLF, "w"), indent=1)
@@ -88,11 +87,13 @@ whoosh = lambda: (noise(0.9, 1, seed=7) * np.sin(np.linspace(0, np.pi, int(0.9 *
 splash = lambda: mix(noise(0.8, 2, seed=9), 0.6 * tone(300, 0.5, "sine", 80, decay=0.15))
 thunder = lambda: (np.convolve(noise(2.5, 1.5, seed=11), np.ones(60) / 60, "same") * 3).astype(np.float32)
 
-# ---------------------------------------------------------------- music
+# ---------------------------------------------------------------- music + sfx (per chapter, in <ch>/cues.py)
 music = np.zeros(N, np.float32)
+sfx = np.zeros(N, np.float32)
 BEAT = 60 / 100
-def section(t_start, t_end, chords, melody, tempo_beat=BEAT, style="island"):
-    """loop a 4-chord progression with a melody line over [t_start, t_end)"""
+def section(t_start, t_end, chords, melody, tempo_beat=BEAT, style="island", lead=None, vol=1.0):
+    """loop a 4-chord progression with a melody line over [t_start, t_end).
+    style: island (bass + hats + marimba), mystery (low pulse + glassy arps), march (square bass + snare-ish noise), drone (pads)"""
     bar = 4 * tempo_beat; i = 0; tb = t_start
     while tb < t_end - 0.05:
         root = chords[i % len(chords)]
@@ -100,56 +101,32 @@ def section(t_start, t_end, chords, melody, tempo_beat=BEAT, style="island"):
             tbeat = tb + b * tempo_beat
             if tbeat >= t_end: break
             if style == "island":
-                place(music, tbeat, bass(root - 12 if b % 2 == 0 else root - 5), 0.55)
-                place(music, tbeat + tempo_beat / 2, hat(), 0.12)
-                place(music, tbeat, hat(), 0.07)
+                place(music, tbeat, bass(root - 12 if b % 2 == 0 else root - 5), 0.55 * vol)
+                place(music, tbeat + tempo_beat / 2, hat(), 0.12 * vol)
+                place(music, tbeat, hat(), 0.07 * vol)
+            elif style == "march":
+                place(music, tbeat, tone(midi(root - 12 if b % 2 == 0 else root - 5), tempo_beat * 0.8, "square", decay=0.2), 0.18 * vol)
+                if b % 2: place(music, tbeat, noise(0.12, 4, seed=21), 0.18 * vol)
+            elif style == "drone":
+                if b == 0: place(music, tbeat, mix(tone(midi(root - 12), bar, "sine", attack=0.5, decay=2.0), 0.5 * tone(midi(root - 5), bar, "sine", attack=0.6, decay=2.0)), 0.45 * vol)
             else:  # mystery: slow low pulse + glassy arps
-                if b == 0: place(music, tbeat, tone(midi(root - 24), bar, "sine", attack=0.4, decay=1.6), 0.5)
-                place(music, tbeat, pluck(root + [0, 7, 12, 15][b], 0.6), 0.22)
+                if b == 0: place(music, tbeat, tone(midi(root - 24), bar, "sine", attack=0.4, decay=1.6), 0.5 * vol)
+                place(music, tbeat, pluck(root + [0, 7, 12, 15][b], 0.6), 0.22 * vol)
         mel = melody[i % len(melody)]
         for k, m in enumerate(mel):
             if m is None: continue
             tn = tb + k * tempo_beat / 2
-            if tn < t_end: place(music, tn, marimba(m) if style == "island" else pluck(m + 12, 0.5), 0.32 if style == "island" else 0.16)
+            if tn >= t_end: continue
+            if lead: place(music, tn, lead(m), 0.3 * vol)
+            elif style == "island": place(music, tn, marimba(m), 0.32 * vol)
+            elif style == "march": place(music, tn, tone(midi(m), tempo_beat * 0.45, "square", decay=0.12), 0.12 * vol)
+            else: place(music, tn, pluck(m + 12, 0.5), 0.16 * vol)
         tb += bar; i += 1
-
-hook_end = seg["h3"]["t1"]
-section(0.0, seg["h3"]["t0"], [57, 53, 55, 52], [[None] * 8], style="mystery")               # A minor, sparse
-place(music, word("h3", 0), chime(69, (0, 7, 12, 16, 19)), 0.35)                               # title sting
+w = word
 _ = None
-YAP_MEL = [[72, _, 74, 76, _, 79, 76, _], [74, _, 72, _, 69, _, 72, _], [76, 79, 81, _, 79, 76, 74, _], [72, _, _, 69, 72, _, _, _]]
-section(hook_end, END - 1.0, [60, 57, 53, 55], YAP_MEL)                                       # C major pentatonic, bright
+exec(open(f"{CH}/cues.py").read())
 fade = np.clip(tt / 1.5, 0, 1) * np.clip((END - tt) / 2.5, 0, 1)
 music *= fade
-
-# ---------------------------------------------------------------- sound effects (mirror scenes-yap.js)
-sfx = np.zeros(N, np.float32)
-w = word
-# h1: pentaja spilling out of the cave, then the BROKEN stamp
-for i in range(30): place(sfx, w("h1", 4) + i * 0.15, clink(2000 + (i * 137) % 900), 0.10)
-place(sfx, w("h1", 15), thud(), 0.6)
-# h2: MADE UP stamp, the four items pop in, then CAVE! stamps
-place(sfx, w("h2", 2), thud(), 0.5)
-for i, n in enumerate([13, 16, 19, 21]): place(sfx, w("h2", n), pop_(600 + i * 150), 0.18)
-for i in range(4): place(sfx, w("h2", 24) + i * 0.3, thud(), 0.45)
-# chapter 1
-place(sfx, seg["y1"]["t0"], whoosh(), 0.25)
-for k in np.arange(w("y2", 5), w("y2", 13), 0.45): place(sfx, k, mix(tone(1600, 0.04, "square"), noise(0.04, 4, seed=13)), 0.08)   # chisel
-place(sfx, w("y2", 19), pop_(900), 0.15)
-place(sfx, w("y2", 29), thunder(), 0.35); place(sfx, w("y2", 32), splash(), 0.3)
-for n in (8, 11, 17): place(sfx, w("y3", n), clink(1800), 0.12)
-place(sfx, w("y3", 33), tone(500, 0.25, "square", 700, decay=0.08), 0.12)                    # oink-ish squeak
-for k in np.arange(w("y3", 36), w("y3", 40), 0.09): place(sfx, k, tone(1200, 0.03, "square"), 0.03)
-place(sfx, w("y4", 15), chime(76, (0, 7)), 0.2)
-place(sfx, w("y4", 24.5), splash(), 0.25)
-place(sfx, w("y4", 44), thud(), 0.45)
-place(sfx, w("y6", 15), whoosh(), 0.15)
-place(sfx, w("y6", 21), pop_(800), 0.15)
-for k in np.linspace(w("y7", 9), w("y7", 19), 40): place(sfx, k, pop_(500 + 900 * (k - w("y7", 9)) / max(0.1, w("y7", 19) - w("y7", 9))), 0.05)
-place(sfx, w("y7", 22), thud(), 0.6)
-place(sfx, w("y8", 25), thud(), 0.5)
-place(sfx, w("y8", 38), chime(72, (0, 4, 7, 12)), 0.3)
-place(sfx, w("y9", 24), chime(67, (0, 3, 7, 10)), 0.25)
 
 # ---------------------------------------------------------------- duck the bed under the voice
 k = int(0.25 * SR)

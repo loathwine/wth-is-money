@@ -33,7 +33,8 @@
   "t1": 42.525,
   "voice": 27.585,
   "speech": 14.59,
-  "text": "Our first stop is Yap, a small island in the western Pacific. Yap has no good stone for making money. So for generations, Yapese sailors crossed hundreds of kilometres of open ocean, to the islands of Palau."
+  "text": "Our first stop is Yap, a small island in the western Pacific. Yap has no good stone for making money. So for generations, Yapese sailors crossed hundreds of kilometres of open ocean, to the islands of Palau.",
+  "dip": true
  },
  {
   "id": "y2",

@@ -162,7 +162,6 @@
     schooner, pig, basket, icon, alien, text, body, label, stamp, where, blitLo, fadeOut, SC };
 
   /* ---------- frame ---------- */
-  const CHAPTER_STARTS = new Set(["y1"]);
   window.renderFrame = function (t) {
     const TL = window.TIMELINE;
     let s = TL[TL.length - 1];
@@ -174,7 +173,7 @@
     try { (SC[s.scene] || (() => blitLo()))(lt, d, t, s); }
     catch (e) { console.error(`scene ${s.id} @ ${t.toFixed(2)}s: ${e.message}`); window.__sceneErrors = (window.__sceneErrors || 0) + 1; }
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
-    const dip = CHAPTER_STARTS.has(s.id) ? 1 - seg(lt, 0, 0.5) : 0;
+    const dip = s.dip ? 1 - seg(lt, 0, 0.5) : 0;   // "dip": true in narration.json fades a segment in from black
     const a = Math.max(dip, 1 - seg(t, 0, 0.5));
     if (a > 0) { ctx.fillStyle = `rgba(0,0,0,${a})`; ctx.fillRect(0, 0, W, H); }
   };
