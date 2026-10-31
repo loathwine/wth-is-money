@@ -118,7 +118,7 @@ const LOOKS = {
   bob:  { body: '#8d93a6', dark: '#555b6e', belly: '#c3c8d6', eyes: 1, top: 'none', wide: true },
   sela: { body: '#eef2ff', dark: '#a5afd0', belly: '#ffffff', eyes: 2, top: 'fluff' },
   dov:  { body: '#b27ae8', dark: '#6c3aa3', belly: '#e4c9ff', eyes: 3, top: 'cap' },
-  rod:  { body: '#ff8ac2', dark: '#b8407c', belly: '#ffd0e6', eyes: 2, top: 'stalks' },
+  wren:  { body: '#ff8ac2', dark: '#b8407c', belly: '#ffd0e6', eyes: 2, top: 'stalks' },
   hesk: { body: '#5cc8cf', dark: '#2a7e86', belly: '#bff3f5', eyes: 1, top: 'beard' },
 };
 
@@ -184,12 +184,12 @@ const B = (MH - 24) * TILE; // phone: how far the hut and its garden move down f
 const STALLS = PHONE ? {
   mira: { tx: 2, ty: 3 }, bob:  { tx: 9, ty: 3 },
   sela: { tx: 2, ty: 8 }, dov:  { tx: 9, ty: 8 },
-  rod:  { tx: 2, ty: 13 }, hesk: { tx: 9, ty: 13 },
+  wren:  { tx: 2, ty: 13 }, hesk: { tx: 9, ty: 13 },
 } : {
   mira: { tx: 9,  ty: 3 }, bob:  { tx: 14, ty: 3 }, sela: { tx: 19, ty: 3 },
-  dov:  { tx: 9,  ty: 9 }, rod:  { tx: 14, ty: 9 }, hesk: { tx: 19, ty: 9 },
+  dov:  { tx: 9,  ty: 9 }, wren:  { tx: 14, ty: 9 }, hesk: { tx: 19, ty: 9 },
 };
-const AWNING = { mira: '#ffd23f', bob: '#9aa3b5', sela: '#e9f0ff', dov: '#c77dff', rod: '#ff6fb5', hesk: '#4de1e8' };
+const AWNING = { mira: '#ffd23f', bob: '#9aa3b5', sela: '#e9f0ff', dov: '#c77dff', wren: '#ff6fb5', hesk: '#4de1e8' };
 for (const id in STALLS) {
   const s = STALLS[id];
   s.npc = { x: s.tx * TILE + 24, y: s.ty * TILE + 6 };

@@ -22,7 +22,7 @@ const GOODS = {
   ket: { name: 'Kettlestone', rot: Infinity, size: 3,   color: '#9aa3b5', blurb: 'A heavy stone that holds heat. Tools are made from it.' },
   snm: { name: 'Snarlmilk',   rot: 2,        size: 1,   color: '#e9f0ff', blurb: 'Milk from a snarl beast. Sours after 2 days.' },
   dri: { name: 'Driftcap',    rot: 4,        size: 1,   color: '#c77dff', blurb: 'A floating mushroom used as medicine. Wilts after 4 days.' },
-  pen: { name: 'Pentaja',     rot: Infinity, size: 0.2, color: '#ff6fb5', blurb: 'A tiny five-sided crystal. Pretty. Rod digs one up now and then.' },
+  pen: { name: 'Pentaja',     rot: Infinity, size: 0.2, color: '#ff6fb5', blurb: 'A tiny five-sided crystal. Pretty. Wren digs one up now and then.' },
   zir: { name: 'Zirnet',      rot: Infinity, size: 0.2, color: '#4de1e8', blurb: 'A blue bead that never chips. Old Hesk finds one every few days.' },
 };
 const IDS = Object.keys(GOODS);
@@ -35,7 +35,7 @@ const VILLAGERS = [
   { id: 'bob',  name: 'Bob',  makes: 'ket', rate: 2,   needs: { lum: 1 }, keeps: { pen: 2 },         attend: 0.7 },
   { id: 'sela', name: 'Sela', makes: 'snm', rate: 4,   needs: { bog: 1, lum: 1 }, keeps: { zir: 1 }, attend: 0.85 },
   { id: 'dov',  name: 'Dov',  makes: 'dri', rate: 3,   needs: { ket: 1 / 3, snm: 1, bog: 0.5 }, keeps: { pen: 1 }, attend: 0.8 },
-  { id: 'rod',  name: 'Rod',  makes: 'pen', rate: 0.5, needs: { lum: 1, dri: 0.5 },               attend: 0.75 },
+  { id: 'wren',  name: 'Wren',  makes: 'pen', rate: 0.5, needs: { lum: 1, dri: 0.5 },               attend: 0.75 },
   { id: 'hesk', name: 'Hesk', makes: 'zir', rate: 0.3, needs: { bog: 0.5, lum: 1 },               attend: 0.6 },
 ];
 
@@ -52,6 +52,23 @@ const JUNK = 0.5;        // below this a unit isn't worth carrying; it's left at
 const STOCK_LIMIT = 8;   // stop producing once you hold this many of your own good
 const MONEY_BAR = 2.5;  // exchange value at which a villager 'takes it as payment'
 
+/* ---------- family sickness ----------
+   Now and then someone at home falls ill (at night). While they're sick:
+   - you make less bogwool (1 a day instead of 2; nothing at all once it gets worse),
+   - your family needs DOSES driftcap (Dov's medicine). Each night they take what's in
+     your pack, up to what's still needed; with all doses taken they're cured that night.
+   - two nights in a row with no medicine and it gets worse (no bogwool at all),
+   - left alone it passes by itself after NATURAL nights.
+   When: once early (night of day 6-8), once a few days after the cave (when saved
+   pentaja has lost most of its worth), and once more late for those who keep playing.
+   Drawn from its own random stream, so it never shifts the rest of the village. */
+const FAMILY = [
+  { id: 'gran', name: 'Gran' },
+  { id: 'tam',  name: 'Little Tam' },
+  { id: 'ola',  name: 'Aunt Ola' },
+];
+const SICK = { DOSES: 2, RATE: 1, WORSE_AFTER: 2, WORSE_RATE: 0, WORSE_DOSES: 0, NATURAL: 6, FIRST: [6, 8], AFTER_CAVE: [5, 6], LATE: [11, 13], GAP: 4 };
+
 function rng(seed) {
   let s = (seed >>> 0) || 1;
   return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
@@ -62,13 +79,14 @@ function createWorld(opts = {}) {
   const w = {
     day: 1, seed, rand: rng(seed),
     playerAuto: opts.playerAuto ?? false,
-    rodDay: null, rodStrikeAt: opts.rodStrikeAt ?? { minDay: 14, maxDay: 28, moneyness: 0.5 },
+    caveDay: null, caveStrikeAt: opts.caveStrikeAt ?? { minDay: 14, maxDay: 28, moneyness: 0.5 },
     agents: [], byId: {},
     produced: Object.fromEntries(IDS.map(g => [g, []])), // per-day production, last 7 days
     s2f: Object.fromEntries(IDS.map(g => [g, 1])),
     history: [],   // per-day stats
     events: [],    // today's notable happenings (for the UI)
     trades: [],    // today's trades
+    family: null,  // set below
   };
   for (const v of VILLAGERS) {
     const a = {
@@ -88,6 +106,17 @@ function createWorld(opts = {}) {
     a.note[b.id] = Object.fromEntries(IDS.map(g => [g, null]));
     a.seen[b.id] = null;
   }
+  // family sickness: its own random stream, so it never changes what the village does by itself
+  const fr = rng(((seed * 2654435761) ^ 0x5eed) >>> 0);
+  const roll = ([lo, hi]) => lo + Math.floor(fr() * (hi - lo + 1));
+  const order = shuffle({ rand: fr }, FAMILY.map(f => f.id));
+  w.family = {
+    sick: null,          // { who, name, since, doses, left, nights, missed, worse }
+    episodes: [],        // every sickness so far (same objects, kept after the cure)
+    first: roll(SICK.FIRST), afterCave: roll(SICK.AFTER_CAVE), late: roll(SICK.LATE),
+    order, lastCured: -99, sickNights: 0,
+    on: opts.sickness ?? true,
+  };
   recomputeS2F(w);
   w.history.push(stats(w));
   return w;
@@ -106,6 +135,7 @@ function take(a, g, n) {
 /* ---------- valuation ---------- */
 function wantUnits(a, g) {
   if (a.keeps[g]) return a.keeps[g];
+  if (a.dosesLeft != null && g === 'dri' && a.needs.dri) return a.dosesLeft;
   const r = a.needs[g]; return r ? Math.max(1, Math.ceil(r * HORIZON)) : 0;
 }
 
@@ -276,6 +306,7 @@ function endDay(w) {
   for (const a of w.agents) {
     // eat and use
     for (const g in a.needs) {
+      if (a.id === 'you' && g === 'dri') continue;   // medicine is handled by the sickness below
       a.acc[g] += a.needs[g];
       while (a.acc[g] >= 1) {
         a.acc[g] -= 1;
@@ -292,6 +323,7 @@ function endDay(w) {
       if (lost && a.id === 'you') ev.push({ type: 'rot', g, n: lost });
     }
   }
+  nurse(w, ev);
   // leave junk at home: units not worth carrying to market tomorrow
   for (const a of w.agents) {
     for (const g of IDS) {
@@ -305,8 +337,7 @@ function endDay(w) {
   // produce
   const prodToday = Object.fromEntries(IDS.map(g => [g, 0]));
   for (const a of w.agents) {
-    let rate = a.rate;
-    if (a.id === 'you' && a.hunger.ket > 0) rate = Math.max(1, Math.floor(rate / 2)); // no tools
+    const rate = a.id === 'you' ? outputRate(w) : a.rate;
     a.prodAcc += rate;
     let made = 0;
     while (a.prodAcc >= 1) {
@@ -322,17 +353,111 @@ function endDay(w) {
   }
   for (const g of IDS) { w.produced[g].push(prodToday[g]); if (w.produced[g].length > 7) w.produced[g].shift(); }
   recomputeS2F(w);
+  // after the day's work: does anyone fall ill tonight? (Dov has picked fresh driftcap, so his price is tomorrow's)
+  fallSick(w, ev);
 
-  // Rod strikes a pentaja vein once pentaja has become the thing everyone takes.
-  const st = stats(w);
-  const rs = w.rodStrikeAt;
-  if (rs && w.rodDay == null && w.day >= rs.minDay && (st.moneyness.pen >= rs.moneyness || w.day >= rs.maxDay)) {
-    w.rodDay = w.day + 1;
-    w.byId.rod.rate = 10;
-    ev.push({ type: 'rod' });
+  // Wren strikes a pentaja vein once pentaja has become the thing everyone takes.
+  let st = stats(w);
+  const rs = w.caveStrikeAt;
+  if (rs && w.caveDay == null && w.day >= rs.minDay && (st.moneyness.pen >= rs.moneyness || w.day >= rs.maxDay)) {
+    w.caveDay = w.day + 1;
+    w.byId.wren.rate = 10;
+    ev.push({ type: 'wren' });
   }
+  st.sick = !!w.family.sick;
   w.history.push(st);
   w.day++;
+}
+
+/* ---------- family sickness ---------- */
+// Bogwool you'll make tonight: 2 normally, half without tools, 1 while someone's sick, 0 once it's worse.
+function outputRate(w) {
+  const a = w.byId.you, s = w.family && w.family.sick;
+  let rate = a.rate;
+  if (a.hunger.ket > 0) rate = Math.max(1, Math.floor(rate / 2));   // no tools
+  if (s) rate = Math.min(rate, s.worse ? SICK.WORSE_RATE : SICK.RATE);
+  return rate;
+}
+
+function setMedNeed(a, left) {
+  if (left > 0) { a.needs.dri = 1; a.wants.dri = 1; a.dosesLeft = left; }
+  else { delete a.needs.dri; delete a.wants.dri; a.dosesLeft = null; a.hunger.dri = 0; a.acc.dri = 0; }
+}
+
+// Tonight: does anyone fall ill?
+function fallSick(w, ev) {
+  const F = w.family; if (!F.on || F.sick) return;
+  const d = w.day, r = w.caveDay;
+  const due = d === F.first || (r != null && (d === r + F.afterCave || d === r + F.late));
+  if (!due || d - F.lastCured < SICK.GAP || d < 4) return;
+  const who = F.order[F.episodes.length % F.order.length];
+  const name = FAMILY.find(f => f.id === who).name;
+  const s = { who, name, since: d, doses: SICK.DOSES, left: SICK.DOSES, nights: 0, missed: 0, worse: false,
+    afterCave: r != null && d >= r, price: medPrice(w), before: r != null && d >= r ? medPriceBefore(w) : null, cured: null, natural: false };
+  F.sick = s; F.episodes.push(s);
+  setMedNeed(w.byId.you, s.left);
+  ev.push({ type: 'sick', who, name, doses: s.doses, price: s.price, before: s.before, afterCave: s.afterCave });
+}
+
+// Tonight: medicine from the pack, or the sickness drags on.
+function nurse(w, ev) {
+  const F = w.family, s = F.sick; if (!s) return;
+  const a = w.byId.you;
+  s.nights++; F.sickNights++;
+  const n = Math.min(count(a, 'dri'), s.left);
+  if (n) { take(a, 'dri', n); s.left -= n; }
+  if (!s.left) return cure(w, ev, false);
+  if (n) { s.missed = 0; ev.push({ type: 'dose', who: s.who, name: s.name, n, left: s.left }); }
+  else {
+    s.missed++; a.hunger.dri++;
+    ev.push({ type: 'nomed', who: s.who, name: s.name, left: s.left, nights: s.nights });
+    if (s.missed >= SICK.WORSE_AFTER && !s.worse) { s.worse = true; s.left += SICK.WORSE_DOSES; ev.push({ type: 'worse', who: s.who, name: s.name, left: s.left }); }
+  }
+  if (s.nights >= SICK.NATURAL) cure(w, ev, true);
+  else setMedNeed(a, s.left);
+}
+
+function cure(w, ev, natural) {
+  const F = w.family, s = F.sick;
+  s.cured = w.day; s.natural = natural;
+  F.sick = null; F.lastCured = w.day;
+  setMedNeed(w.byId.you, 0);
+  ev.push({ type: 'cured', who: s.who, name: s.name, natural, nights: s.nights });
+}
+
+// Dov's price for the medicine (n driftcap), in y: how many y he'd want. null = won't take y
+// (or has no driftcap). Dov's own judgement only, so it's the same whatever you're carrying.
+function medPrice(w, n = SICK.DOSES) {
+  const you = w.byId.you, dov = w.byId[MAKER.dri], out = {};
+  for (const y of ['pen', 'zir', 'bog']) {
+    let k = null;
+    if (count(dov, 'dri') >= n) {
+      for (let j = 1; j * GOODS[y].size <= HAUL * 2; j++) {
+        const gB = gainOf(w, dov, y, j) - lossOf(w, dov, 'dri', n);
+        if (gB > HASSLE) { k = j; break; }
+      }
+    }
+    out[y] = k;
+  }
+  return out;
+}
+
+// What the medicine typically cost in pentaja before the cave (median of the days Dov quoted one).
+function medPriceBefore(w, y = 'pen') {
+  const end = w.caveDay ? w.caveDay - 1 : w.history.length;
+  const v = w.history.slice(1, end).map(h => h.med && h.med[y]).filter(x => x != null).sort((p, q) => p - q);
+  return v.length ? v[v.length >> 1] : null;
+}
+
+// Everything the UI needs about home in one place.
+function family(w) {
+  const s = w.family.sick, a = w.byId.you;
+  return {
+    sick: !!s, who: s ? s.who : null, name: s ? s.name : null,
+    dosesNeeded: s ? s.left : 0, dosesHave: count(a, 'dri'), nights: s ? s.nights : 0,
+    worse: s ? s.worse : false, natural: SICK.NATURAL, outputRate: outputRate(w),
+    episodes: w.family.episodes.length,
+  };
 }
 
 function recomputeS2F(w) {
@@ -380,7 +505,9 @@ function stats(w) {
   }
   const indirect = w.trades.filter(t => !t.refused && (t.indirectA || t.indirectB)).length;
   const total = w.trades.filter(t => !t.refused).length;
-  return { day: w.day, moneyness, medium, holding, price, indirect, total, s2f: { ...w.s2f } };
+  // what Dov wants for the medicine (2 driftcap) today, in pentaja / zirnet / bogwool
+  const med = w.family ? medPrice(w) : null;
+  return { day: w.day, moneyness, medium, holding, price, med, indirect, total, s2f: { ...w.s2f } };
 }
 
 function shuffle(w, arr) {
@@ -498,7 +625,8 @@ function findRoutes(w, target, need = 1, maxHops = 3) {
 }
 
 const Sim = {
-  GOODS, IDS, VILLAGERS, CAP, HAUL, createWorld, startDay, endDay, stats,
+  GOODS, IDS, VILLAGERS, CAP, HAUL, FAMILY, SICK, createWorld, startDay, endDay, stats,
+  family, outputRate, medPrice, medPriceBefore,
   count, load, val, planVal, useVal, exchVal, saleability, playerTrade, playerAsk, askPrice, wantUnits,
   quote, takes, findRoutes,
 };

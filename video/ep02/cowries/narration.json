@@ -1,0 +1,50 @@
+[
+ {
+  "id": "c0",
+  "scene": "ctitle",
+  "text": "Chapter four. Cowries: the money that got too heavy to carry.",
+  "dip": true,
+  "pad": 0.8
+ },
+ {
+  "id": "c1",
+  "scene": "shellmap",
+  "text": "For centuries, much of West Africa used a small seashell as money: the cowrie. Most came from the Maldives, in the Indian Ocean."
+ },
+ {
+  "id": "c2",
+  "scene": "strings",
+  "text": "One shell bought very little, so people counted them. Forty to a string. Two thousand to a head."
+ },
+ {
+  "id": "c3",
+  "scene": "ships",
+  "text": "West African traders wanted shells: their markets ran on them. So European ships brought shells by the ton, to buy enslaved people... and later, palm oil."
+ },
+ {
+  "id": "c4",
+  "scene": "zanzibar",
+  "text": "In eighteen forty-five, a Hamburg firm found a shortcut. In Zanzibar, local traders sold a bigger cowrie for far less. The firm shipped some to Dahomey."
+ },
+ {
+  "id": "c5",
+  "scene": "shellflood",
+  "text": "German and French firms followed. Coastal merchants bought them: they were cheap. By one estimate, sixteen billion shells poured in."
+ },
+ {
+  "id": "c6",
+  "scene": "jar",
+  "text": "In Dahomey, a silver dollar cost about two thousand shells in the eighteen forties. By the eighteen eighties: twenty thousand. A family that had saved two thousand shells now held a tenth of a dollar. They hadn't spent a single one."
+ },
+ {
+  "id": "c7",
+  "scene": "heavy",
+  "text": "And the money got heavy. Around nineteen hundred in Lagos, one small silver shilling was worth four thousand shells. A coin in your fist... or a sack on your head."
+ },
+ {
+  "id": "c8",
+  "scene": "ccallback",
+  "text": "Remember Ulm Hollow's bogwool? Too bulky to be money. Flood a money, and it turns into bogwool. Wren found a cave. Hamburg found a reef. Next: what if Wren... is the emperor?",
+  "pad": 1.5
+ }
+]

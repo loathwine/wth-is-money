@@ -16,7 +16,7 @@ function run(seed, verbose) {
       const z = s.price.zir != null ? s.price.zir.toFixed(2) : '  - ';
       const hunger = w.agents.filter(a => Object.values(a.hunger).some(h => h > 0)).map(a => a.id).join(',');
       const med = Sim.IDS.map(g => short[g] + s.medium[g]).join(' ');
-      console.log(`d${String(s.day).padStart(2)} ${m}  L/P ${p} L/Z ${z} med[${med}] ${w.rodDay === s.day + 1 ? 'ROD!' : ''} short:${hunger}`);
+      console.log(`d${String(s.day).padStart(2)} ${m}  L/P ${p} L/Z ${z} med[${med}] ${w.caveDay === s.day + 1 ? 'WREN!' : ''} short:${hunger}`);
     }
   }
   return w;
@@ -26,13 +26,13 @@ if (many) {
   const tally = {}, at = {};
   for (let s = 1; s <= many; s++) {
     const w = run(s, false);
-    const pre = w.history[Math.min(w.history.length - 1, (w.rodDay ?? days) - 1)];
+    const pre = w.history[Math.min(w.history.length - 1, (w.caveDay ?? days) - 1)];
     const fin = w.history[w.history.length - 1];
     const top = g => Sim.IDS.reduce((a, b) => (g.moneyness[b] > g.moneyness[a] ? b : a));
     const k = top(pre) + '→' + top(fin);
     tally[k] = (tally[k] || 0) + 1;
-    at[w.rodDay] = (at[w.rodDay] || 0) + 1;
+    at[w.caveDay] = (at[w.caveDay] || 0) + 1;
   }
-  console.log('winner before Rod → after:', tally);
-  console.log('rod day:', at);
+  console.log('winner before Wren → after:', tally);
+  console.log('wren day:', at);
 } else run(+(args[0] ?? 7), true);

@@ -1,0 +1,55 @@
+[
+ {
+  "id": "r1",
+  "scene": "rometitle",
+  "text": "Chapter five: Rome. When Wren is the emperor.",
+  "dip": true,
+  "pad": 0.8
+ },
+ {
+  "id": "r2",
+  "scene": "denarius",
+  "text": "Two thousand years ago, Rome paid its soldiers in silver coins called denarii. Under the first emperor, Augustus, they were almost pure silver."
+ },
+ {
+  "id": "r3",
+  "scene": "legions",
+  "text": "Rome ran on its army. A dying emperor reportedly told his sons: keep the soldiers rich, never mind anyone else."
+ },
+ {
+  "id": "r4",
+  "scene": "melt",
+  "text": "Soldiers cost more silver than the empire had. So emperors did what Wren did: melt the coins, add cheap copper, stamp out more."
+ },
+ {
+  "id": "r5",
+  "scene": "fourcoins",
+  "text": "By the year two hundred, coins were about half silver. By two seventy, under five percent: copper, with a thin silver skin."
+ },
+ {
+  "id": "r6",
+  "scene": "wheat",
+  "text": "In Roman Egypt, a sack of wheat cost about eight drachmas in the year one hundred. Prices crept up for a long time, then leapt: by three hundred, about three hundred."
+ },
+ {
+  "id": "r7",
+  "scene": "jar",
+  "text": "Picture savings worth a year of bread, back then. By three hundred, the same sum bought about ten days. Nobody stole a coin. The emperor just made more."
+ },
+ {
+  "id": "r8",
+  "scene": "edict",
+  "text": "In three hundred and one, Emperor Diocletian blamed greedy sellers and capped over a thousand prices and wages. Charge more, and you could die."
+ },
+ {
+  "id": "r9",
+  "scene": "emptystalls",
+  "text": "A writer of the time says blood was spilled over small things, and people were too scared to sell. The law was finally dropped."
+ },
+ {
+  "id": "r10",
+  "scene": "callback",
+  "text": "Wren needed luck to find a cave of pentaja. An emperor owned one. It was called the mint. Next: is there money with no cave at all?",
+  "pad": 1.5
+ }
+]

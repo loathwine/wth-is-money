@@ -1,5 +1,5 @@
 // Robustness check: across many seeds, does pentaja become money, and does the village
-// move to zirnet after Rod's cave? Mirrors the game: the player only trades on autopilot
+// move to zirnet after Wren's cave? Mirrors the game: the player only trades on autopilot
 // in the afternoon (as with the AUTO DAY button).
 // Usage: node tools/simstats.js [seeds=40] [days=32]
 const Sim = require('../lessons/01-barter/sim.js');
@@ -10,7 +10,7 @@ let penMoney = 0, zirSwitch = 0; const rise = [], rows = [];
 for (let s = 1; s <= seeds; s++) {
   const w = Sim.createWorld({ seed: s });
   for (let d = 0; d < days; d++) { Sim.startDay(w); w.playerAuto = true; Sim.endDay(w); w.playerAuto = false; }
-  const r = w.rodDay ?? days;
+  const r = w.caveDay ?? days;
   const pre = w.history.slice(Math.max(1, r - 6), r), post = w.history.slice(-6);
   const pp = avg(pre, 'pen'), pz = avg(pre, 'zir'), qp = avg(post, 'pen'), qz = avg(post, 'zir');
   if (pp >= 0.5 && pp > pz) penMoney++;

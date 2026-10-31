@@ -1,4 +1,4 @@
-/* EP 02 · Every Rod in History: the video engine and shared drawing kit.
+/* EP 02 · Every Wren in History: the video engine and shared drawing kit.
    window.TIMELINE = [{ id, scene, t0, t1, voice, speech }]  (seconds; built by build.py from the narration clips)
    window.renderFrame(t) draws the frame at time t. Everything is a pure function of t, so renders are repeatable.
    Pixel art goes on a 240×135 canvas (`lx`) that is scaled ×8; crisp text is drawn on top at 1920×1080. */

@@ -1,0 +1,50 @@
+[
+ {
+  "id": "w1",
+  "scene": "wtitle",
+  "text": "Chapter three. Wampum: when the tools changed.",
+  "dip": true,
+  "pad": 1.0
+ },
+ {
+  "id": "w2",
+  "scene": "wshore",
+  "text": "On America's northeast coast, people made beads from shells: white from the whelk, purple from the quahog clam. Wampum."
+ },
+ {
+  "id": "w3",
+  "scene": "wstone",
+  "text": "Each bead was cut, drilled and polished by hand, with stone. Slow work. Strung into belts, wampum sealed treaties between nations."
+ },
+ {
+  "id": "w4",
+  "scene": "wlaw",
+  "text": "European colonists arrived with almost no coins. Inland nations took wampum for furs, so colonists used it as money. In sixteen thirty-seven, Massachusetts made it legal small change: six beads to a penny."
+ },
+ {
+  "id": "w5",
+  "scene": "wiron",
+  "text": "The newcomers also brought iron. Coastal makers switched to iron drill points: far faster than stone. Beads multiplied. Rough ones and fakes poured in too."
+ },
+ {
+  "id": "w6",
+  "scene": "wbeaver",
+  "text": "In Dutch New Amsterdam, a beaver pelt cost about six hundred and forty beads in sixteen forty-one. By sixteen sixty-two: three thousand two hundred. Same pelt. Five times the beads. That's inflation: the pelt didn't change. The beads got cheap."
+ },
+ {
+  "id": "w7",
+  "scene": "wbakers",
+  "text": "If you saved wampum, or earned it, it bought less and less. You did nothing wrong. In sixteen fifty-eight, the town's leaders complained that bakers and brewers would hardly take the beads."
+ },
+ {
+  "id": "w8",
+  "scene": "wfade",
+  "text": "In sixteen sixty-one, with Boston now minting silver coins, Massachusetts dropped wampum as legal money. Wampum belts still matter today. But as money, it faded away."
+ },
+ {
+  "id": "w9",
+  "scene": "wcallback",
+  "text": "In Ulm Hollow, Wren found a cave. Here, the cave was an iron drill. Same story. Next: cowries, the money that got too heavy to carry.",
+  "pad": 1.5
+ }
+]

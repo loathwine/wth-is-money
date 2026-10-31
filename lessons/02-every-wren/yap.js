@@ -113,14 +113,14 @@
         <p class="muted" style="font-size:13px">The 30% is a game number. The sources only say his stones traded for "an appropriately reduced value".</p>
         <div class="row"><button class="btn ghost" data-again>PLAY AGAIN</button><button class="btn" data-done>CONTINUE</button></div>`);
     ui.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); pickPanel(); };
-    ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealRod(); };
+    ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealWren(); };
     Chip.sfx(sunk ? "sad" : "chime");
     if (PHONE) ui.scrollIntoView({ block: "center" });
   }
-  function revealRod() {
-    $("#rod-step").hidden = false; $("#rod-card").hidden = false;
-    Art.drawPortrait($("#rod-portrait"), "rod", 0);
-    $("#rod-card").scrollIntoView({ behavior: "smooth", block: "center" });
+  function revealWren() {
+    $("#wren-step").hidden = false; $("#wren-card").hidden = false;
+    Art.drawPortrait($("#wren-portrait"), "wren", 0);
+    $("#wren-card").scrollIntoView({ behavior: "smooth", block: "center" });
     Ep02.done("yap");
   }
 
@@ -220,6 +220,6 @@
   }
   pickPanel();
   requestAnimationFrame(frame);
-  if (params.has("done")) revealRod();
+  if (params.has("done")) revealWren();
   window.__yap = S;
 })();

@@ -23,9 +23,9 @@ You raise bogwool in Ulm Hollow and need lumfruit and kettlestone. The goods are
 - Each villager keeps a **notebook** of who accepted or refused which good (the player's notebook tab is the same data).
 - A good is worth holding *to trade on* when the holder believes others take it (`saleability`), or knows a specific chain ("Bob sells kettlestone and Bob takes driftcap", `planVal`). That value is discounted by **rot**, **size** (pack space, max haul per swap) and **stock-to-flow** (is new supply diluting it?).
 - Swaps need to be clearly worth it for both sides (`HASSLE`), so early on people refuse a lot.
-- Whichever good wins that feedback loop becomes money. The only scripted event is **Rod's cave**: once pentaja has caught on (or by day 28), Rod's output jumps from 0.5 to 10 a day.
+- Whichever good wins that feedback loop becomes money. The only scripted event is **Wren's cave**: once pentaja has caught on (or by day 28), Wren's output jumps from 0.5 to 10 a day.
 
-Story cards fire on what the simulation actually did (first refusal, first indirect trade, money emerging, Rod, inflation, the switch to zirnet).
+Story cards fire on what the simulation actually did (first refusal, first indirect trade, money emerging, Wren, inflation, the switch to zirnet).
 
 **Trading** happens at a table: the stall's goods on top, your pack at the bottom. Every card says what deal it gives you, and a ✗ means no deal. The "takes" strip shows everything the villager would accept, including goods you don't have. The **🧭 route finder** (`findRoutes` in sim.js) works out chains like "Dov: bogwool → pentaja, then Mira: pentaja → lumfruit", the same way you could from your notebook. FOLLOW marks the stalls on the map and walks you there. Nobody trades while you're at the market, so a route stays valid until you change your own pack.
 
@@ -68,6 +68,6 @@ tools/                      headless sim runners
 
 ## Roadmap
 
-- **EP 02 · Every Rod in History**: Rai stones (O'Keefe), aggry beads, wampum, cowries, Roman debasement. Narrated shorts plus mini-games, each tied back to Rod.
+- **EP 02 · Every Wren in History**: Rai stones (O'Keefe), aggry beads, wampum, cowries, Roman debasement. Narrated shorts plus mini-games, each tied back to Wren.
 - **EP 03 · Why Gold?**: stock-to-flow.
 - **EP 04 · The Theory of Money and Credit**: Mises (1912). The regression theorem (which the EP 01 notebooks already act out), fiduciary media, the business cycle.

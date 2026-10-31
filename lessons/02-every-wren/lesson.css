@@ -42,10 +42,10 @@ h1 { font-size: clamp(28px, 5vw, 44px); margin: 6px 0 24px; }
 .versus .bar { height: 10px; background: var(--panel); margin-top: 6px; border: 0; padding: 0; }
 .versus .bar .fill { display: block; height: 10px; background: var(--gold); }
 
-.rod-card { display: flex; gap: 18px; align-items: flex-start; background: var(--panel); border: 2px solid var(--pen); padding: 18px 20px; box-shadow: 6px 6px 0 #000; }
-.rod-card canvas { width: 80px; height: 96px; flex: none; background: var(--bg); border: 2px solid var(--line); }
-.rod-card p { margin: 0 0 10px; }
-.rod-card .big { font-size: 20px; font-weight: 700; color: var(--pen); }
+.wren-card { display: flex; gap: 18px; align-items: flex-start; background: var(--panel); border: 2px solid var(--pen); padding: 18px 20px; box-shadow: 6px 6px 0 #000; }
+.wren-card canvas { width: 80px; height: 96px; flex: none; background: var(--bg); border: 2px solid var(--line); }
+.wren-card p { margin: 0 0 10px; }
+.wren-card .big { font-size: 20px; font-weight: 700; color: var(--pen); }
 
 .sources { margin-top: 40px; color: var(--muted); font-size: 14px; }
 .sources summary { cursor: pointer; font-family: var(--font-pixel); font-size: 12px; }
@@ -67,7 +67,7 @@ h1 { font-size: clamp(28px, 5vw, 44px); margin: 6px 0 24px; }
   .choices { flex-direction: column; }
   .choice { width: 100%; text-align: left; padding: 12px; }
   .row .btn { flex: 1; justify-content: center; padding: 14px; }
-  .rod-card { flex-direction: column; }
+  .wren-card { flex-direction: column; }
   .versus { grid-template-columns: 1fr; }
 }
 

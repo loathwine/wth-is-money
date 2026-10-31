@@ -10,8 +10,8 @@
   const X = (x) => x * K;  // lo-res → hi-res coordinates for labels
 
   /* ================================================================ HOOK */
-  // h1 · "Remember Rod? He found a cave full of pentaja... and the money of a whole village stopped working."
-  SC.rodcave = (lt, d, t, s) => {
+  // h1 · "Remember Wren? He found a cave full of pentaja... and the money of a whole village stopped working."
+  SC.wrencave = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     sky(0, 96, "#2a1f45", "#3a2a5c");
     ground(96, "#3d2f5a", "#4a3a6c");
@@ -24,7 +24,7 @@
       const fx = lerp(178, tx, clamp(age / 0.6, 0, 1)), fy = lerp(80, ty, clamp(age / 0.6, 0, 1)) - Math.sin(clamp(age / 0.6, 0, 1) * Math.PI) * 18;
       icon("pen", fx - 6, fy - 12);
     }
-    alien("rod", 150, 99, t);
+    alien("wren", 150, 99, t);
     blitLo();
     text("PREVIOUSLY · ULM HOLLOW", 70, 70, 36, C.muted, { align: "left", alpha: 1 - seg(lt, d - 0.5, d) });
     const k = seg(lt, w(9), w(9) + 2.5);
@@ -35,13 +35,13 @@
     fadeOut(lt, d, 0.3);
   };
 
-  // h2 · "Rod is made up. But every money in history has had a Rod. A stone wheel. A glass bead. A seashell. A silver coin. Each time, ..."
+  // h2 · "Wren is made up. But every money in history has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, ..."
   SC.montage = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     lx.fillStyle = C.bg; lx.fillRect(0, 0, LO_W, LO_H);
     for (let i = 0; i < 60; i++) px(hash(i) * LO_W, hash(i + 60) * LO_H, 1, 1, C.line);
     const solo = 1 - seg(lt, w(5), w(5) + 0.5);
-    if (solo > 0) { lx.save(); lx.globalAlpha = solo; alien("rod", 120, 84, t); lx.restore(); }
+    if (solo > 0) { lx.save(); lx.globalAlpha = solo; alien("wren", 120, 84, t); lx.restore(); }
     const slots = seg(lt, w(5), w(5) + 0.5);
     if (slots > 0) for (let i = 0; i < 4; i++) { const x = 36 + i * 56; lx.save(); lx.globalAlpha = slots * 0.8; px(x - 16, 46, 32, 32, C.panel); px(x - 15, 47, 30, 30, C.bg2); lx.restore(); }
     const items = [
@@ -67,16 +67,16 @@
     fadeOut(lt, d, 0.3);
   };
 
-  // h3 · "This is: Every Rod in History."
+  // h3 · "This is: Every Wren in History."
   SC.title = (lt, d, t) => {
     lx.fillStyle = C.bg; lx.fillRect(0, 0, LO_W, LO_H);
     for (let i = 0; i < 80; i++) { const tw = Math.sin(t * 2 + i) > 0.3; if (tw) px(hash(i) * LO_W, hash(i + 80) * LO_H, 1, 1, i % 3 ? C.line : C.pen); }
-    alien("rod", 196, 118, t);
+    alien("wren", 196, 118, t);
     icon("pen", 204, 100); icon("pen", 182, 106);
     blitLo();
     const k = seg(lt, 0.3, 0.9);
     ctx.save(); ctx.globalAlpha = k;
-    text("EVERY ROD", WIDTH / 2, 400, 150, C.gold, { alpha: k });
+    text("EVERY WREN", WIDTH / 2, 400, 150, C.gold, { alpha: k });
     text("IN HISTORY", WIDTH / 2, 570, 150, C.gold, { alpha: k });
     ctx.restore();
     text("WTH IS MONEY? · EPISODE 2", WIDTH / 2, 730, 40, C.muted, { alpha: seg(lt, 1.0, 1.6) });
@@ -289,7 +289,7 @@
     const w = (n) => word(s, n), split = w(8);
     if (lt < split) {
       sky(0, 96, "#2a1f45", "#3a2a5c"); ground(96, "#3d2f5a", "#4a3a6c");
-      cave(150, 34, 70, 64, t); alien("rod", 120, 99, t);
+      cave(150, 34, 70, 64, t); alien("wren", 120, 99, t);
       for (let i = 0; i < 20; i++) icon("pen", 60 + hash(i) * 120, 86 - hash(i + 4) * 6);
       blitLo();
       label("SOUND FAMILIAR?", WIDTH / 2, 200, { k: seg(lt, 0.2, 0.6), size: 50 });
@@ -320,7 +320,7 @@
     ground(110, "#2a2140", "#33284d");
     const tease = seg(lt, w(24), w(24) + 0.5), tease2 = seg(lt, w(24) + 0.5, w(24) + 1.1);
     lx.save(); lx.globalAlpha = 1 - tease;
-    alien("rod", 150, 112, t); icon("pen", 156, 92);
+    alien("wren", 150, 112, t); icon("pen", 156, 92);
     alien("hesk", 190, 112, t); icon("zir", 196, 92);
     lx.restore();
     if (tease2 > 0) { lx.save(); lx.globalAlpha = tease2; bead(120, 66, 3); lx.restore(); }

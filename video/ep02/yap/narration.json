@@ -1,18 +1,18 @@
 [
  {
   "id": "h1",
-  "scene": "rodcave",
-  "text": "Remember Rod? He found a cave full of pentaja... and the money of a whole village stopped working."
+  "scene": "wrencave",
+  "text": "Remember Wren? He found a cave full of pentaja... and the money of a whole village stopped working."
  },
  {
   "id": "h2",
   "scene": "montage",
-  "text": "Rod is made up. But every money in history has had a Rod. A stone wheel. A glass bead. A seashell. A silver coin. Each time, somebody found a cheaper way to make more of it."
+  "text": "Wren is made up. But every money in history has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, somebody found a cheaper way to make more of it."
  },
  {
   "id": "h3",
   "scene": "title",
-  "text": "This is: Every Rod in History.",
+  "text": "This is: Every Wren in History.",
   "pad": 1.6
  },
  {
@@ -49,7 +49,7 @@
  {
   "id": "y8",
   "scene": "discount",
-  "text": "Sound familiar? It's Rod's cave, all over again. But this time, the islanders noticed. By later accounts, O'Keefe's stones, so much easier to get, traded for LESS than the old ones that had cost lives. Yap had spotted its Rod."
+  "text": "Sound familiar? It's Wren's cave, all over again. But this time, the islanders noticed. By later accounts, O'Keefe's stones, so much easier to get, traded for LESS than the old ones that had cost lives. Yap had spotted its Wren."
  },
  {
   "id": "y9",

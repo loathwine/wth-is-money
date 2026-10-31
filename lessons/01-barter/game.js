@@ -8,7 +8,7 @@
 const { GOODS, IDS } = Sim;
 const { STALLS, DOOR, HUT, TREES, STONE, TILE, PHONE } = Art;
 const $ = s => document.querySelector(s);
-const NPCS = ['mira', 'bob', 'sela', 'dov', 'rod', 'hesk'];
+const NPCS = ['mira', 'bob', 'sela', 'dov', 'wren', 'hesk'];
 const params = new URLSearchParams(location.search);
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const NARROW = () => matchMedia('(max-width: 900px)').matches;
@@ -24,7 +24,7 @@ const LINES = {
   bob:  { hi: ['Kettlestone. Heavy. Good.', 'Bob has stones.'], no: ['{g}? Nah.', 'Bob no need {g}.'] },
   sela: { hi: ['Snarlmilk! Drink it before it sours.', 'Milk from my snarls. Fresh today.'], no: ['Hmm, {g}? Not for me.', 'I\'d never get rid of {g}.'] },
   dov:  { hi: ['Driftcaps. They float, you know. Medicine.', 'Driftcap for what ails you.'], no: ['{g}? Can\'t heal anyone with that.', 'Not {g}, friend.'] },
-  rod:  { hi: ['Pentaja! Pretty, aren\'t they? Took me ages to find these.'], rich: ['Pentaja! Plenty more where these came from!', 'Need pentaja? I\'ve got LOTS.'], no: ['{g}? Pass.', 'Nah, not {g}.'] },
+  wren:  { hi: ['Pentaja! Pretty, aren\'t they? Took me ages to find these.'], rich: ['Pentaja! Plenty more where these came from!', 'Need pentaja? I\'ve got LOTS.'], no: ['{g}? Pass.', 'Nah, not {g}.'] },
   hesk: { hi: ['Zirnet. Found this one in the riverbed. Took me days.', 'A zirnet never chips. Never.'], no: ['Hrm. {g}? No.', 'At my age? No {g}.'] },
 };
 
@@ -71,7 +71,7 @@ function newGame() {
     if (params.get('talk')) { openDialog(params.get('talk')); if (params.get('pick') && S.phase === 'dialog') { S.dlg.x = params.get('pick'); renderDialog(); } if (params.get('find') && S.phase === 'dialog') findWay(params.get('find')); }
     if (params.get('plan')) { plan(params.get('plan')); if (params.get('follow')) followRoute(S.plan.routes[0]); }
     if (params.get('tab')) { $('#tab-village').hidden = false; showTab(params.get('tab')); }
-    if (params.get('story') !== '1') S.flags = Object.assign(S.flags, { money: true, rod: true, inflation: true, zir: true, end: true });
+    if (params.get('story') !== '1') S.flags = Object.assign(S.flags, { money: true, wren: true, inflation: true, zir: true, end: true });
     return;
   }
   story(introCard(), () => beginDay(), 'WALK TO THE MARKET');
@@ -357,7 +357,7 @@ function openDialog(id) {
   S.dlg = { npc: id, x: st && st.npc === id ? st.x : null, find: null, routes: null, learned: false };
   S.knownNeeds[id] = true;
   const L = LINES[id];
-  $('#d-say').textContent = '"' + pick(id === 'rod' && S.w.rodDay && S.w.day >= S.w.rodDay ? L.rich : L.hi) + '"';
+  $('#d-say').textContent = '"' + pick(id === 'wren' && S.w.caveDay && S.w.day >= S.w.caveDay ? L.rich : L.hi) + '"';
   $('#dialog').hidden = false;
   renderDialog();
 }
@@ -720,10 +720,10 @@ function lineChart(c, series, maxY, unit) {
   }
   const X = i => pad + (W - pad - 10) * i / (n - 1);
   const Y = v => Hh - pad - (Hh - 2 * pad) * v / m;
-  if (S.w.rodDay) {
-    const i = S.w.rodDay - 1;
+  if (S.w.caveDay) {
+    const i = S.w.caveDay - 1;
     g.strokeStyle = '#ff6fb5'; g.setLineDash([6, 6]); g.beginPath(); g.moveTo(X(i), pad / 2); g.lineTo(X(i), Hh - pad); g.stroke(); g.setLineDash([]);
-    g.fillStyle = '#ff6fb5'; g.fillText('Rod\'s cave', X(i) + 6, pad);
+    g.fillStyle = '#ff6fb5'; g.fillText('Wren\'s cave', X(i) + 6, pad);
   }
   for (const s of series) {
     const pts = unit === '%' ? smooth(s.pts) : s.pts;
@@ -791,7 +791,7 @@ function nightCard(ev, autoTrades, away) {
   const seen = away.slice(0, 5).map(t => `<li class="feedline">${tradeLine(t)}</li>`).join('');
   return `<h2>Night falls · Day ${S.w.day - 1}</h2><ul class="night-list">${lines.join('')}</ul>
     ${away.length ? `<h3 class="pixel sub">WHILE YOU WERE HOME · ${away.length} SWAP${away.length === 1 ? '' : 'S'}</h3><ul class="night-list ticker-like">${seen}</ul>${away.length > 5 ? `<p class="muted" style="font-size:13px">…and ${away.length - 5} more.</p>` : ''}` : ''}
-    ${ev.some(e => e.type === 'rod') ? '' : '<p class="muted">Tomorrow the market opens again.</p>'}`;
+    ${ev.some(e => e.type === 'wren') ? '' : '<p class="muted">Tomorrow the market opens again.</p>'}`;
 }
 
 // Story beats fire on what the simulation actually did, not on a fixed script.
@@ -833,16 +833,16 @@ function checkStory(then) {
       <p class="big">A good that people hold only to trade away again is called <b class="pen">money</b>.</p>
       <p class="quote long">"…the most saleable of goods became the ones everyone accepts in exchange." Carl Menger, <i>On the Origin of Money</i>, 1892 (paraphrased)</p>`, 'SHOW ME');
   }
-  if (!f.rod && w.rodDay && w.day >= w.rodDay) {
-    return fire('rod', `
+  if (!f.wren && w.caveDay && w.day >= w.caveDay) {
+    return fire('wren', `
       <h2>News at the market</h2>
-      <p class="big"><b class="pen">Rod found a cave full of pentaja.</b></p>
-      <p>Rod used to dig up a pentaja every couple of days. Now he's bringing out <b>ten a day</b>.</p>
-      <p class="long">Lucky Rod! He can buy whatever he wants now. But think about what that means for everyone else's pentaja…</p>`);
+      <p class="big"><b class="pen">Wren found a cave full of pentaja.</b></p>
+      <p>Wren used to dig up a pentaja every couple of days. Now he's bringing out <b>ten a day</b>.</p>
+      <p class="long">Lucky Wren! He can buy whatever he wants now. But think about what that means for everyone else's pentaja…</p>`);
   }
-  if (!f.inflation && w.rodDay && w.day >= w.rodDay + 4) {
+  if (!f.inflation && w.caveDay && w.day >= w.caveDay + 4) {
     const H = w.history;
-    const pre = H.slice(0, w.rodDay - 1).map(h => h.price.pen).filter(v => v != null);
+    const pre = H.slice(0, w.caveDay - 1).map(h => h.price.pen).filter(v => v != null);
     const post = H.slice(-4).map(h => h.price.pen).filter(v => v != null);
     const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
     if (pre.length && post.length) {
@@ -851,13 +851,13 @@ function checkStory(then) {
       $('#tab-village').classList.add('new');
       return fire('inflation', `
         <h2>Your pentaja buys less</h2>
-        <p>Before Rod's cave, a lumfruit cost about <b>${a.toFixed(1)}</b> ${icon('pen', 'sm')}.<br>Now it costs about <b class="pen">${b.toFixed(1)}</b> ${icon('pen', 'sm')}.</p>
+        <p>Before Wren's cave, a lumfruit cost about <b>${a.toFixed(1)}</b> ${icon('pen', 'sm')}.<br>Now it costs about <b class="pen">${b.toFixed(1)}</b> ${icon('pen', 'sm')}.</p>
         <p class="long">Nothing about lumfruit changed. There are just a lot more pentaja chasing the same lumfruit.</p>
         ${mine ? `<p>You're holding <b>${mine}</b> pentaja. That used to buy about ${Math.floor(mine / a)} lumfruit. Today it buys about ${Math.floor(mine / b)}.</p>` : ''}
-        <p class="big">Rod didn't steal from anyone. But everyone who <b>saved</b> in pentaja just paid for his shopping.</p>`, 'OOF');
+        <p class="big">Wren didn't steal from anyone. But everyone who <b>saved</b> in pentaja just paid for his shopping.</p>`, 'OOF');
     }
   }
-  if (!f.zir && w.rodDay && w.day > w.rodDay + 2 && recentMoneyness('zir') > recentMoneyness('pen') + 0.15) {
+  if (!f.zir && w.caveDay && w.day > w.caveDay + 2 && recentMoneyness('zir') > recentMoneyness('pen') + 0.15) {
     $('#tab-village').classList.add('new');
     return fire('zir', `
       <h2>The village is quietly switching</h2>
@@ -865,18 +865,18 @@ function checkStory(then) {
       <p class="long">Old Hesk still finds one every few days, cave or no cave. Nobody can suddenly make lots more zirnet. That makes it a better place to keep your savings.</p>
       <p class="big">Money is only as good as <b>how hard it is to make more of it</b>.</p>`);
   }
-  if (!f.end && w.rodDay && w.day >= w.rodDay + 10 && f.rod) {
+  if (!f.end && w.caveDay && w.day >= w.caveDay + 10 && f.wren) {
     return fire('end', `
       <h2>What just happened</h2>
       <ul class="night-list">
         <li>1. Barter was painful. You rarely had what the other person wanted.</li>
         <li>2. So you, and everyone else, started taking goods you didn't need, just to trade them on.</li>
         <li>3. The goods that were easiest to pass on (durable, small, scarce) won. One became <b class="pen">money</b>. Nobody planned it.</li>
-        <li>4. Then Rod found a way to make lots more of it. Prices rose. Savers lost out.</li>
+        <li>4. Then Wren found a way to make lots more of it. Prices rose. Savers lost out.</li>
         <li>5. ${f.zir ? 'The village moved to something harder to make: zirnet.' : 'Nobody trusts pentaja like before. The village is looking for something harder to make.'}</li>
       </ul>
       <p class="long">This has happened again and again in human history: shells, beads, stones, metal. Each time, someone found a cave.</p>
-      <p class="big">Next: <b>Every Rod in History.</b></p>
+      <p class="big">Next: <b>Every Wren in History.</b></p>
       <p class="muted long">You can keep playing. Try a different village: add <code>?seed=3</code> to the address.</p>`, 'KEEP PLAYING');
   }
   return false;
