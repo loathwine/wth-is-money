@@ -92,15 +92,7 @@
     Chip.song(Chip.SONGS.yap);
   }
   // Phones: the run takes over the whole screen (and asks to turn sideways); menus return to the page.
-  const PHONE = matchMedia("(max-width: 700px), (pointer: coarse) and (max-height: 500px)").matches;
-  function playMode(on) {
-    document.body.classList.toggle("playing", on);
-    const el = $("#game");
-    try {
-      if (on && el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().then(() => screen.orientation?.lock?.("landscape")).catch(() => {});
-      if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    } catch {}
-  }
+  const PHONE = Ep02.PHONE, playMode = Ep02.playMode;
   function finish() {
     if (PHONE) playMode(false);
     const s = S.stone, sunk = S.sunk, value = sunk ? 0 : s.baskets, ok = Math.round(s.baskets * OKEEFE_SHARE);
@@ -129,7 +121,7 @@
     $("#rod-step").hidden = false; $("#rod-card").hidden = false;
     Art.drawPortrait($("#rod-portrait"), "rod", 0);
     $("#rod-card").scrollIntoView({ behavior: "smooth", block: "center" });
-    try { localStorage.setItem("wth-ep02-yap-done", "1"); } catch {}
+    Ep02.done("yap");
   }
 
   /* ---------- input ---------- */
@@ -145,8 +137,6 @@
   addEventListener("pointermove", (e) => { if (S.drag && S.phase === "run") S.target = pointerY(e); });
   addEventListener("pointerup", () => { S.drag = false; });
   if (matchMedia("(pointer: coarse)").matches) $("#steer-hint").innerHTML = "Drag up and down on the sea to steer.";
-  $("#mute").onclick = () => { Chip.setMuted(!Chip.muted); $("#mute").textContent = Chip.muted ? "♪ OFF" : "♪ ON"; };
-  $("#mute").textContent = Chip.muted ? "♪ OFF" : "♪ ON";
 
   /* ---------- simulation ---------- */
   const TOP = 56, BOT = H - 12;
