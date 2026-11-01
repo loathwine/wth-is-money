@@ -15,7 +15,7 @@ The drill itself stays exactly as the outline wanted: slow rhythm taps with ston
 
 ## Controls (one thumb, any orientation)
 - **DRILL**: tap anywhere on the play area. Keyboard: `Space`. Mouse: click.
-- **BUY**: three buttons, one per item, each showing its live price: `CORN`, `KETTLE`, `COAT`. Keyboard: `1`, `2`, `3`. A button greys out while you can't afford it, and pulses gold when you can.
+- **BUY**: three buttons, one per item, each showing its live price: `CORN`, `KETTLE`, `COAT`. Keyboard: `1`, `2`, `3`. A button greys out while you can't afford it, and pulses gold when you can. CORN only pulses once the kettle and coat are bought, and buying corn before that pops `STILL NEED A KETTLE!` (or COAT): playtests showed the easy 1-bead corn could eat every bead before the kettle was ever affordable.
 - **Portrait phone (390×844):** full-screen play mode, as in the canoe run (`Ep02.playMode`). The canvas (320×180, pixel-scaled) goes on top. Under it are three big BUY buttons in a row (at least 56 px tall), and under those a **big drill pad** filling the rest of the screen. The thumb lives on the pad and slides up to buy. The drill pad shows the drill animation, so nothing is lost by not looking up.
 - **Landscape phone or desktop:** the canvas fills the height, the BUY buttons sit in a column on the right edge, and tapping anywhere on the canvas drills. There is no "turn your phone" hint: both orientations are first-class.
 - There's no drag, no double-tap, and no timing on the buy buttons. Only the stone phase asks for rhythm.

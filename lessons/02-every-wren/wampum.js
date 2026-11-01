@@ -172,7 +172,7 @@
     g.restore();
     // banners
     const ban = banner();
-    if (ban) { g.fillStyle = "rgba(14,10,24,.82)"; g.fillRect(0, 70, W, 34); txt(ban[0], W / 2, 86, 16, "#ffd23f", "center"); txt(ban[1], W / 2, 99, 8, "#f4ecff", "center"); }
+    if (ban) { g.fillStyle = "rgba(14,10,24,.85)"; g.fillRect(0, 80, W, 27); txt(ban[0], W / 2, 94, 16, "#ffd23f", "center"); txt(ban[1], W / 2, 104, 8, "#f4ecff", "center"); }   // under the board, so the prices stay visible
   }
   function banner() {
     const ph = S.phase, t = S.t;
@@ -212,6 +212,7 @@
     const p = price(gd);
     if (S.beads < p) { sfx("thud"); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); pop(`NEED ${p}`, 171, 86, "#ff5a5a"); return; }
     S.beads -= p; S.got[gd.k]++; sfx("chime"); pop(`${gd.name}!`, 171, 146, "#8fd16a");
+    if (!gd.once && !(S.got.kettle && S.got.coat)) pop(S.got.kettle ? "STILL NEED A COAT!" : "STILL NEED A KETTLE!", 171, 136, "#ff9a5a");   // the corn trap
   }
   function repaint(k, ti) {
     S.k = k; S.P = level(ti); S.paintAt = S.now; sfx("clink");
@@ -230,7 +231,7 @@
     GOODS.forEach((gd, i) => {
       const b = buyBox.children[i], p = price(gd), have = gd.once && S.got[gd.k];
       b.querySelector(".p").textContent = have ? "✓ GOT IT" : `${p} bead${p > 1 ? "s" : ""}`;
-      b.classList.toggle("can", !have && S.beads >= p && inPlay());
+      b.classList.toggle("can", !have && S.beads >= p && inPlay() && (gd.once || (S.got.kettle && S.got.coat)));   // corn pulses only once the goal is bought
       b.classList.toggle("got", !!have);
       b.disabled = !inPlay() || !!have;
     });
@@ -276,10 +277,10 @@
       if (k > S.k && S.t < IRON_T) repaint(k, S.t);
       if (S.t >= IRON_T) { repaint(12, IRON_T); S.phase = "winter"; S.t = 0; Chip.song(Chip.SONGS.mystery); }
     } else if (S.phase === "winter") { S.t += dt; if (S.t >= WINTER_T) finish(); }
-    if (keyHeld && S.now - keyHeld > 0.1) { keyHeld = S.now; drillTap(); }
+    if (keyHeld && S.phase === "iron" && S.now - keyHeld > 0.2) { keyHeld = S.now; drillTap(); }   // holding Space drills slowly; mashing is faster
   }
   function finish() {
-    S.phase = "result"; playMode(false); buyBox.hidden = PHONE; pad.hidden = true; keyHeld = 0;
+    S.phase = "result"; playMode(false); buyBox.hidden = true; pad.hidden = true; keyHeld = 0;   // hide the buttons: they would stretch beside the tall result panel
     const sc = score(), warm = S.got.kettle && S.got.coat, ratio = S.stone ? Math.round(S.made / S.stone) : 0, real = S.stone ? Math.round(sc / S.stone * 10) / 10 : 0;
     const stars = (S.got.kettle ? 1 : 0) + (S.got.coat ? 1 : 0) + (sc >= 15 ? 1 : 0);
     const isBest = sc > S.best; if (isBest) { S.best = sc; try { localStorage.setItem("wth-ep02-wampum-best", sc); } catch {} }

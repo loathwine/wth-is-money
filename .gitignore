@@ -2,6 +2,7 @@
 video/*/*/audio/
 video/*/*/frames/
 video/*/*/prev/
+video/*/*/still/
 video/*/*/out/*.wav
 video/*/*/out/video_only.mp4
 video/*/*/out/*.log

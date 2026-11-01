@@ -75,7 +75,7 @@ Pressing it: a stone tablet thuds down, `MAX PRICE: 10 COINS` stamps onto every 
 **Mutiny:**
 > **MUTINY, AD 197**
 > Your coins stayed honest, so the soldiers went unpaid. They picked a new emperor. That happened to many real emperors of this era.
-> Your successor added the copper for you: Marcus's jar ended up at **6 weeks of bread** anyway.
+> Your successor added the copper for you: (then the same facts and Marcus line as a full run; in a test, the successor ends at **4.3% silver**, a loaf at **23 coins**, and Marcus with **19 weeks** of bread. Marcus doesn't count toward the score after a mutiny.)
 > [TRY AGAIN] [CONTINUE]
 
 **Greedy (Marcus at 0 days):** the same as the full win, with the Marcus line in red: *"Marcus's 3,000 coins: 8 years of bread → **less than a day**. You paid him in coins you made worthless."*

@@ -87,8 +87,10 @@ The game is set in an ordinary 1840s–1890 market (goats, shells, a grandmother
 - **Loads:** 1840s 2,000 × 1 g = 2 kg (pouch); 1871 10,000 × 2 g = 20 kg (one head-load); 1890 20,000 × 2 g = 40 kg = two 20 kg trips (cap 10,000 shells a trip).
 - **Steps per walk:** `7 + 21 × kg / 20` (about 9 at 2 kg, 28 at 20 kg, 7 walking home empty).
 - **Sway:** each step adds `0.06 + 0.5 × kg / 20`; it settles with a 0.5 s time constant; over 1 it spills. At 2 kg you can mash; at 20 kg two quick taps spill, and the steady limit is about 2.4 steps a second. A small bar over your head shows it (green → red).
-- **Spill:** 10% of the load (rounded to 100) is lost on the path and you stagger 0.7 s. Arriving short means walking home for the rest (a light, fast trip), so a spill costs a few seconds of sun.
-- **Hold** steps at a safe rhythm (≈ 0.5 s at 20 kg), so a careful one-thumb player still gets all three goats: 1871 with ≈ 8 s left, 1890 with ≈ 5 s.
+- **Spill:** 10% of the load (rounded to 100) is lost on the path and you stagger 0.9 s. Arriving short means walking home for the rest, so a spill costs a few seconds of sun.
+- **No mashing through:** a step only gets its full length if it comes 0.25 s or more after the last one (faster taps shuffle). Without this, mashing won: spills shrank the load, light loads walk fast, and the infinite jar at home refilled them (1871 with 7.5 s left after 12 spills). Simulated now (same formulas): hold 1871 ≈ 7.7 s left, 1890 ≈ 3.2 s; steady taps every 0.42 s: 10.0 s / 6.4 s; mashing every 0.12 s or faster: sunset in 1871 and 1890. The 1840s stay mashable (≈ 22 s left).
+- **Hold** steps at a safe rhythm (≈ 0.5 s at 20 kg, never faster than 0.25 s), so a careful one-thumb player still gets all three goats: 1871 with ≈ 8 s left, 1890 with ≈ 3 s.
+- **Cards between rounds** ignore taps for their first 0.9 s, so a thumb still mashing from the last round cannot skip the jar.
 - **Timers:** 25 s / 22 s / 34 s. Score = goats × 1000 + tenths of a second left in 1890, stored in `localStorage["wth-ep02-cowries-best"]`.
 - **Phones:** during a run the game takes the whole screen (canvas on top and a big STEP button under it in portrait; side by side when held sideways). No orientation lock. Cards between rounds show the jar (2,000 shells = 1 goat → 1/5 → 1/10).
 - **Result:** the 1840s vs 1890 boxes (shells, kg, trips, steps from the run), the jar line, an "In real life" line (€2,000 in a drawer that a lifetime later buys what €200 used to), and the real-vs-game note.

@@ -243,7 +243,7 @@
         for (let k = 0; k < 9; k++) { px(x - 4 + k, y - 4 + k, 1, 1, "#e8edf5"); px(x + 4 - k, y - 4 + k, 1, 1, "#e8edf5"); }
       }
       // Wren's cameo: "that's my move"
-      const kw = seg(lt, w(12), w(12) + 0.3) * (1 - seg(lt, split - 0.3, split));
+      const kw = seg(lt, w(11), w(11) + 0.3) * (1 - seg(lt, split - 0.3, split));   // from "what": long enough to read the bubble
       if (kw > 0) { wrenRoyal(156, 96 + Math.round((1 - kw) * 14), t); icon("pen", 162, 66 + Math.round((1 - kw) * 14)); }
       blitLo();
       label("SILVER IN: A LITTLE · PAY OUT: A LOT", WIDTH / 2, 140, { k: seg(lt, w(2), w(2) + 0.4), size: 38, bg: C.gold });
@@ -315,7 +315,11 @@
     });
     if (zoom > 0) {
       text("AD 270", WIDTH / 2, 90, 60, C.gold, { alpha: zoom });
-      body("still looks like silver…", WIDTH / 2, 160, 40, C.ink, { alpha: zoom * (1 - seg(lt, w(19), w(19) + 0.3)) });
+      // right of the big coin (it spans x 560-1360): first the trick, then the number
+      body("still looks", 1650, 500, 44, C.ink, { alpha: zoom * (1 - seg(lt, w(19), w(19) + 0.3)) });
+      body("like silver…", 1650, 560, 44, C.ink, { alpha: zoom * (1 - seg(lt, w(19), w(19) + 0.3)) });
+      const k5 = seg(lt, w(19.3), w(19.3) + 0.3);
+      text("UNDER 5%", 1650, 500, 70, C.bad, { alpha: k5 }); text("SILVER", 1650, 580, 50, C.bad, { alpha: k5 });
       stamp("SILVER SKIN, COPPER INSIDE", WIDTH / 2, 960, seg(lt, w(21), w(21) + 0.25), { size: 56, rot: -0.05 });
     }
     fadeOut(lt, d, 0.3);
@@ -350,10 +354,10 @@
       ctx.fillStyle = price > 16 ? "#ffe2d6" : "#fff8e8"; ctx.fillRect(-tw / 2, -th / 2, tw, th); ctx.strokeStyle = "#1a1026"; ctx.strokeRect(-tw / 2, -th / 2, tw, th);
       ctx.restore();
       text(String(price), cx, cy + 6, sz, price > 16 ? C.bad : "#1a1026", { shadow: false, alpha: kt });
-      text("DRACHMAS", cx, cy + 140, 40, C.ink, { alpha: kt });
+      text("DRACHMAS", cx, cy + sz * 0.7 + 50, 40, C.ink, { alpha: kt });
     }
     label("1 SACK OF WHEAT ≈ 30 KG", X(46), 1030, { k: seg(lt, w(5), w(5) + 0.4), size: 30 });
-    body("drachma = Egypt's unit of money", 760, 330, 30, C.ink, { alpha: seg(lt, w(10), w(10) + 0.4) * (1 - seg(lt, w(16), w(16) + 0.3)) });
+    body("drachma = Egypt's unit of money", 760, 330, 40, C.ink, { alpha: seg(lt, w(10), w(10) + 0.4) * (1 - seg(lt, w(16), w(16) + 0.3)) });
     if (lt > w(16) && lt < w(23)) label("CREEPING UP…", 760, 300, { k: seg(lt, w(16), w(16) + 0.3), size: 36 });
     if (lt > w(23)) label("THEN A LEAP!", 760, 270, { k: seg(lt, w(23), w(23) + 0.3), size: 44, bg: C.bad, color: "#fff" });
     const kch = seg(lt, w(15), w(15) + 0.5);
@@ -439,8 +443,8 @@
       text(a, 760, 330 + i * 100, 42, "#2a2420", { align: "left", shadow: false, alpha: k });
       if (b) text(b, 1810, 330 + i * 100, 52, "#2a2420", { align: "right", shadow: false, alpha: k });
     });
-    body("max prices, in denarii · the worker also gets meals", X(161), 730, 32, "#3a3430", { shadow: false, alpha: seg(lt, w(14), w(14) + 0.4) });
-    stamp("CHARGE MORE: DEATH", X(161), 850, seg(lt, w(23), w(23) + 0.25), { size: 60 });
+    body("max prices, in denarii · the worker also gets meals", X(161), 715, 32, "#3a3430", { shadow: false, alpha: seg(lt, w(14), w(14) + 0.4) });
+    stamp("CHARGE MORE: DEATH", X(161), 880, seg(lt, w(23), w(23) + 0.25), { size: 60 });
     fadeOut(lt, d, 0.3);
   };
 
@@ -470,6 +474,8 @@
     blitLo();
     const flash = seg(lt, w(6), w(6) + 0.15) * (1 - seg(lt, w(6) + 0.15, w(6) + 0.5));
     if (flash > 0) { ctx.fillStyle = `rgba(200,20,20,${0.35 * flash})`; ctx.fillRect(0, 0, WIDTH, H); }
+    text("PRICE", X(120), X(4 + 10) + X(easeInOut(drop) * 60), 30, "#2a2420", { shadow: false, alpha: 1 - drop });
+    text("LAW", X(120), X(4 + 18) + X(easeInOut(drop) * 60), 30, "#2a2420", { shadow: false, alpha: 1 - drop });
     xs.forEach((x) => label("MAX PRICE", X(x * 2), X(68), { k: seg(lt, 0.3, 0.7), size: 26, bg: "#fff8e8" }));
     body("A writer of the time: Lactantius, a critic of Diocletian", 40, 1045, 32, C.ink, { align: "left", alpha: seg(lt, 0.3, 0.8) });
     body("“men were afraid to put anything up for sale”", WIDTH / 2, 330, 40, "#2a1a10", { shadow: false, alpha: seg(lt, w(13), w(13) + 0.4) * (1 - seg(lt, w(18), w(18) + 0.3)) });
@@ -522,6 +528,7 @@
       text("?", WIDTH / 2, 360, 140, C.gold, { alpha: tz });
       text("NEXT · FINALE", WIDTH / 2, 760, 44, C.muted, { alpha: seg(lt, w(19) + 0.4, w(19) + 0.9) });
       text("MONEY WITH NO CAVE?", WIDTH / 2, 850, 76, C.ink, { alpha: seg(lt, w(19) + 0.6, w(19) + 1.1) });
+      text("CAVE = MINT", WIDTH / 2, 150, 90, C.gold);   // the chapter's point stays lit above the dim
     }
     fadeOut(lt, d, 1.0);
   };

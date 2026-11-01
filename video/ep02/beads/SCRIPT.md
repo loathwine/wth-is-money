@@ -2,13 +2,13 @@
 
 **Purpose:** let a viewer with no economics background *feel* two things: (1) being the one who brings cheap new money feels like winning, and (2) the people who saved the old money pay for it. Then contrast that with the one bead nobody could copy, which kept its value for two centuries.
 
-The narration lives in `narration.json`: 9 lines, 230 words, about 94 s at the Yap pace (2.44 words/s including gaps), plus 3.7 s of pads.
+The narration lives in `narration.json`: 9 lines, 230 words, about 94 s at the Yap pace (2.44 words/s including gaps), plus 3.7 s of pads. The built timeline (`timeline.json`) runs **111.4 s**.
 It uses the same pipeline and conventions as `../yap/` (`tts.sh beads` → `trim.sh` → `build.py beads` → `scenes.js` / `cues.py`).
 `b5` has its own TTS `style` (quiet and grave); the other lines use the default narrator.
 Scene names are prefixed or unique (`beadflood`, `beadcallback`, and so on) so they never collide with Yap's `SC.flood` / `SC.callback` if both chapters' scenes are ever loaded together.
 
 Word numbers below are **0-based** indices into the segment's text, as in `word(s, n)` / `w("b4", 13)`. They were recounted after the fact-check edit; recount if a line changes.
-Wren is drawn with `alien("wren", …)` once the rename lands; until then, use the Rod sprite. Wren is never given a gendered pronoun in on-screen text.
+Wren is drawn with `Art.drawAlien(…, "wren", …)` (the `wren()` helper in `scenes.js` adds the trader's hat). Wren is never given a gendered pronoun in on-screen text.
 
 **What changed in the fact-check pass (and why):**
 - b2: "was worth" → "could be worth" (Francis: "often worth its weight in gold"); "Old ones passed from hand to hand" → "All were old" (old beads were also dug up from ancestral sites, so "hand to hand" was too neat).
@@ -51,7 +51,7 @@ Wren is drawn with `alien("wren", …)` once the rename lands; until then, use t
 | 10 "I" | Wren's eyes light up (2 frames of gold pixels). | `I CAN MAKE THAT!` (speech bubble) |
 | 14 "Europe's" | Split screen right: a glass furnace (orange glow) in "VENICE", and a glassblower pulling out a blue bead copy. Three copies pop out, plink plink plink. | `VENICE · HOLLAND` |
 | 17 "But" | A plain side-by-side for the viewer (no hands, no buyer): the real accori and a copy sit by a small fire. The copy **cracks** (2-frame white split); the accori doesn't. This illustrates a property of the beads, not a test anyone is recorded doing. | `GLASS COPIES "WILL NOT BEAR THE HEAT OF FIRE"`, then a source line in small muted text: `A PORTUGUESE PILOT, c. 1540` |
-| 22 "could" | Back at the market, the merchant looks at the copy, then hands it back to Wren with a shrug. A pink stamp lands. | `NOT FOOLED` |
+| 22 "could" | Back at the market, the merchant looks at the copy, then hands it back to Wren with a shrug. A pink stamp lands (built at word 23, "tell"). | `NOT FOOLED` |
 
 ## b4 · `beadflood`: "New plan: ordinary beads, by the ton. By the late seventeen hundreds, Venice made tens of millions a year. In Liverpool, the price of one ounce of gold bought nearly fifty kilos. Coastal merchants still bargained hard."
 
@@ -61,7 +61,7 @@ Wren is drawn with `alien("wren", …)` once the rename lands; until then, use t
 | 2 "ordinary" | Barrels tip and ordinary small beads (1–2 px dots in red, white, blue, yellow) **pour** across the floor. Reuse the h1 spill loop with ~150 dots and `hash()` positions. | |
 | 7 "By" | A year counter in the corner rolls `1600 → 1700 → 1780`. | |
 | 12 "Venice" | A counter ticks up fast. | `BEADS A YEAR: TENS OF MILLIONS` (with digits rolling past 10,000,000) |
-| 19 "In" | A balance scale again (rhymes with b2). Left pan: one small gold coin `coin()`, labelled `1 OZ GOLD`. The right pan fills with sacks (`sack()`), stacking 1 → 7 sacks, until it balances at word 30 "fifty". Wren cameo in the bottom corner, a wink and a speech bubble `THAT'S MY MOVE!` (no voice), at word 28 "bought". | `1 OUNCE OF GOLD = NEARLY 50 KG OF BEADS` |
+| 19 "In" | *(Built: two dark cards, `1 OUNCE OF GOLD / 31 GRAMS` (a troy ounce, the unit of the 1717 gold price) and `BEADS / NN KILOS` counting up to 47 as the sacks land.)* A balance scale again (rhymes with b2). Left pan: one small gold coin `coin()`, labelled `1 OZ GOLD`. The right pan fills with sacks (`sack()`), stacking 1 → 7 sacks, until it balances at word 30 "fifty". Wren cameo in the bottom corner, a wink and a speech bubble `THAT'S MY MOVE!` (no voice), at word 28 "bought". | `1 OUNCE OF GOLD = NEARLY 50 KG OF BEADS` |
 | 30 "fifty" | Small text bottom. | `LIVERPOOL PRICES, 1760s–1780s` |
 | 32 "Coastal" | Cut to the beach market: a merchant behind a table looks at Wren's open sack, shakes their head, and pushes back a counter-offer (a tally of fingers). Wren's grin slips a little. | `HARD BARGAINING` |
 
@@ -89,7 +89,7 @@ This is the chapter's felt moment. Keep it simple and slow. It is a **what-if**,
 | 4 "Imagine" | A string of 20 beads is drawn bead by bead across the screen (one per 0.05 s, glass clinks). | `IMAGINE` (small, muted, top left, stays through b7), `YOUR FAMILY'S SAVINGS` |
 | 11 "years" | The string sits in the centre. Beside it, a food pile: 12 yam baskets (`basket()`). | `= 12 BASKETS OF FOOD` |
 | 18 "every" | A ship's horn: a ship silhouette crosses the horizon in the background and a puff of new beads lands in the market. Repeat at word 22 "beads," and word 25 "buys" (three ships in all). | |
-| 18–28 | With each ship, **food baskets vanish from the pile** (12 → 8 → 5 → 3), each with a soft "pop" down. The string of beads does not change at all. | label updates: `= 8 BASKETS` → `= 5` → `= 3` |
+| 18–28 | With each ship, **food baskets vanish from the pile** (12 → 8 → 5 → 3), each with a soft "pop" down. The string of beads does not change at all. | label `BUYS 12 BASKETS OF FOOD` updates (once the baskets are gone, so the number always matches what is drawn): `8` → `5` → `3`, with a dark struck-through `WAS 12`; `SHIPS WITH NEW BEADS: n` top right (dark text on the dawn sky) |
 | 29 "Same" | Highlight the string (a white outline). | `SAME STRING` |
 | 31 "Less" | Highlight the 3 baskets. | `LESS FOOD` |
 
@@ -100,7 +100,8 @@ This is the chapter's felt moment. Keep it simple and slow. It is a **what-if**,
 | Word | Visual | On screen |
 |---|---|---|
 | 0 | The same string. One bead in it turns sky-blue and glows: the accori (the b2 prop). | |
-| 5 "accori" | Soft chime. The baskets that bead "holds" (three, set slightly apart) **do not vanish** as one more ship passes. | `ACCORI: STILL 3 BASKETS` |
+| 3 "held" | Soft chime. Three gold-ringed baskets appear right under the accori, joined to it by a dotted gold line. | `THE ACCORI BUYS 3` |
+| 3–5 | One more ship crosses (horn). The ordinary row drops 3 → 2 (one basket pops away); the accori's three **do not move**. | label flips to `NEW SHIP. ACCORI: STILL 3`; small dark `OTHER BEADS: NOW 2` under the ordinary row |
 | 6 "Nobody" | Tiny replay of the cracked copy from b3 (0.6 s). | `CAN'T BE COPIED` |
 | 10 "Two" | The scale from b2 again, exactly as before: the accori on the left, **one** pile of gold on the right, balancing at word 23 "weight". The point is that nothing changed. | `c. 1700: STILL WEIGHED AGAINST GOLD`, small muted `WILLEM BOSMAN, DUTCH TRADER` |
 
@@ -108,7 +109,7 @@ This is the chapter's felt moment. Keep it simple and slow. It is a **what-if**,
 
 | Word | Visual | On screen |
 |---|---|---|
-| 0 | Ulm Hollow (EP 01 palette, same as `SC.rodcave`): Wren at the cave, arms full of pink pentaja. | `ULM HOLLOW` |
+| 0 | Ulm Hollow (EP 01 palette, same as Yap's `SC.wrencave`): Wren at the cave, arms full of pink pentaja. | `ULM HOLLOW` |
 | 6 "Wren" | Wren hurries to a stall and buys a lumfruit. The price tag shows `1` pentaja. | |
 | 9 "first," | The tag flips to `4`, then `8` behind Wren as the next villagers queue. | |
 | 11 "pentaja" | A villager behind Wren opens their savings pouch: four pentaja, which now buy half a lumfruit. | |
@@ -134,7 +135,7 @@ This is the chapter's felt moment. Keep it simple and slow. It is a **what-if**,
 - **b4:** `whoosh()` at word 0 (toss); **bead pour**: about 60 `clink(1800–3200)` at 0.04 s spacing across words 2–7 (the h1 spill pattern, faster and higher); a tick per counter step at words 12–18 (`tone(1200, 0.03, "square")`); a `thud()` per sack landing at words 21–30; `chime(72, (0, 4, 7))` when the scale balances at word 30; a dry `pop_(500)` at word 35 (the counter-offer).
 - **b5:** a low ship creak only (`noise(1.2, 1, seed=9)` very quiet) at segment start. **No sound effects from word 14 to the end of the segment.** No stings.
 - **b6:** a soft `clink(2400)` per bead as the string is drawn (words 4–10, 20 clinks); a ship horn (`tone(110, 0.9, "saw", 98)`, quiet) at words 18, 22, 25; a soft low `pop_(300)` for each basket that vanishes.
-- **b7:** `chime(79, (0, 4, 7, 11, 14))` at word 5 (the accori glows); a replay of the b3 fire crack (quieter) at word 6; one `clink(1800)` as the gold pile lands and the scale balances at word 23.
+- **b7:** `chime(74, (0, 4, 7, 11, 14))` at word 3 (the accori glows); the b6 ship horn at word 3 and a low `pop_(300)` 0.8 s later (an ordinary basket goes); a replay of the b3 fire crack (quieter) at word 6; one `clink(1800)` as the gold pile lands and the scale balances at word 23.
 - **b8:** the EP 01 coin/pentaja clink (`clink(2000)`) at word 6; two quick `pop_` price-tag flips at word 9; `thud()` at word 23.
 - **b9:** a woodblock drill rhythm (`tone(900, 0.02, "square")`) that accelerates from 3 to 12 per second across words 9–11; `chime(67, (0, 3, 7, 10))` at the end.
 
@@ -164,7 +165,7 @@ Every claim in the narration and on screen, with its source. "Checked" means the
 | b3 | On screen: glass copies "will not bear the heat of fire". | A Portuguese pilot, c. 1540, in J. W. Blake, *Europeans in West Africa 1450–1560* (Hakluyt Soc., 1942), p. 153, as quoted by Francis 1990: some wear "necklaces of glass, which are very similar [to coris] but which will not bear the heat of fire". | Quoted second-hand (Blake not read). The pilot does **not** say that buyers ran a fire test, so the film shows the property as a side-by-side for the viewer, with no buyer doing it, and the narration never mentions fire. |
 | b4 | "By the late seventeen hundreds, Venice made tens of millions a year." | Saul Guerrero, "Venetian Glass Beads and the Slave Trade from Liverpool, 1750–1800", *BEADS* 22 (2010), abstract: "manufactured tens of millions of units of conterie and perle a lume beads per year during the second half of the 18th century." Appendix A: about 9 million large beads a year, and the small conterie "at least one order of magnitude greater". https://journals.uoregon.edu/beads/article/view/6232 | ✓ Checked (full PDF). "Tens of millions" is the cautious end: Guerrero's own appendix suggests ~100 million. "Late" was added because the figure is for 1750–1800. |
 | b4 | "By the ton." | Guerrero 2010, Appendix A (after Trivellato 2000): perle-a-lume exports averaged 340,628 *libbre grosse* a year in 1769–1796 ≈ **162.5 tonnes**, and conterie were "around three times greater" by weight. | ✓ Checked. Optional on-screen line: `~160 TONNES A YEAR (LARGE BEADS ALONE)`. |
-| b4 | "In Liverpool, the price of one ounce of gold bought nearly fifty kilos." | Bead price: Guerrero 2010, p. 57: "In Liverpool the price recorded for the beads loaded as cargo on the Davenport slavers was on the order of 9 pence a pound", a price "in the majority of the accounts" of voyages 1761–1782 (n. 9). Gold: Isaac Newton's 1717 mint report fixed gold at £3 17s 10½d per standard ounce (= 934.5 d). https://www.gold.org/sites/default/files/documents/1717sep21.pdf | **Our own arithmetic:** 934.5 d ÷ 9 d/lb ≈ 104 lb ≈ **47 kg**, hence "nearly fifty" (by fine gold it would be ≈ 51 kg). ⚠️ This was WD&Co.'s unusually cheap price: Guerrero calls it "a very aggressive marketing policy". At London's 1782 price (2s/lb, Guerrero Table 2) it would be ≈ 18 kg. So the narration says "In Liverpool", the screen says `LIVERPOOL PRICES, 1760s–1780s`, and the line must not be generalised to "Europe". |
+| b4 | "In Liverpool, the price of one ounce of gold bought nearly fifty kilos." On screen: `1 OUNCE OF GOLD / 31 GRAMS` (gold is weighed in troy ounces, 31.1 g; Newton's price is per troy ounce, so the screen no longer says 28 g, the kitchen ounce). | Bead price: Guerrero 2010, p. 57: "In Liverpool the price recorded for the beads loaded as cargo on the Davenport slavers was on the order of 9 pence a pound", a price "in the majority of the accounts" of voyages 1761–1782 (n. 9). Gold: Isaac Newton's 1717 mint report fixed gold at £3 17s 10½d per standard ounce (= 934.5 d). https://www.gold.org/sites/default/files/documents/1717sep21.pdf | **Our own arithmetic:** 934.5 d ÷ 9 d/lb ≈ 104 lb ≈ **47 kg**, hence "nearly fifty" (by fine gold it would be ≈ 51 kg). ⚠️ This was WD&Co.'s unusually cheap price: Guerrero calls it "a very aggressive marketing policy". At London's 1782 price (2s/lb, Guerrero Table 2) it would be ≈ 18 kg. So the narration says "In Liverpool", the screen says `LIVERPOOL PRICES, 1760s–1780s`, and the line must not be generalised to "Europe". |
 | b4 | "Coastal merchants still bargained hard." | Guerrero 2010, p. 58: slaves were bartered for a mixed "basket of goods", and there was "reticence of the African slave trader to accept them [cheap goods] unless compensated with the goods he actually preferred"; conclusion: the account books "seriously question the idea that African traders were gullible enough to barter slaves for a handful of beads"; beads had "a barter value per pound sterling spent in Liverpool second only to gunpowder". | ✓ Checked. Added in this pass so that b4's cheap Liverpool price can't be heard as the "trinkets" myth. |
 | b5 | The ships also carried cloth, iron and guns. | Guerrero 2010, Table 3 (Liverpool slavers, 1755–1800, after Richardson 1979): textiles 27.9% of cargo value, brassware 14.3%, beads 7.7%, iron 7.7%, cowries 7.1%, arms 6.5%, gunpowder 5.4%, spirits 5.2%. | ✓ Checked. Beads were a real but **minor** share, hence "helped pay for", not "paid for". |
 | b5 | "They bought gold and ivory. Above all, Liverpool's traders bought people." | Guerrero 2010: the Davenport accounts cover "61 slave trading ventures"; the account books record "sales of slaves, ivory, or palm oil"; beads were "one of the eight main categories of cargo bartered for slaves in Africa by traders from Liverpool". V&A, "From culture to currency: glass beads and the transatlantic slave trade": beads bought "ivory, gold, and palm oil" from the 15th century, and "were also used to purchase enslaved Africans". https://www.vam.ac.uk/articles/from-culture-to-currency-glass-beads-and-the-transatlantic-slave-trade | ✓ Checked. The old line put people last in a list after gold, ivory and palm oil; for these Liverpool ships, buying people was the main business, so the narration now says so in its own sentence. Gold mattered most in the 1500s–1600s; palm oil mostly after 1807, so it was dropped from the narration. |

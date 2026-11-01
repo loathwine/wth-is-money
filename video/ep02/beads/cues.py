@@ -62,7 +62,9 @@ for j, n in enumerate((18, 22, 25)):
     place(sfx, w("b6", n), tone(110, 0.9, "saw", 98, decay=0.5), 0.05)
     for i in range([4, 3, 2][j]): place(sfx, w("b6", n) + 0.6 + i * 0.1, pop_(300), 0.1)
 place(sfx, w("b6", 31), thud(), 0.4)
-# b7: the accori glows; CAN'T BE COPIED; gold pours and the scale balances
+# b7: the accori glows; one more ship: a horn, and one ordinary basket pops away (the accori's stay); CAN'T BE COPIED; gold pours
+place(sfx, w("b7", 3), tone(110, 0.9, "saw", 98, decay=0.5), 0.05)
+place(sfx, w("b7", 3) + 0.8, pop_(300), 0.1)
 place(sfx, w("b7", 6), thud(), 0.35)
 for k in np.linspace(w("b7", 19), w("b7", 23), 10): place(sfx, k, pop_(500 + 600 * (k - w("b7", 19)) / max(0.1, w("b7", 23) - w("b7", 19))), 0.05)
 place(sfx, w("b7", 23), clink(1800), 0.2)

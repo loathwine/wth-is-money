@@ -55,7 +55,7 @@ Again and again in history, money has had a Wren: someone who found a cheaper wa
 | 4 | `cowries.html` · cowries | Ships full of cheaper shells from Zanzibar. |
 | 5 | `rome.html` · Rome | The emperor makes the coins himself. |
 
-`chapters.js` is shared by every chapter page: the chapter bar (✓ for finished chapters, saved in localStorage), the ♪ mute button, `Ep02.done(ch)`, `Ep02.next()` (the next chapter, for the final card's link) and `Ep02.playMode(on)`, which makes the game fill a phone's screen during a run. Music and sound effects come from `assets/js/chip.js`.
+`chapters.js` is shared by every chapter page: the chapter bar (✓ for finished chapters, saved in localStorage), the ♪ mute button, `Ep02.done(ch)`, `Ep02.next()` (the next chapter, for the final card's link) and `Ep02.playMode(on)`, which makes the game fill a phone's screen during a run. It also makes every `video.movie` play inline on iPhones, and swaps a movie that isn't rendered yet (404) for a short "still being made" note. Music and sound effects come from `assets/js/chip.js`.
 
 The movies are built per chapter in `video/ep02/<ch>/` (`narration.json`, `scenes.js`, `cues.py`, `SCRIPT.md` with the fact check) by a shared engine in `video/ep02/`; each script takes the chapter dir:
 

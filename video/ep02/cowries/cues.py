@@ -48,7 +48,7 @@ place(sfx, w("c5", 16), thud(), 0.45)
 place(sfx, w("c6", 4), chime(76, (0, 7)), 0.15)
 for k in np.linspace(w("c6", 14), w("c6", 19), 9): place(sfx, k, thud(), 0.15)
 place(sfx, w("c6", 19), thud(), 0.5)
-place(sfx, w("c6", 20), whoosh(), 0.1)
+place(sfx, w("c6", 23), whoosh(), 0.1)                                      # cut to the family and its jar
 place(sfx, w("c6", 31), tone(300, 0.9, "square", 150, decay=0.3), 0.10)
 place(sfx, w("c6", 36), pop_(500), 0.1)
 # c7: "heavy"; one bright coin; 4,000 shells into a sack; slow footsteps under the load

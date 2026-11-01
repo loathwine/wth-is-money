@@ -52,6 +52,13 @@
     mute.onclick = () => { Chip.setMuted(!Chip.muted); label(); };
     label();
   }
+  // movies: play inline on iPhones; one that isn't rendered yet becomes a short note instead of a dead black box
+  document.querySelectorAll("video.movie").forEach((v) => {
+    v.playsInline = true;
+    const gone = () => { const p = document.createElement("p"); p.className = "movie-soon pixel"; p.textContent = "THE MOVIE FOR THIS CHAPTER IS STILL BEING MADE. PLAY THE GAME BELOW ▼"; v.replaceWith(p); };
+    v.addEventListener("error", gone);
+    if (v.error) gone();   // it may have failed before this script ran
+  });
   renderBar();
   window.Ep02 = { CHAPTERS, here, done, isDone, next, playMode, PHONE };
 })();

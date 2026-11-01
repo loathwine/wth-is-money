@@ -9,7 +9,8 @@ const CH = process.env.CH || "yap";
 const TIMELINE = JSON.parse(fs.readFileSync(`${CH}/timeline.json`, "utf8"));
 const URL = process.env.SCENE_URL || `http://127.0.0.1:8931/video/ep02/scene.html?ch=${CH}`;
 const PORT = +(process.env.PORT || 9336);
-const chrome = spawn(process.env.CHROME || "google-chrome-stable", ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=/tmp/claude-1000/ep02-render-${PORT}`, "--no-sandbox", "--disable-gpu", "--window-size=1920,1080", "--hide-scrollbars", "--mute-audio", "about:blank"], { stdio: "ignore" });
+const PROFILE = `/tmp/claude-1000/ep02-render-${PORT}-${process.pid}`;   // fresh profile each run, so a re-render never shows a cached scenes.js
+const chrome = spawn(process.env.CHROME || "google-chrome-stable", ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${PROFILE}`, "--no-sandbox", "--disable-gpu", "--window-size=1920,1080", "--hide-scrollbars", "--mute-audio", "about:blank"], { stdio: "ignore" });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let ws;
 for (let i = 0; i < 50; i++) {
@@ -47,4 +48,5 @@ if (mode === "stills") {
 }
 console.log("scene errors:", (await ev("window.__sceneErrors || 0")));
 ws.close(); chrome.kill();
+await sleep(300); fs.rmSync(PROFILE, { recursive: true, force: true });
 process.exit(0);

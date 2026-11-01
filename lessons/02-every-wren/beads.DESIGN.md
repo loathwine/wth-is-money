@@ -90,7 +90,7 @@ Intro card (3 s, tap to skip): **"Imagine Esi. She makes and sells pots. Ten yea
 
 ## Flow and timings
 
-1. **Start card** (tap): "**THE BEAD SHIP** · You are Wren. Your crate cost you pennies in Liverpool. Turn it into cargo before the other ships come. ▶ START"
+1. **Start card** (tap): "**THE BEAD SHIP** · You are Wren. Your crate holds 4,000 glass beads. Back in Europe they cost next to nothing. Buy as much cargo as you can before the other ships come. ▶ START" (The card no longer names Liverpool: the game lets you play a bead trader buying gold, ivory and oil, and Liverpool's bead ships were slave ships, so the playful part stays generic. Liverpool stays in the film's b4/b5 and in the result footnote.)
 2. **Half 1**, 25 s. Banner at 0 s: "BUY! BEFORE THE NEXT SHIP". Ship banners at 7, 13 and 19 s.
 3. **Haul card** (1.5 s): "CARGO: 186 ⛁ · Prices are now ×4.4".
 4. **Esi intro** (3 s, see above).

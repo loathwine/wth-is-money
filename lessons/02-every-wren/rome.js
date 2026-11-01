@@ -217,7 +217,7 @@
       <p class="muted small">Game numbers: 60 silver a year, a loaf at 1 coin, prices catching up in one year. Real: under Augustus a veteran's bonus of 3,000 denarii was 13 years of a soldier's pay; on Diocletian's price list of 301 it was 120 days of a farmhand's wage (plus meals).</p>
       <div class="row"><button class="btn ghost" id="b-again">${mutiny ? "TRY AGAIN" : "PLAY AGAIN"}</button><button class="btn" id="b-done">CONTINUE</button></div>`);
     $("#b-again").onclick = () => { Chip.sfx("pop"); start(); };
-    $("#b-done").onclick = () => { panel(""); S.phase = "done"; revealWren(); };
+    $("#b-done").onclick = () => { panel(""); S.phase = "done"; Chip.stop(); revealWren(); };
     Chip.sfx(mutiny || d < 30 ? "sad" : "chime");
     setTimeout(() => ui.scrollIntoView({ behavior: "smooth", block: PHONE ? "start" : "center" }), 60);
   }
@@ -326,7 +326,7 @@
     if (short && (S.phase === "mint" || S.phase === "card")) {
       const blink = Math.floor(t * 4) % 2;
       if (out) { px(48, 4, 84, 14, "#1a1026"); txt("OUT OF SILVER!", 90, 11, 8, blink ? "#ff5a5a" : "#ffd23f"); }
-      txt(out ? "TAP + COPPER" : "NOT ENOUGH SILVER", 148, 82, 6, blink || !out ? "#ffd23f" : "#ff8a3a");
+      txt(out ? "TAP + COPPER" : "NOT ENOUGH SILVER", 177, 85, 6, blink || !out ? "#ffd23f" : "#ff8a3a", { align: "right" });
     }
   }
   function market(t, h = 100) {
@@ -349,7 +349,7 @@
     roman(84, base, { t: t * 0.3, tunic: "#8a4a3a", beard: "#cfcfcf", hair: "#cfcfcf" });
     jar(100, base);
     txt("MARCUS", 92, base + 6, 5, "#1a1026", { shadow: false });
-    txt("3,000 COINS", 100, base - 23, 5, "#1a1026", { shadow: false });
+    txt("3,000", 100, base - 30, 6, "#1a1026", { shadow: false }); txt("COINS", 100, base - 23, 5, "#1a1026", { shadow: false });
     px(118, top + 18, 58, 44, "#7a5236"); for (let r = 0; r < 4; r++) px(118, top + 27 + r * 11, 58, 1, "#4a2f19");
     for (let i = 0; i < S.loaves; i++) loaf(121 + (i % 8) * 7, top + 22 + Math.floor(i / 8) * 11);
     for (const q of S.fx) { const k = (S.t - q.born) / 0.6; g.save(); g.globalAlpha = 1 - k; loaf(121 + (q.i % 8) * 7, top + 22 + Math.floor(q.i / 8) * 11 - k * 10); g.restore(); }
@@ -380,7 +380,7 @@
     else txt(S.phase === "idle" ? "" : "Hold MINT · out of silver? + COPPER", 90, 66, 7, "#a99cc8", { body: true });
   }
   function finaleScene(t) {
-    const W = L.w, H = L.h, n = Math.round(S.price), mx = MAXP(), e = S.phase === "edict" ? S.pt : -1;
+    const W = L.w, H = L.h, n = Math.round(S.price), mx = MAXP(), e = S.phase === "edict" ? S.pt : S.phase === "result" || S.phase === "done" ? 99 : -1;   // the result keeps the empty market
     px(0, 0, W, H, "#bfe3f7"); px(0, H * 0.6, W, H * 0.4, "#cdbb8e");
     const stalls = L.portrait ? [36, 90, 144] : [50, 130, 210, 290], base = Math.round(H * 0.6) + 24;
     stalls.forEach((x, i) => {
@@ -421,13 +421,13 @@
     const t = now / 1000;
     g.setTransform(K, 0, 0, K, 0, 0); g.imageSmoothingEnabled = false;
     g.fillStyle = "#120d1d"; g.fillRect(0, 0, L.w, L.h);
-    if (S.phase === "finale" || S.phase === "edict" || (S.phase === "result" && S.y >= YEARS.length)) { finaleScene(t); return; }
+    if (S.phase === "finale" || S.phase === "edict" || ((S.phase === "result" || S.phase === "done") && S.y >= YEARS.length)) { finaleScene(t); return; }
     zone(L.camp, () => camp(t)); zone(L.mint, () => mint(t)); zone(L.market, () => market(t));
     if (L.info) zone(L.info, info);
     if (L.hud) {
       px(0, 0, 180, 20, "#120d1d"); timeline(46, 10, 88);
       txt("AD 14", 22, 10, 5, "#a99cc8"); txt(`${fmt(S.score)}`, 158, 10, 7, "#f4ecff");
-      tipBox(6, 124, 168);
+      tipBox(6, 22, 168);   // over the year card (the HUD shows the year), never over STILL OWED / OUT OF SILVER
     }
   }
 

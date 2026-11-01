@@ -162,7 +162,7 @@
     const kc = seg(lt, w(9), w(9) + 0.35);
     if (kc > 0) { lx.save(); lx.globalAlpha = kc; cowrie(222, 104 - (1 - easeOut(kc)) * 10, 3); lx.restore(); }
     blitLo();
-    where("WEST AFRICA", "1300s to around 1900", lt, d);
+    where("WEST AFRICA", "from the 1300s on", lt, d);   // no end date: inland, shells stayed in use into the 1930s
     label("COWRIE COUNTRY", X(46), X(86), { k: seg(lt, w(4), w(4) + 0.4), size: 32, bg: "#f3e3b8" });
     if (kc > 0) { text("A COWRIE", X(222), X(80), 30, C.ink, { alpha: kc }); label("≈ 1 GRAM", X(222), X(127), { k: kc, size: 28 }); }
     if (km > 0) label("MALDIVES", X(M[0]) + 190, X(M[1]), { k: seg(lt, w(18), w(18) + 0.4), size: 34, bg: C.gold });
@@ -202,7 +202,7 @@
     label("1 SHELL = VERY LITTLE", WIDTH / 2, 200, { k: seg(lt, w(1), w(1) + 0.4) * one, size: 36 });
     if (ks > 0) { text(String(Math.max(1, n40)), X(sx0) + 110, 160, 70, C.gold); label("STRING = 40", X(sx0) + 40, X(124), { k: seg(lt, w(11), w(11) + 0.4), size: 32 }); }
     if (kh > 0) text(fmt(kb > 0 ? 2000 : Math.max(40, n50 * 40)), X(hx), 120, 80, C.gold);
-    if (kb > 0) { label("HEAD = 2,000", X(hx), X(hy) + 250, { k: kb, size: 40, bg: C.gold }); body("≈ 2 kg · a bag of flour", X(hx), X(hy) + 340, 34, C.ink, { alpha: kb }); }
+    if (kb > 0) { label("HEAD = 2,000", X(hx), X(hy) + 250, { k: kb, size: 40, bg: C.gold }); label("≈ 2 KG · A BAG OF FLOUR", X(hx), X(hy) + 345, { k: seg(lt, w(13) + 0.9, w(13) + 1.3), size: 30 }); }
   };
 
   // c3 · a coastal market; ships bring shells by the ton; the slave trade; palm oil
@@ -248,7 +248,7 @@
     if (dark > 0) px(0, 0, LO_W, LO_H, `rgba(8,4,14,${0.9 * dark})`);
     blitLo();
     label("ONE SHIP, 1720s: ABOUT 12 TONNES OF SHELLS", WIDTH / 2, 1000, { k: seg(lt, w(14), w(14) + 0.4) * (1 - dark), size: 30, bg: C.gold });
-    text("CENTURIES OF THE SLAVE TRADE", WIDTH / 2, H / 2, 54, C.muted, { alpha: dark });
+    text("CENTURIES OF THE SLAVE TRADE", WIDTH / 2, H / 2, 54, "#f2ead6", { alpha: dark });
     label("1800s · PALM OIL", X(152), X(84) - 40, { k: seg(lt, w(24), w(24) + 0.4), size: 34, bg: "#e8742a" });
   };
 
@@ -295,12 +295,12 @@
     if (k2 > 0.9) label("DAHOMEY", X(D[0]) - 10, X(D[1]) + 70, { k: seg(lt, w(25), w(25) + 0.4), size: 30, bg: C.gold });
     if (kp > 0 && kc <= 0) { body("gathered alive", X(37), X(66), 26, C.ink, { alpha: kp }); body("on East African reefs", X(37), X(66) + 34, 26, C.ink, { alpha: kp }); }
     if (kc > 0) {
-      text("MALDIVES", X(22), X(36), 22, C.ink, { alpha: kc }); body("≈ 1 g", X(22), X(84), 36, C.ink, { alpha: kc });
-      text("ZANZIBAR", X(52), X(36), 22, C.gold, { alpha: kc }); body("≈ 2 g", X(52), X(84), 36, C.gold, { alpha: kc });
-      if (kpr > 0) { for (const [x, str, hh, c] of [[22, "HIGH", 26, C.bad], [52, "LOW", 8, C.leaf]]) { const y = X(124 - hh * easeOut(kpr)) - 62; text(str, X(x), y, 22, c, { alpha: kpr }); text("PRICE", X(x), y + 28, 22, c, { alpha: kpr }); } }
+      text("MALDIVES", X(22), X(36), 28, C.ink, { alpha: kc }); body("≈ 1 g", X(22), X(84), 36, C.ink, { alpha: kc });
+      text("ZANZIBAR", X(52), X(36), 28, C.gold, { alpha: kc }); body("≈ 2 g", X(52), X(84), 36, C.gold, { alpha: kc });
+      if (kpr > 0) { for (const [x, str, hh, c] of [[22, "HIGH", 26, C.bad], [52, "LOW", 8, C.leaf]]) { const y = X(124 - hh * easeOut(kpr)) - 62; text(str, X(x), y - 6, 28, c, { alpha: kpr }); text("PRICE", X(x), y + 28, 28, c, { alpha: kpr }); } }
     }
     const kw = seg(lt, w(23), w(23) + 0.2) * (1 - seg(lt, w(23) + 1.6, w(23) + 1.9));
-    if (kw > 0) label("HEY, THAT'S MY MOVE", 1590, 900, { k: kw, size: 26, bg: "#ffd0e6" });
+    if (kw > 0) label("HEY, THAT'S MY MOVE", 1570, 900, { k: kw, size: 32, bg: "#ffd0e6" });
   };
 
   // c5 · the flood of shells onto the beach at Ouidah
@@ -340,14 +340,14 @@
     if (kb > 0) {
       label("≈ 16,000,000,000 SHELLS", WIDTH / 2, 330, { k: kb, size: 60, bg: C.gold });
       label("≈ 1,000 FOR EVERY PERSON IN THE REGION", WIDTH / 2, 460, { k: seg(lt, w(18), w(18) + 0.4), size: 32 });
-      body("one estimate", WIDTH / 2 + 380, 400, 26, C.ink, { alpha: kb * 0.8 });
+      body("one estimate", WIDTH / 2 + 380, 402, 32, C.ink, { alpha: kb * 0.8 });
     }
   };
 
   // c6 · the saver's loss: the dollar goes from 2,000 to 20,000 shells; the jar stays at 2,000
   const STOPS = [[0, "1840s", 2000], [14, "1864", 5000], [16, "1871", 10000], [18, "1880s", 20000]];
   SC.jar = (lt, d, t, s) => {
-    const w = (n) => word(s, n), split = w(20);
+    const w = (n) => word(s, n), split = w(23);   // hold the scale (and the ×10) through "A family that had"
     const wall = () => { px(0, 0, LO_W, 100, "#6b4426"); for (let i = 0; i < 60; i++) px(hash(i) * LO_W, hash(i + 9) * 98, 3, 1, "#5e3b1a"); px(0, 100, LO_W, 35, "#4a2f19"); for (let i = 0; i < 30; i++) px(hash(i + 3) * LO_W, 102 + hash(i + 5) * 30, 2, 1, "#3b2615"); };
     if (lt < split) {
       wall();
@@ -373,7 +373,7 @@
       if (ks > 0) {
         text(stop[1], 960, 110, 50, C.muted, { alpha: ks });
         text(`1 DOLLAR = ${fmt(stop[2])} SHELLS`, 960, 200, 70, C.gold, { alpha: ks });
-        label("1 SILVER DOLLAR", X(84), X(78), { k: ks, size: 26 });
+        label("1 SILVER DOLLAR", X(84), X(78), { k: ks, size: 32 });
       }
       if (lt > w(19)) stamp("×10", 1640, 560, seg(lt, w(19), w(19) + 0.25), { size: 120, color: C.gold, rot: -0.12 });
       return;
@@ -406,8 +406,8 @@
     if (lt > w(35)) label("SHELLS SPENT: 0", X(136), 1010, { k: seg(lt, w(36), w(36) + 0.4), size: 32 });
     const kn = seg(lt, w(38), w(38) + 0.6);
     if (kn > 0) {
-      body("Food rose too. In Abomey, a ball of maize dough:", 70, 90, 28, C.muted, { alpha: kn, align: "left" });
-      body("3 shells in 1858 → 12 in 1864", 70, 136, 36, C.ink, { alpha: kn, align: "left" });
+      body("Food rose too. In Abomey, a ball of maize dough:", 70, 90, 34, C.muted, { alpha: kn, align: "left" });
+      body("3 shells in 1858 → 12 in 1864", 70, 144, 44, C.ink, { alpha: kn, align: "left" });
     }
     fadeOut(lt, d, 0.4);
   };
@@ -445,10 +445,10 @@
       lx.restore();
       blitLo();
       where("LAGOS", "about 1900", lt, d);
-      if (ko > 0) { label("1 SILVER SHILLING", X(72), X(46), { k: ko, size: 32 }); body("5.7 grams", X(72), X(46) + 66, 34, C.ink, { alpha: ko }); }
+      if (ko > 0) { label("1 SILVER SHILLING", X(72), X(46), { k: ko, size: 32 }); body("5.7 grams", X(72), X(46) + 70, 42, C.ink, { alpha: ko }); }
       if (kf > 0) {
         label("4,000 SHELLS", X(176), X(46), { k: kf, size: 34, bg: C.gold });
-        const kg = Math.round(4 * easeOut(kf));
+        const kg = Math.max(1, Math.round(4 * easeOut(kf)));
         text(`≈ ${kg}–${kg * 2} KG`, X(176), X(130), 50, C.gold, { alpha: kf });
       }
       if (lt > w(19)) text("=", WIDTH / 2, 780, 140, C.gold, { alpha: seg(lt, w(19), w(19) + 0.3) });
@@ -513,7 +513,7 @@
       blitLo();
       stamp("CAVE", X(60), 300, seg(lt, w(20), w(20) + 0.25), { size: 80 });
       stamp("REEF", X(180), 300, seg(lt, w(24), w(24) + 0.25), { size: 80 });
-      text("WREN", X(60), 960, 40, C.pen); text("HAMBURG", X(180), 960, 40, C.zir);
+      label("WREN", X(60), 960, { size: 36, bg: "#ffd0e6" }); label("HAMBURG", X(180), 960, { size: 36, bg: "#9ad4f2" });
       return;
     }
     // teaser: a silver coin spins inside a laurel wreath, and flips to a stamped emperor

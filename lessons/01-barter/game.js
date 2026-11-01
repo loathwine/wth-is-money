@@ -13,6 +13,10 @@ const params = new URLSearchParams(location.search);
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const NARROW = () => matchMedia('(max-width: 900px)').matches;
 const SEED = +(params.get('seed') ?? 6);
+// Phone controls (bottom bar, sheets) on a portrait phone (Art.PHONE: the tall map) and on a phone held
+// sideways (the wide map, the bar as a rail on the right).
+const LANDQ = matchMedia('(pointer: coarse) and (max-height: 500px) and (orientation: landscape)');
+const UI = PHONE || LANDQ.matches;
 
 const icon = (g, cls = '') => `<img class="gi ${cls}" src="${Art.iconURL[g]}" alt="${GOODS[g].name}" title="${GOODS[g].name}">`;
 const gname = (g, n = 1) => GOODS[g].name + (n === 1 || /s$|wool$|milk$/.test(GOODS[g].name) ? '' : 's');
@@ -52,13 +56,16 @@ const S = {
   plan: null,                // { g, routes } shown in the pack tab
   lastNotes: null,
   score: { nights: 0, fed: 0, sickNights: 0 },   // for the festival
+  autoRun: false,            // ⏩ days pass on their own until something happens
   startedAt: performance.now(),
 };
 
 /* ---------- boot ---------- */
 const canvas = $('#world');
 canvas.width = Art.MW * TILE; canvas.height = Art.MH * TILE;
-if (PHONE) document.body.classList.add('phone');
+if (UI) document.body.classList.add('phone');
+const setLand = () => document.body.classList.toggle('land', UI && LANDQ.matches);
+setLand(); LANDQ.addEventListener?.('change', setLand);
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 const bg = Art.buildBackground();
@@ -97,6 +104,7 @@ function beginDay() {
   addTicker(`<b>Day ${S.w.day}.</b> The market is open. ${awayText()}`);
   diffNotes();
   renderAll();
+  if (S.autoRun) autoDay();
 }
 
 function awayText() {
@@ -116,7 +124,8 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { S.keys[e.key.toLowerCase()] = false; });
 
 canvas.addEventListener('pointerdown', e => {
-  if (PHONE && sheetOpen()) { closeSheet(); return; }
+  if (UI && sheetOpen()) { closeSheet(); return; }
+  if (S.autoRun) stopAuto();
   if (S.phase !== 'market') return;
   const r = canvas.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * canvas.width;
@@ -134,10 +143,10 @@ canvas.addEventListener('pointerdown', e => {
 
 $('#overlay').addEventListener('click', e => { if (e.target.closest('[data-interact]') && S.phase === 'market') interact(); });
 if (TOUCH) $('#hint').innerHTML = 'Tap to walk. Tap a stall to trade.';
-$('#btn-home').onclick = () => { if (S.phase === 'market') goHome(); };
-$('#btn-auto').onclick = () => { if (S.phase === 'market') goHome(true); };
+$('#btn-home').onclick = () => { if (S.phase === 'market' && sureHome()) goHome(); };
+$('#btn-auto').onclick = () => S.autoRun ? stopAuto() : startAuto();
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => showTab(b.dataset.tab));
-document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeDialog);
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeDialog());
 $('#dialog').addEventListener('click', e => { if (e.target.id === 'dialog') closeDialog(); });
 addEventListener('keydown', e => {
   if (e.key === 'Escape' && S.phase === 'dialog') closeDialog();
@@ -242,7 +251,7 @@ function update(dt) {
     vx = dx / d; vy = dy / d;
   }
   const len = Math.hypot(vx, vy); if (!len) return;
-  const sp = 70 * dt;
+  const sp = 100 * dt;
   vx = vx / len * sp; vy = vy / len * sp;
   if (vx) p.face = Math.sign(vx);
   const ox = p.x, oy = p.y;
@@ -322,7 +331,7 @@ function replayMorning(now) {
   if (S.phase !== 'market' || !S.morningReplay?.length || now < S.nextMorningAt) return;
   const t = S.morningReplay.shift();
   S.w.trades.push(t);
-  S.nextMorningAt = now + 1100;
+  S.nextMorningAt = now + (S.autoRun ? 300 : 750);
   showTrade(t);
 }
 
@@ -371,10 +380,11 @@ function openDialog(id) {
   renderDialog();
 }
 
-function closeDialog() {
+// then: what to do once any story card this sets off is closed (e.g. walk on to the next route stop)
+function closeDialog(then) {
   $('#dialog').hidden = true;
   if (S.phase === 'dialog') S.phase = 'market';
-  checkStory();
+  if (!checkStory(then) && then) then();
 }
 
 // What one unit of y is worth to you right now (so we suggest paying with spare stuff, not food).
@@ -397,7 +407,7 @@ function renderDialog() {
     .map(y => ({ y, ...Q[x][y], cost: myCost(y, Q[x][y].k) / Q[x][y].n }))
     .sort((p, q) => p.cost - q.cost);
   const jarQ = Object.fromEntries(stall.map(g => [g, Sim.jarQuote(w, npc, g)]));
-  if (!stall.includes(S.dlg.x) && jarQ.dri && w.family.sick) S.dlg.x = 'dri';
+  if (!stall.includes(S.dlg.x) && jarQ.dri && w.family.sick && npc === 'dov') S.dlg.x = 'dri';   // (elsewhere the jar overpays)
   if (!stall.includes(S.dlg.x)) S.dlg.x = stall.find(x => x === a.makes && affordable(x).length) || stall.find(x => affordable(x).length) || (stall.includes(a.makes) ? a.makes : stall[0]) || null;
   const x = S.dlg.x;
 
@@ -442,13 +452,18 @@ function renderDialog() {
     if (jq) {
       const isStep = step && step.jar && step.npc === npc && step.x === x;
       deal += `<div class="deal-row jar ${isStep ? 'route' : ''}"><span class="terms">give <b>${jq.k}</b> ${icon(jq.y)}<span class="from"> from 🫙</span><span class="arrow">→</span>get <b>${jq.n}</b> ${icon(x)}<span class="gn"> ${x === 'zir' ? 'into the jar' : gname(x, jq.n)}</span></span><button class="btn small" data-jar data-y="${jq.y}" data-k="${jq.k}" data-n="${jq.n}">${x === 'zir' ? 'SWAP' : 'PAY'}</button></div>`;
+      // the jar overpaying for medicine away from Dov (Wren may want 7 of its 8 crystals for one driftcap)
+      const tr = x === 'dri' && npc !== 'dov' ? Sim.family(w).trend[jq.y] : null;
+      if (tr && jq.k / jq.n > tr / Sim.SICK.DOSES * 2) deal += `<p class="dear">⚠ Dear! Dov usually asks about ${tr} ${icon(jq.y, 'sm')} for ${Sim.SICK.DOSES} ${icon('dri', 'sm')}.</p>`;
     }
+    // the route's own step comes first, with its amounts (it may need 2 of x, where the plain deal gives 1)
+    const rs = step && !step.jar && step.npc === npc && step.x === x && Sim.count(you, step.y) >= step.k ? step : null;
+    const row = (o, isStep) => `<div class="deal-row ${isStep ? 'route' : ''}" data-y="${o.y}"><span class="terms">give <b>${o.k}</b> ${icon(o.y)}<span class="gn"> ${GOODS[o.y].name}</span><span class="arrow">→</span>get <b>${o.n}</b> ${icon(x)}<span class="gn"> ${gname(x, o.n)}</span>${isStep ? ' <span class="tag">← <span class="long">YOUR </span>ROUTE</span>' : ''}</span><button class="btn small" data-y="${o.y}" data-k="${o.k}" data-n="${o.n}">TRADE</button></div>`;
+    if (rs) deal += row(rs, true);
     if (ok.length) {
-      deal += ok.map(o => {
-        const isStep = step && step.npc === npc && step.x === x && step.y === o.y;
-        return `<div class="deal-row ${isStep ? 'route' : ''}" data-y="${o.y}"><span class="terms">give <b>${o.k}</b> ${icon(o.y)}<span class="gn"> ${GOODS[o.y].name}</span><span class="arrow">→</span>get <b>${o.n}</b> ${icon(x)}<span class="gn"> ${gname(x, o.n)}</span>${isStep ? ' <span class="tag">← <span class="long">YOUR </span>ROUTE</span>' : ''}</span><button class="btn small" data-y="${o.y}" data-k="${o.k}" data-n="${o.n}">TRADE</button></div>`;
-      }).join('');
-    } else if (!jq) {
+      deal += ok.filter(o => !rs || o.y !== rs.y || o.k !== rs.k || o.n !== rs.n)
+        .map(o => row(o, !rs && step && step.npc === npc && step.x === x && step.y === o.y)).join('');
+    } else if (!jq && !rs) {
       const wantsIt = IDS.filter(y => Q[x][y] && !Sim.count(you, y));
       deal += `<p class="nodeal">✗ Nothing in your pack works. ${wantsIt.length ? `${nm(npc)} would take ${wantsIt.slice(0, 4).map(y => icon(y)).join(' ')} for it.` : ''}</p>`;
       if (S.dlg.find !== x) deal += `<button class="btn small" data-find="${x}">🧭 FIND A WAY TO GET ${GOODS[x].name.toUpperCase()}</button>`;
@@ -456,7 +471,7 @@ function renderDialog() {
   }
   if (S.dlg.find) deal += routesHTML(S.dlg.find, S.dlg.routes);
   $('#d-deal').innerHTML = deal || '<p class="empty">Nothing on the stall.</p>';
-  document.querySelectorAll('#d-deal [data-k]').forEach(b => b.onclick = () => doTrade(npc, x, +b.dataset.n, b.dataset.y, +b.dataset.k, 'jar' in b.dataset));
+  document.querySelectorAll('#d-deal [data-k]').forEach(b => b.onclick = () => doTrade(npc, x, +b.dataset.n, b.dataset.y, +b.dataset.k, 'jar' in b.dataset, mid(b)));
   document.querySelectorAll('#d-deal .deal-row').forEach(r => {
     r.onmouseenter = () => document.querySelector(`#d-mine [data-y="${r.dataset.y}"]`)?.classList.add('lit');
     r.onmouseleave = () => document.querySelector(`#d-mine [data-y="${r.dataset.y}"]`)?.classList.remove('lit');
@@ -484,7 +499,10 @@ function renderDialog() {
 // The 🧭 helper: for medicine, all the doses still missing at once if it can, else one at a time.
 function routesFor(g) {
   const F = S.w.family, n = g === 'dri' && F.sick ? Math.max(1, F.sick.left - Sim.count(S.w.byId.you, 'dri')) : 1;
-  const all = [...Sim.findRoutes(S.w, g, n), ...(n > 1 ? Sim.findRoutes(S.w, g, 1) : [])], top = all.slice(0, 3);
+  // never pay with what home needs tonight (the medicine you just bought, the last lumfruit, the tools' kettlestone)
+  const you = S.w.byId.you, keep = { dri: F.sick ? F.sick.left : 0, lum: 1, ket: you.acc.ket + you.needs.ket >= 1 - 1e-9 ? 1 : 0 };
+  const safe = r => Object.keys(r.spent).every(y => y === g || !keep[y] || Sim.count(you, y) - r.spent[y] >= keep[y]);
+  const all = [...Sim.findRoutes(S.w, g, n), ...(n > 1 ? Sim.findRoutes(S.w, g, 1) : [])].filter(safe), top = all.slice(0, 3);
   const jar = all.find(r => r.jar);   // the sick card points at the jar, so always offer it
   if (jar && !top.includes(jar)) top[Math.min(2, top.length)] = jar;
   return top;
@@ -512,7 +530,7 @@ function followRoute(r) {
   if (S.phase === 'dialog') {
     const st = r.steps[0];
     if (st.npc === S.dlg.npc) { S.dlg.x = st.x; S.dlg.find = null; renderDialog(); renderRoute(); return; }
-    closeDialog();
+    renderPack(); renderRoute(); closeDialog(walkToStep); return;
   }
   renderPack(); renderRoute();
   walkToStep();
@@ -528,12 +546,14 @@ function advanceRoute(npc, x) {
   const st = r.steps[r.i];
   if (st.npc !== npc || st.x !== x) return;
   r.i++;
+  let done = false;
   if (r.i >= r.steps.length) {
     bubble('you', `✓ got ${icon(r.target, 'sm')}`);
     addTicker(`🧭 Route done: you got ${gname(r.target)}.`);
-    S.route = null;
+    S.route = null; done = true;
   }
   renderRoute();
+  return done;
 }
 function renderRoute() {
   const el = $('#route-banner'), r = S.route;
@@ -548,19 +568,32 @@ function renderRoute() {
   el.querySelector('[data-x]').onclick = () => { S.route = null; renderRoute(); };
 }
 
-function doTrade(npc, x, n, y, k, jar = false) {
+function doTrade(npc, x, n, y, k, jar = false, pt = null) {
+  const needWas = homeNeed();
   const t = jar ? Sim.jarTrade(S.w, npc, x, n, k, y) : Sim.playerTrade(S.w, npc, x, n, y, k);
-  if (!t) { bubble(npc, '✗', true); renderDialog(); return; }
+  if (!t) { bubble(npc, '✗', true); sfx('nope'); renderDialog(); shake($('#d-deal')); return; }
   S.tradedToday = true;
+  if (jar && x === 'zir') S.penToZir = (S.penToZir || 0) + k;
+  sfx(jar || [x, y].some(g => g === 'pen' || g === 'zir') ? 'coin' : 'pop');
   bubble('you', `${jar ? '🫙' : ''}${k}${icon(y, 'sm')} → ${n}${icon(x, 'sm')}`);
   fly('you', npc, y, k); fly(npc, 'you', x, n);
   feed(t);
-  if (t.indirectA && !S.flags.indirect) S.flags.indirectPending = { npc, x, y };
-  advanceRoute(npc, x);
+  if (t.indirectA && !S.flags.indirect && x !== S.w.byId.you.makes) S.flags.indirectPending = { npc, x, y };
+  const routeDone = advanceRoute(npc, x);
   S.dlg.find = null; S.dlg.routes = null;
   const st = routeStep();
   if (st && st.npc === npc) S.dlg.x = st.x;
   renderDialog(); renderPack(); renderTop(); diffNotes();
+  if (pt) floatAt(`+${n} ${icon(x)}`, pt.x, pt.y - 30, 'good');
+  const card = document.querySelector(`#d-mine [data-y="${x}"]`); if (card) bump(card);
+  // that did it (a need filled, or the next step is at another stall): close the table and get going
+  const now = homeNeed(), filled = routeDone || (needWas.g === x && (now.g !== x || now.cls !== needWas.cls));
+  const tok = S.dlg.tok = (S.dlg.tok || 0) + 1;
+  if ((st && st.npc !== npc) || (!st && filled)) setTimeout(() => {
+    if (S.phase !== 'dialog' || S.dlg.npc !== npc || S.dlg.tok !== tok) return;
+    closeDialog(() => { if (S.route) walkToStep(); });
+    if (filled && Sim.count(S.w.byId.you, x)) homeLand(x, n, npc);
+  }, 650);
 }
 
 /* ---------- goods flying between stalls ---------- */
@@ -631,11 +664,37 @@ function goHome(auto = false) {
   S.route = null; renderRoute();
   const ev = w.events.slice();
   S.score.nights++;
-  if (!ev.some(e => e.type === 'short' && e.g === 'lum')) S.score.fed++;
+  const hungry = ev.some(e => e.type === 'short' && e.g === 'lum');
+  if (!hungry) S.score.fed++;
   if (w.family.sick) S.score.sickNights++;
   diffNotes();
   renderAll();
-  story(nightCard(ev, autoTrades, away), () => { if (!checkStory(() => beginDay())) beginDay(); });
+  const has = t => ev.some(e => e.type === t);
+  const next = () => { if (!checkStory(() => beginDay())) beginDay(); };
+  // ⏩ a quiet night just flashes by; anything that needs you (hunger, broken tools, sickness) stops the run
+  if (S.autoRun && auto && !ev.some(e => e.type === 'short' || ['sick', 'worse', 'nomed'].includes(e.type))) {
+    sfx(has('cured') ? 'cured' : 'tick');
+    if (has('cured')) bump($('#family .faces'));
+    toast(nightToast(ev, autoTrades), 1500);
+    S.autoT = setTimeout(next, 650);
+    return;
+  }
+  if (S.autoRun) stopAuto();
+  sfx(has('sick') ? 'sick' : has('cured') ? 'cured' : hungry || has('worse') ? 'sad' : 'night');
+  story(nightCard(ev, autoTrades, away), next, 'NEXT DAY ▶', { text: '⏩ AUTO', fn: () => { S.autoRun = true; renderTop(); next(); } });
+}
+
+// One line for a night that flashed by on ⏩: "Night 6 · ate · +2 bogwool · 3 swaps"
+function nightToast(ev, autoTrades) {
+  const made = ev.filter(e => e.type === 'made').reduce((s, e) => s + e.n, 0);
+  const bits = [`🌙 <b>Night ${S.w.day - 1}</b>`, '🍽️ ate'];
+  if (made) bits.push(`+${made} ${icon('bog', 'sm')}`);
+  if (autoTrades.length) bits.push(`🤝 ${autoTrades.length}`);
+  for (const e of ev) {
+    if (e.type === 'dose') bits.push(`💊 ${e.name}`);
+    if (e.type === 'cured') bits.push(`💜 ${e.name} is better!`);
+  }
+  return bits.join(' · ') + '<span class="stop">tap to stop</span>';
 }
 
 /* ---------- side panels ---------- */
@@ -646,15 +705,27 @@ function moodOf(id, F = Sim.family(S.w)) {
   if (F.who === id) return F.worse ? 'worse' : 'sick';
   return F.hungry > 0 ? 'hungry' : 'ok';
 }
-// The one thing home needs most for tonight: { g, html, cls } (g: what the 🧭 helper should look for).
+// The one thing home needs most for tonight that the 🧭 helper can get today: { g, html, cls }.
+// A need nobody at the market can fill today is skipped (else "needs driftcap" hides "no lumfruit" and the family goes hungry).
 function homeNeed() {
-  const w = S.w, you = w.byId.you, F = Sim.family(w);
-  if (F.sick && F.dosesHave < F.dosesNeeded) return { g: 'dri', cls: 'bad', html: `🤒 ${F.name} is sick: needs ${F.dosesNeeded - F.dosesHave} ${icon('dri', 'sm')} driftcap` };
-  if (!Sim.count(you, 'lum')) return { g: 'lum', cls: 'bad', html: `🍽️ No ${icon('lum', 'sm')} lumfruit for tonight` };
-  if (!Sim.count(you, 'ket') && you.acc.ket + you.needs.ket >= 1 - 1e-9) return { g: 'ket', cls: 'warn', html: `🔨 Tools break tonight: need ${icon('ket', 'sm')} kettlestone` };
-  if (Sim.count(you, 'lum') < 2) return { g: 'lum', cls: 'ok', html: `✓ Fed tonight · 1 more ${icon('lum', 'sm')} for tomorrow?` };
-  if (!Sim.count(you, 'ket')) return { g: 'ket', cls: 'ok', html: `✓ Fed tonight · tools need ${icon('ket', 'sm')} soon` };
+  const w = S.w, you = w.byId.you, F = Sim.family(w), list = [];
+  if (F.sick && F.dosesHave < F.dosesNeeded) list.push({ g: 'dri', cls: 'bad', html: `🤒 ${F.name} is sick: needs ${F.dosesNeeded - F.dosesHave} ${icon('dri', 'sm')} driftcap`, none: `🤒 ${F.name} is sick · no ${icon('dri', 'sm')} driftcap today` });
+  if (!Sim.count(you, 'lum')) list.push({ g: 'lum', cls: 'bad', html: `🍽️ No ${icon('lum', 'sm')} lumfruit for tonight`, none: `🍽️ No ${icon('lum', 'sm')} lumfruit to be had today` });
+  if (!Sim.count(you, 'ket') && you.acc.ket + you.needs.ket >= 1 - 1e-9) list.push({ g: 'ket', cls: 'warn', html: `🔨 Tools break tonight: need ${icon('ket', 'sm')} kettlestone`, none: `🔨 Tools break tonight · no ${icon('ket', 'sm')} kettlestone today` });
+  if (Sim.count(you, 'lum') < 2) list.push({ g: 'lum', cls: 'ok', html: `✓ Fed tonight · 1 more ${icon('lum', 'sm')} for tomorrow?` });
+  if (!Sim.count(you, 'ket')) list.push({ g: 'ket', cls: 'ok', html: `✓ Fed tonight · tools need ${icon('ket', 'sm')} soon` });
+  const open = S.phase === 'market' || S.phase === 'dialog';
+  const n = list.find(n => !open || canGet(n.g)), stuck = list.find(n => n.cls !== 'ok');
+  if (n) return n;
+  if (stuck) return { g: null, cls: stuck.cls, html: stuck.none };
   return { g: null, cls: 'ok', html: `✓ All set · festival on day ${FEST}` };
+}
+// Can the 🧭 helper find any way to get g right now? Cached until the day, your pack or the jar changes.
+function canGet(g) {
+  const w = S.w, you = w.byId.you, key = [g, w.day, ...IDS.map(y => Sim.count(you, y)), w.family.jar.pen, w.family.jar.zir, w.family.sick ? w.family.sick.left : 0].join();
+  if (S.canGetDay !== w.day) { S.canGetDay = w.day; S.canGet = {}; }
+  if (!(key in S.canGet)) S.canGet[key] = routesFor(g).length > 0;
+  return S.canGet[key];
 }
 
 function renderTop() {
@@ -664,7 +735,7 @@ function renderTop() {
   $('#phase-label').textContent = night ? '· night' : '· market';
   // the family, and Gran's jar priced in medicines at today's prices
   const meds = F.jarMeds, J = F.jar;
-  if (S.jarWas != null && meds < S.jarWas) S.jarDrop = performance.now();
+  if (S.jarWas != null && meds < S.jarWas) { S.jarDrop = performance.now(); sfx('drain'); }
   S.jarWas = meds;
   const jarTip = `Gran's jar: ${J.pen} pentaja${J.zir ? ` and ${J.zir} zirnet` : ''}. Today that buys ${meds} medicine${meds === 1 ? '' : 's'} from Dov.`;
   $('#family').innerHTML = `<button class="faces" data-plan-home title="Your family">${Sim.FAMILY.map(f => face(f.id, moodOf(f.id, F))).join('')}</button>
@@ -678,6 +749,10 @@ function renderTop() {
   $('#pb-village').hidden = $('#tab-village').hidden;
   $('#pb-village').classList.toggle('new', $('#tab-village').classList.contains('new'));
   $('#pb-home').classList.toggle('home', !!S.tradedToday);
+  $('#pb-auto').innerHTML = S.autoRun ? '<span>⏸</span>STOP' : '<span>⏩</span>AUTO';
+  $('#pb-auto').classList.toggle('on', S.autoRun);
+  $('#btn-auto').textContent = S.autoRun ? '⏸ STOP' : '⏩ AUTO DAYS';
+  music();
   $('#family [data-plan-home]').onclick = () => { const n = homeNeed(); if (n.g && S.phase === 'market') plan(n.g); else bubble('you', n.html, false, 2500); };
   $('#family [data-jar]').onclick = () => { addTicker('🫙 ' + jarTip + ' Keep it for emergencies.'); bubble('you', `🫙 ${J.pen}${icon('pen', 'sm')} ≈ ${meds} 💊 medicine${meds === 1 ? '' : 's'}`, false, 2500); };
 }
@@ -710,8 +785,8 @@ function jarHTML() {
 }
 
 function plan(g) {
-  if (PHONE) openSheet('pack'); else showTab('pack');
-  if (NARROW() && !PHONE) $('.side').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (UI) openSheet('pack'); else showTab('pack');
+  if (NARROW() && !UI) $('.side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   S.plan = { g, routes: S.phase === 'market' || S.phase === 'dialog' ? routesFor(g) : [] };
   renderPack();
 }
@@ -816,17 +891,20 @@ function recentMoneyness(g, days = 3) {
 }
 
 /* ---------- story ---------- */
-function story(html, done, okText = 'OK') {
+// A card with OK (done) and, optionally, a second button alt = { text, fn }; cls styles the card (e.g. 'end').
+function story(html, done, okText = 'OK', alt = null, cls = '') {
   const prev = S.phase;
   S.phase = 'story';
-  $('#story-body').innerHTML = html;
+  $('#story-body').innerHTML = html.replace(/(<img class="gi[^>]*>(?:<\/b>)?)(?=[.,:;!?)])/g, '$1\u2060');   // no line break between an icon and its full stop
   $('#story-ok').textContent = okText;
+  const ab = $('#story-alt'), card = $('#story .card');
+  ab.hidden = !alt; if (alt) ab.textContent = alt.text;
+  card.className = 'card story ' + cls;
   $('#story').hidden = false;
-  $('#story-ok').onclick = () => {
-    $('#story').hidden = true;
-    S.phase = prev === 'story' ? 'market' : prev;
-    if (done) done();
-  };
+  card.scrollTop = 0;
+  const close = fn => () => { $('#story').hidden = true; S.phase = prev === 'story' ? 'market' : prev; if (fn) fn(); };
+  $('#story-ok').onclick = close(done);
+  ab.onclick = alt ? close(alt.fn) : null;
 }
 
 function introCard() {
@@ -868,16 +946,16 @@ function nightCard(ev, autoTrades, away) {
     ${away.length ? `<h3 class="pixel sub">WHILE YOU WERE HOME · ${away.length} SWAP${away.length === 1 ? '' : 'S'}</h3><ul class="night-list ticker-like">${seen}</ul>` : ''}`;
 }
 
-// Prices as whole numbers of things: "1 pentaja bought 3 lumfruit" / "1 lumfruit costs 2 pentaja"
-// (p = pentaja per lumfruit); when that can't show the change, "10 pentaja bought 12 lumfruit".
-function priceSay(p, past, ten = false) {
-  if (ten) return `10 ${icon('pen', 'sm')} ${past ? 'bought' : 'buy'} <b>${Math.round(10 / p) || 'less than 1'}</b> ${icon('lum', 'sm')}`;
-  return p < 1 ? `1 ${icon('pen', 'sm')} ${past ? 'bought' : 'buys'} <b>${Math.round(1 / p)}</b> ${icon('lum', 'sm')}` : `1 ${icon('lum', 'sm')} ${past ? 'cost' : 'costs'} <b>${Math.round(p)}</b> ${icon('pen', 'sm')}`;
+// One basket of lumfruit, priced in whole pentaja before the cave and now (a, b = pentaja per lumfruit):
+// "2 lumfruit cost 1 pentaja. Now the same 2 cost 8." Ten times the basket when rounding would hide the change.
+function basket(a, b) {
+  let n = a < 1 ? Math.round(1 / a) : 1;
+  if (Math.round(n * b) <= Math.max(1, Math.round(n * a))) n *= 10;
+  return { n, pa: Math.max(1, Math.round(n * a)), pb: Math.round(n * b) };
 }
 function priceChange(a, b) {
-  const flat = p => p < 1 ? 'b' + Math.round(1 / p) : 'c' + Math.round(p);
-  const ten = flat(a) === flat(b) || (a < 1 && Math.round(1 / a) === 1 && b < 1.5);
-  return `Before Wren's cave: ${priceSay(a, true, ten)}.<br>Now: <b class="pen">${priceSay(b, false, ten).replace(/<\/?b>/g, '')}</b>.`;
+  const { n, pa, pb } = basket(a, b);
+  return `Before Wren's cave, ${n} ${icon('lum', 'sm')} lumfruit cost <b>${pa}</b> ${icon('pen', 'sm')}.<br>Now the same ${n} cost <b class="pen">${pb}</b> ${icon('pen', 'sm')}.`;
 }
 // What the jar buys in medicines, before the cave and today: '' when that hasn't changed.
 function jarLine(lead) {
@@ -887,10 +965,27 @@ function jarLine(lead) {
   return a > b ? `<p>🫙 ${lead || 'Gran\'s jar'}: ${J.pen} ${icon('pen', 'sm')}. Before the cave that bought <b>${a}</b> 💊 medicine${a === 1 ? '' : 's'}. Today: <b class="pen">${b || 'not even 1'}</b>.</p>` : '';
 }
 
+// Pentaja per lumfruit: a = before the cave (average), b = the last 3 days.
+function lumRise() {
+  const H = S.w.history, avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+  return { a: avg(H.slice(1, S.w.caveDay).map(h => h.price.pen).filter(v => v != null)), b: avg(H.slice(-3).map(h => h.price.pen).filter(v => v != null)) };
+}
+// The jar in days of food (1 lumfruit a day), before the cave and now, at the basket prices the card just showed.
+function jarFood(a, b) {
+  const J = S.w.family.jar, { n, pa, pb } = basket(a, b), fa = Math.floor(J.pen * n / pa), fb = Math.floor(J.pen * n / pb);
+  return J.pen && fa > fb ? `<p>🫙 Gran's ${J.pen} ${icon('pen', 'sm')} used to buy <b>${fa} days</b> of food. Today: <b class="pen">${fb ? fb + ' day' + (fb === 1 ? '' : 's') : 'not even 1 day'}</b>.</p>` : '';
+}
+
 // Story beats fire on what the simulation actually did, not on a fixed script.
 function checkStory(then) {
   const w = S.w, f = S.flags, F = w.family;
-  const fire = (key, html, ok, after) => { f[key] = true; story(html, () => { renderAll(); if (after) after(); if (then) then(); else checkStory(); }, ok); return true; };
+  const fire = (key, html, ok, after, alt, cls) => {
+    f[key] = true; stopAuto();
+    sfx({ refusal: 'nope', indirect: 'tada', money: 'chime', wren: 'thud', inflation: 'sad', zir: 'chime', end: 'fanfare' }[key] || (key.startsWith('sick') ? 'sick' : 'pop'));
+    const go = fn => () => { renderAll(); if (fn) fn(); if (then) then(); else checkStory(); };
+    music();
+    story(html, go(after), ok, alt && { text: alt.text, fn: go(alt.fn) }, cls); return true;
+  };
 
   if (!f.refusal && f.sawRefusal && S.phase === 'market') {
     const { npc, g } = f.sawRefusal;
@@ -911,9 +1006,14 @@ function checkStory(then) {
   // someone at home falls sick: once before the cave (the jar pays easily), once after (it barely can)
   const ep = F.episodes.length;
   if (F.sick && (f.sickSeen || 0) < ep) {
-    const s = F.sick, med = Sim.medPriceNow(w).pen, J = F.jar;
+    const s = F.sick, med = Sim.medPriceNow(w).pen, tr = Sim.family(w).trend.pen || med, J = F.jar;   // tr: as the top bar counts it
     f.sickSeen = ep;
-    const after = s.afterCave && s.before && med && med > s.before;
+    const after = s.afterCave && s.before && med && med > s.before, lag = s.afterCave && s.before && med && !after && J.pen;
+    if (lag) return fire('sick' + ep, `
+      <h2>${face(s.who, 'sick', 'big')} ${s.name} is sick</h2>
+      <p>${s.name} needs <b>${s.left} ${icon('dri', 'sm')} driftcap</b>. ${lumRise().b > lumRise().a * 1.5 ? 'Lumfruit costs far more pentaja since Wren\'s cave, but ' : ''}Dov still asks only <b>${med}</b> ${icon('pen', 'sm')} for it, like before the cave.</p>
+      <p class="big">Prices don't all rise at once. Pay from the jar <b>before Dov catches on</b>.</p>
+      <p class="muted">${TOUCH ? 'Tap' : 'Click'} the line under the faces for help.</p>`, 'HURRY');
     return fire('sick' + ep, after ? `
       <h2>${face(s.who, 'sick', 'big')} ${s.name} is sick</h2>
       <p>Same medicine, same Dov. Before Wren's cave it cost <b>${s.before} ${icon('pen', 'sm')}</b>. Today: <b class="pen">${med} ${icon('pen', 'sm')}</b>.</p>
@@ -921,7 +1021,7 @@ function checkStory(then) {
       <p class="big">The crystals didn't change. They just buy less. That's <b class="pen">inflation</b>, at home.</p>` : `
       <h2>${face(s.who, 'sick', 'big')} ${s.name} is sick</h2>
       <p>${s.name} needs <b>${s.left} ${icon('dri', 'sm')} driftcap</b>, Dov's medicine. Until then you make only 1 bogwool a day.</p>
-      ${J.pen && med ? `<p>🫙 Gran's jar can pay. Today the medicine costs <b>${med} ${icon('pen', 'sm')}</b> of its ${J.pen}.</p>` : `<p>Look for driftcap at the market.</p>`}
+      ${J.pen && tr ? `<p>🫙 Gran's jar can pay: the medicine costs about <b>${tr} ${icon('pen', 'sm')}</b> of its ${J.pen}.</p>` : `<p>Look for driftcap at the market.</p>`}
       <p class="muted">${TOUCH ? 'Tap' : 'Click'} the line under the faces for help.</p>`, after ? 'OUCH' : 'OK');
   }
   const top = topMoney();
@@ -941,7 +1041,7 @@ function checkStory(then) {
       <p class="big">A good people take only to trade it on is called <b class="pen">money</b>.</p>
       <p class="muted">In real life: that's exactly what a euro or a dollar is. You can't eat it. You take it because you know the baker will.</p>
       <p class="quote long">"Money has not been generated by law. In its origin it is a social, and not a state-institution." Carl Menger, <i>On the Origins of Money</i>, 1892</p>`,
-      'SHOW ME', () => PHONE ? openSheet('village') : showTab('village'));
+      'SHOW ME', () => UI ? openSheet('village') : showTab('village'));
   }
   if (!f.wren && w.caveDay && w.day >= w.caveDay) {
     return fire('wren', `
@@ -951,17 +1051,15 @@ function checkStory(then) {
       <p class="muted">Hesk's zirnet can't be found any faster. Hesk might swap some for the jar's pentaja.</p>
       <p class="muted long">In an old fable, a wren became king of the birds by riding on the eagle's back. It won without doing the work.</p>`);
   }
-  if (!f.inflation && w.caveDay && w.day >= w.caveDay + 4) {
-    const H = w.history;
-    const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
-    const a = avg(H.slice(1, w.caveDay).map(h => h.price.pen).filter(v => v != null));
-    const b = avg(H.slice(-3).map(h => h.price.pen).filter(v => v != null));
+  const rise = w.caveDay && w.day >= w.caveDay + 4 ? lumRise() : null;   // wait (a few days at most) until the rise shows in whole numbers
+  if (!f.inflation && rise && (rise.b > rise.a * 1.25 || w.day >= w.caveDay + 8)) {
+    const { a, b } = rise;
     $('#tab-village').classList.add('new');
     return fire('inflation', `
       <h2>Your pentaja buys less</h2>
       ${a && b && b > a ? `<p>${priceChange(a, b)}</p>` : ''}
       <p>Lumfruit didn't change. There's just far more pentaja around, so each one buys less. That's <b class="pen">inflation</b>.</p>
-      ${jarLine()}
+      ${a && b && b > a ? jarFood(a, b) : ''}
       <p>Wren spent first, at the old prices. Everyone who <b>saved</b> pentaja paid the difference.</p>
       <p class="muted">In real life: a dollar saved in the year 2000 buys only about half as much today.</p>`, 'OOF');
   }
@@ -974,21 +1072,149 @@ function checkStory(then) {
       <p class="muted">In real life: where prices rise fast, as in Argentina or Turkey, many families save in US dollars or gold instead.</p>`);
   }
   if (!f.end && w.day >= FEST) {
-    const sc = S.score;
-    return fire('end', `
-      <h2>🎉 The harvest festival!</h2>
-      <div class="fam-row">${Sim.FAMILY.map(m => face(m.id, moodOf(m.id), 'big')).join('')}<span>${sc.nights ? `Your family ate on <b>${sc.fed} of ${sc.nights}</b> nights.` : ''}</span></div>
-      <ul class="night-list">
-        <li>1. Barter was hard: you rarely had what the other person wanted.</li>
-        <li>2. So everyone took goods they didn't need, just to trade them on.</li>
-        <li>3. The easiest to pass on (lasting, small, scarce) became <b class="pen">money</b>. Nobody planned it.</li>
-        <li>4. Then Wren found a way to make lots more. Each pentaja bought less: <b class="pen">inflation</b>. Savers lost out.</li>
-        <li>5. ${f.zir ? 'The village moved to something harder to make: zirnet.' : 'Nobody trusts pentaja like before. The village is looking for something harder to make.'}</li>
-      </ul>
-      <p>This has happened again and again: shells, beads, stones, metal. Each time, someone found a cave.</p>
-      <p class="muted">In real life: today's euros and dollars aren't dug out of a cave. Central banks and ordinary banks create them, mostly when they lend. When a lot more is made, prices rise and savings buy less.</p>
-      <p><a class="btn" href="../02-every-wren/">▶ NEXT: EVERY WREN IN HISTORY</a></p>`, 'KEEP PLAYING');
+    S.fest = true;
+    return fire('end', endScreen(), '▶ EP 02', () => { location.href = '../02-every-wren/'; },
+      { text: 'KEEP PLAYING', fn: () => { S.fest = false; music(); } }, 'end');
   }
+  return false;
+}
+
+/* ---------- the festival: score and end screen ---------- */
+const median = a => { const b = a.filter(v => v != null && isFinite(v)).sort((p, q) => p - q); return b.length ? b[(b.length - 1) >> 1] : null; };
+// How many lumfruit (= days of food) one y buys (y: pen | zir), now or before the cave: from the lumfruit trades;
+// zirnet by way of Dov's medicine prices (zirnet-for-lumfruit swaps are rare and jumpy).
+function lumPer(y, before = false) {
+  const w = S.w, H = before ? w.history.slice(1, w.caveDay || undefined) : w.history.slice(1).slice(-4);
+  if (y === 'zir') {
+    const p = lumPer('pen', before), m = before ? { pen: Sim.medPriceBefore(w), zir: Sim.medPriceBefore(w, 'zir') } : Sim.medTrend(w);
+    if (p && m.pen && m.zir) return p * m.pen / m.zir;
+  }
+  const p = median(H.map(h => h.price[y]));
+  if (p) return 1 / p;
+  if (before) return null;
+  const q = Sim.quote(w, 'mira', 'lum', y);
+  return q ? q.n / q.k : null;
+}
+const days = v => v == null ? '?' : v < 1 ? 'less than 1 day' : `${Math.floor(v)} day${Math.floor(v) === 1 ? '' : 's'}`;
+function endScreen() {
+  const w = S.w, sc = S.score, J = w.family.jar, eps = w.family.episodes;
+  const cured = eps.filter(e => e.cured && !e.natural).length;
+  const lp = lumPer('pen'), lz = lumPer('zir'), lb = lumPer('pen', true);
+  // the jar in days of food (lumfruit), before the cave and now
+  // "was": the same crystals before the cave (what's in the jar, plus any pentaja you swapped for zirnet), as the cards count it
+  const base = J.pen + (S.penToZir || 0);
+  const R = lumRise(), bk = R.a && R.b ? basket(R.a, R.b) : null;   // "before" as the inflation card counted it
+  const foodNow = (J.pen ? J.pen * (lp || 0) : 0) + (J.zir ? J.zir * (lz || 0) : 0), foodBefore = !base ? null : bk ? base * bk.n / bk.pa : lb ? base * lb : null;
+  // ...and in medicines, Dov's steady prices (as in the top bar), with the what-ifs: kept in zirnet since before the cave, or left in pentaja
+  const F = Sim.family(w), m = F.trend, mb = { pen: Sim.medPriceBefore(w), zir: Sim.medPriceBefore(w, 'zir') };
+  const meds = F.jarMeds, medsBefore = mb.pen && base ? Math.floor(base / mb.pen) : null;
+  const ifZir = mb.pen && mb.zir && m.zir && base ? Math.floor(base / mb.pen * mb.zir / m.zir) : null;
+  const ifPen = m.pen ? Math.floor((J.pen + (S.penToZir || 0)) / m.pen) : null;
+  const score = sc.fed * 10 + cured * 25 + meds * 10;
+  const max = sc.nights * 10 + eps.length * 25 + Math.max(meds, ifZir || 0, medsBefore || 0) * 10;
+  const stars = score >= max * 0.8 ? 3 : score >= max * 0.55 ? 2 : score >= max * 0.3 ? 1 : 0;
+  let best = 0; try { best = +localStorage.getItem('wth-ep01-best') || 0; if (score > best) localStorage.setItem('wth-ep01-best', score); } catch {}
+  const isBest = score > best;
+  if (isBest && best) setTimeout(() => sfx('tada'), 900);
+  const pill = n => `${n} 💊`;
+  const food = foodBefore && foodBefore > foodNow + 0.5 ? `In food: before Wren's cave the jar fed your family for <b>${days(foodBefore)}</b>. Today: <b class="pen">${days(foodNow)}</b>. ` : '';
+  const what = S.penToZir && ifPen != null && ifPen < meds ? `You moved some into ${icon('zir', 'sm')} zirnet. Left as pentaja it would buy only <b class="pen">${pill(ifPen)}</b>.`
+    : ifZir != null && ifZir > meds ? `Saved in ${icon('zir', 'sm')} zirnet instead, it would buy about <b class="zir">${pill(ifZir)}</b> today${medsBefore != null && ifZir > medsBefore ? ', more than before the cave' : ''}.` : '';
+  return `<div class="endscreen">
+    <h2>🎉 The harvest festival!</h2>
+    <div class="fam-row">${Sim.FAMILY.map(m => face(m.id, moodOf(m.id), 'big')).join('')}<span class="stars">${'★'.repeat(stars)}<i>${'★'.repeat(3 - stars)}</i></span></div>
+    <div class="score">
+      <div class="srow"><span>🍽️ Nights your family ate</span><b>${sc.fed} / ${sc.nights}</b></div>
+      ${eps.length ? `<div class="srow"><span>💊 Sicknesses cured with medicine</span><b>${cured} / ${eps.length}</b></div>` : ''}
+      <div class="srow"><span>🫙 Gran's jar now buys</span><b>${pill(meds)}${medsBefore && medsBefore > meds ? ` <small>was ${medsBefore}</small>` : ''}</b></div>
+      ${food || what ? `<p class="cmp">${food}${what}</p>` : ''}
+      <div class="total pixel">SCORE ${score}${isBest && best ? ' <span class="gold">NEW BEST!</span>' : best ? ` <span class="muted">· BEST ${Math.max(best, score)}</span>` : ''}</div>
+    </div>
+    <h3 class="pixel sub">WHAT YOU SAW</h3>
+    <ol class="take">
+      <li>Nobody invented money. People picked the thing that was easiest to pass on.</li>
+      <li>When someone can make lots more of it, each one buys less. That's <b class="pen">inflation</b>.</li>
+      <li>Whoever gets the new money first wins. Savers lose.</li>
+    </ol>
+    <p class="muted">In real life: euros and dollars aren't dug out of a cave. Central banks and ordinary banks create them, mostly when they lend. When a lot more is made, prices rise and savings buy less.</p>
+    <p class="again">Next: <b>EP 02 · Every Wren in History</b>. Or <a href="?seed=${1 + Math.floor(Math.random() * 99)}">🔁 play a new village</a> and beat your score.</p>
+  </div>`;
+}
+
+/* ---------- sound and juice ---------- */
+const _ = null;
+const SONGS = {   // calm market; tense after the cave; brighter once the village moves to zirnet; slow while someone is sick
+  market: { bpm: 84, style: 'calm', chords: [60, 65, 60, 67, 60, 65, 60, 67], melody: [[72, _, 76, _, 79, _, 76, _], [77, _, 76, _, 72, _, _, _], [76, _, 79, _, 84, _, 81, 79], [79, _, _, 74, _, _, _, _],
+    [72, _, 76, _, 79, _, 81, _], [81, _, 79, _, 77, _, 76, _], [76, _, 74, _, 72, _, _, 74], [74, _, _, 71, _, _, _, _]] },
+  tense: { bpm: 96, style: 'mystery', chords: [57, 53, 55, 52], melody: [[69, _, _, 72, _, _, 71, _], [69, _, _, _, 65, _, _, _], [67, _, 71, _, 74, _, 72, _], [71, _, _, _, 68, _, _, _]] },
+  zir: { bpm: 92, style: 'calm', chords: [62, 67, 69, 62], melody: [[74, _, 78, _, 81, _, 78, _], [79, _, 78, _, 74, _, _, _], [76, _, 78, _, 81, _, 83, _], [81, _, _, 78, 74, _, _, _]] },
+  sick: { bpm: 66, style: 'calm', arp: [0, 3, 7, 12], chords: [57, 52, 53, 52], melody: [[69, _, _, _, 67, _, _, _], [64, _, _, _, _, _, _, _], [65, _, _, _, 64, _, _, _], [64, _, _, _, 59, _, _, _]] },
+  fest: { bpm: 126, style: 'island', chords: [60, 65, 67, 60], melody: [[72, 74, 76, _, 79, _, 76, _], [77, _, 81, _, 79, 77, 76, _], [74, 76, 77, _, 79, _, 74, _], [72, _, 76, _, 72, _, _, _]] },
+};
+const sfx = n => { try { if (window.Chip) Chip.sfx(n); } catch {} };
+// the right loop for this moment (switches only when it changes)
+function music() {
+  if (!window.Chip || !S.started) return;
+  const w = S.w, s = S.fest ? SONGS.fest : w.family.sick ? SONGS.sick : S.flags.zir ? SONGS.zir : w.caveDay && w.day >= w.caveDay ? SONGS.tense : SONGS.market;
+  if (Chip.playing !== s) try { Chip.song(s); } catch {}
+}
+const muteBtn = $('#mute');
+const muteLabel = () => { muteBtn.textContent = !window.Chip || Chip.muted ? '🔇' : '🔊'; muteBtn.classList.toggle('off', !window.Chip || Chip.muted); };
+muteBtn.onclick = () => { if (!window.Chip) return; Chip.setMuted(!Chip.muted); muteLabel(); if (!Chip.muted) { music(); sfx('pop'); } };
+muteLabel();
+
+const mid = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+function bump(el) { if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+function shake(el) { if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+// "+1 🍋" rising and fading at a screen point
+function floatAt(html, x, y, cls = '') {
+  const el = document.createElement('div'); el.className = 'float ' + cls; el.innerHTML = html;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
+}
+// goods flying from a screen point into the top bar; the target bumps when they land
+function flyInto(g, n, from, toEl, then) {
+  if (!toEl) return;
+  const to = mid(toEl), tr = (p, k) => `translate(${p.x - 12}px, ${p.y - 12}px) scale(${k})`;
+  for (let i = 0; i < Math.min(n, 3); i++) {
+    const im = document.createElement('img'); im.className = 'gi flyer'; im.src = Art.iconURL[g]; im.alt = '';
+    document.body.appendChild(im);
+    const a = im.animate([{ transform: tr(from, 1.4) }, { transform: tr({ x: (from.x + to.x) / 2, y: Math.min(from.y, to.y) - 50 }, 1.2), offset: 0.45 }, { transform: tr(to, 0.6) }],
+      { duration: 650, delay: i * 90, easing: 'ease-in', fill: 'both' });
+    a.onfinish = () => { im.remove(); if (i === 0) { bump(toEl); if (then) then(); } };
+  }
+}
+// screen point of a spot on the village map
+function mapPt(p) { const r = canvas.getBoundingClientRect(), k = r.width / canvas.width; return { x: r.left + p.x * k, y: r.top + p.y * k }; }
+// what you just got for home flies from the stall to the faces
+function homeLand(x, n, npc) {
+  const to = $('#family .faces');
+  sfx('whoosh');
+  flyInto(x, n, mapPt(STALLS[npc].npc), to, () => {
+    sfx('tada');
+    const m = mid(to); floatAt(`+${n} ${icon(x, 'sm')}${homeNeed().g ? '' : ' ✓'}`, m.x, m.y + 16, 'good');
+  });
+}
+
+// a line over the village for a few seconds
+function toast(html, ms = 2200) {
+  const el = $('#toast'); el.innerHTML = html; el.hidden = false;
+  el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  clearTimeout(S.toastT); S.toastT = setTimeout(() => { el.hidden = true; }, ms);
+}
+$('#toast').onclick = () => { if (S.autoRun) { stopAuto(); toast('⏸ Stopped. You take over tomorrow.', 1500); } };
+
+/* ---------- fewer taps ---------- */
+// ⏩ AUTO: days pass on their own (you trade on autopilot) until something needs you
+function startAuto() { S.autoRun = true; closeSheet(); sfx('whoosh'); renderTop(); if (S.phase === 'market') goHome(true); }
+function stopAuto() { if (!S.autoRun) return; S.autoRun = false; clearTimeout(S.autoT); renderTop(); }
+function autoDay() { clearTimeout(S.autoT); S.autoT = setTimeout(() => { if (S.autoRun && S.phase === 'market') goHome(true); }, 1200); }
+// HOME with nothing for tonight and no trade yet: ask once (a stray tap shouldn't cost a day)
+function sureHome() {
+  const n = homeNeed(), now = performance.now();
+  if (S.tradedToday || n.cls !== 'bad' || !n.g || now - (S.homeAsk || 0) < 4000) return true;
+  S.homeAsk = now; sfx('nope'); shake($('#status'));
+  toast(`${n.html}. <b>Tap 🏠 again</b> to go home anyway.`, 4000);
   return false;
 }
 

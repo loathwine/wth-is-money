@@ -14,7 +14,8 @@
  {
   "id": "c2",
   "scene": "strings",
-  "text": "One shell bought very little, so people counted them. Forty to a string. Two thousand to a head."
+  "text": "One shell bought very little, so people counted them. Forty to a string. Two thousand to a head.",
+  "pad": 0.7
  },
  {
   "id": "c3",

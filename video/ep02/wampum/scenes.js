@@ -331,7 +331,7 @@
       if (lt > w(13)) strand(lerp(124, 184, kC), 104, 5, "a", { sag: 1 });
       sackL(lerp(198, 132, kG), 96 - 2, 1);
       blitLo();
-      where("TRADING POST", "1620s-1630s", lt - p2, p3 - p2);
+      where("TRADING POST", "1620s–1630s", lt - p2, p3 - p2);
       label("FURS FOR WAMPUM", 560, 220, { k: seg(lt, w(11.5), w(11.5) + 0.35), size: 40, bg: C.gold });
       if (lt > w(14)) label("WAMPUM = MONEY", 1360, 220, { k: seg(lt, w(15.5), w(15.5) + 0.35), size: 40, bg: C.gold });
       if (lt > w(7)) body("inland trader", X(46), X(124), 30, C.ink, { alpha: seg(lt, w(7), w(7) + 0.4) });
@@ -374,9 +374,9 @@
       }
       if (lt > w(6.5)) { const u = seg(lt, w(6.5), w(7.5)); px(lerp(84, 64, u), lerp(88, 104, u), 3, 4, STONEP); }
       blitLo();
-      where("THE COAST · 1630s-1640s", "iron from Europe", lt, split);
-      if (lt > w(4)) label("IRON DRILL POINT", 1300, 760, { k: seg(lt, w(4), w(4) + 0.35), size: 40, bg: C.gold });
-      if (lt > w(7)) body("the makers' own choice: more beads to trade", 1300, 850, 32, C.ink, { alpha: seg(lt, w(7), w(7) + 0.5) });
+      where("THE COAST · 1630s–1640s", "iron from Europe", lt, split);
+      if (lt > w(4)) label("IRON DRILL POINT", 1300, 690, { k: seg(lt, w(4), w(4) + 0.35), size: 40, bg: C.gold });
+      if (lt > w(7)) body("the makers' own choice: more beads to trade", 1300, 770, 34, C.ink, { alpha: seg(lt, w(7), w(7) + 0.5) });
     } else if (lt < p3) {
       // split screen: stone vs iron, same work
       px(0, 0, 120, LO_H, "#3a2a1e"); px(120, 0, 120, LO_H, "#2e2433");
@@ -393,7 +393,8 @@
       const fl = lt > w(12) && lt < w(14) && Math.floor(t * 8) % 2;
       text(`BEADS: ${nS}`, X(60), 980, 60, fl ? C.gold : C.ink);
       text(`BEADS: ${nI}`, X(180), 980, 60, fl ? C.gold : C.ink);
-      body("counts are illustrative: no record says how much faster", WIDTH / 2, 1050, 24, C.muted, { alpha: 0.85 });
+      ctx.fillStyle = "rgba(14,10,24,.85)"; ctx.fillRect(0, 1018, WIDTH, 62);
+      body("made-up counts: no record says how much faster", WIDTH / 2, 1056, 34, C.ink);
     } else {
       // the village pile, then rough beads and fakes on top
       sky(0, 70, "#9ab8c8", "#c9dbe2"); ground(70, "#6f7a5c", "#5f6a4e");
@@ -425,7 +426,7 @@
       big(560, "w", false, true, seg(lt, p3, p3 + 0.3)); big(960, "g", true, true, seg(lt, w(18), w(18) + 0.3)); big(1360, "g", true, false, seg(lt, w(21), w(21) + 0.3));
       if (lt > p3) text("GOOD", 560, 440, 40, C.leaf);
       if (lt > w(18)) text("ROUGH", 960, 440, 40, C.bad);
-      if (lt > w(21)) { text("FAKE", 1360, 440, 40, C.bad); body("no hole · wrong shell or stone", 1360, 490, 26, C.ink); }
+      if (lt > w(21)) { text("FAKE", 1360, 440, 40, C.bad); body("no hole · wrong shell or stone", 1360, 490, 30, C.ink); }
       if (cart > 0.3) { ctx.fillStyle = "rgba(14,10,24,.8)"; ctx.fillRect(560, 570, 800, 140); }
       if (cart > 0.3) stamp("POURED IN", WIDTH / 2, 640, seg(lt, w(22.5), w(22.5) + 0.25), { size: 64 });
     }
@@ -460,8 +461,8 @@
       const kA = seg(lt, w(9), w(13)), steps = [w(17), w(19), w(21.5)];
       let i = 0; while (i < 3 && lt >= steps[i]) i++;
       const from = PTS[Math.max(0, i - 1)][1], to = PTS[i][1], kk = i > 0 ? seg(lt, steps[i - 1], steps[i - 1] + 0.6) : 1;
-      const beads = i === 0 ? Math.round(640 * kA) : Math.round(lerp(from, to, easeOut(kk)));
-      const rows = beads / 300;
+      const beads = i === 0 ? 640 : Math.round(lerp(from, to, easeOut(kk)));   // say 640 as the narrator does; only the strings pile up
+      const rows = (i === 0 ? 640 * kA : beads) / 300;
       for (let r = 0; r < Math.ceil(rows - 0.01); r++) {
         const part = Math.min(1, rows - r), n = Math.max(1, Math.round(6 * part));
         strand(R[0] - 11 + (r % 2) * 2 + Math.round((hash(r) - 0.5) * 3), R[1] - 2 - r * 3, n, "w");
@@ -475,8 +476,8 @@
       text(beads.toLocaleString("en-US"), 1480, 470, 130, C.ink, { alpha: ka });
       body("white beads for one beaver pelt", 1480, 570, 36, C.muted, { alpha: ka });
       text("1 BEAVER PELT", X(L[0]), X(L[1]) + 90, 30, C.ink, { alpha: kp });
-      text("1 STRING = ABOUT 300 BEADS", X(R[0]), X(R[1]) + 90, 26, C.muted, { alpha: ka });
-      if (lt > w(24)) { label("SAME", X(L[0]), X(L[1]) - 260, { k: seg(lt, w(24), w(24) + 0.3), size: 44, bg: C.leaf }); body("in silver: no rise", X(L[0]), X(L[1]) + 140, 28, C.muted, { alpha: seg(lt, w(24.5), w(25)) }); }
+      text("1 STRING = ABOUT 300 BEADS", X(R[0]), X(R[1]) + 90, 30, C.muted, { alpha: ka });
+      if (lt > w(24)) { label("SAME", X(L[0]), X(L[1]) - 260, { k: seg(lt, w(24), w(24) + 0.3), size: 44, bg: C.leaf }); body("in silver coins: same price", X(L[0]), X(L[1]) + 140, 34, C.ink, { alpha: seg(lt, w(24.5), w(25)) }); }
       if (lt > w(26)) stamp("5 TIMES THE BEADS", 1480, 760, seg(lt, w(26), w(26) + 0.25), { size: 60, color: C.gold });
     } else {
       // the card: inflation = the pelt stayed, the beads got cheap. A bar chart along the bottom.
@@ -532,6 +533,7 @@
       if (kw > 0) label("WAGES", X(212), X(80), { k: kw, size: 34 });
       const after = lt > w(9.5);
       if (lt > w(3)) body(after ? "240 beads = 30 stivers = 3 loaves" : "240 beads = 40 stivers = 4 loaves", WIDTH / 2, 990, 48, after ? C.bad : C.gold, { alpha: seg(lt, w(3), w(3) + 0.4) });
+      if (lt > w(3)) body("the 6 → 8 rate is real · the basket and the bread price are an example", WIDTH / 2, 1048, 28, C.muted, { alpha: seg(lt, w(3), w(3) + 0.4) });
       if (lt > w(12)) label("SAME BEADS. LESS BREAD.", 1400, 560, { k: seg(lt, w(12), w(12) + 0.35), size: 36, bg: C.gold });
     } else {
       // a street: bakery and brewery; a boat unloads more strings at the quay
@@ -583,8 +585,10 @@
       text("MASSACHUSETTS · 1661", 620, 300, 52, ink, { shadow: false });
       text("WAMPUM", 620, 470, 90, ink, { shadow: false });
       const kR = seg(lt, w(10), w(10) + 0.25);
-      ctx.save(); ctx.globalAlpha = 1 - 0.75 * kR; stamp("LEGAL", 620, 690, 1, { size: 72, color: "#2f8a3a" }); ctx.restore();
-      stamp("REPEALED", 640, 650, kR, { size: 92, rot: -0.12 });
+      // LEGAL is struck through and REPEALED lands below it (no overlap)
+      ctx.save(); ctx.globalAlpha = 1 - 0.6 * kR; stamp("LEGAL", 620, 610, 1, { size: 64, color: "#2f8a3a" }); ctx.restore();
+      if (kR > 0) { ctx.fillStyle = "#c43a3a"; ctx.fillRect(500, 604, 240 * kR, 10); }
+      stamp("REPEALED", 620, 750, kR, { size: 84, rot: -0.08 });
       if (lt > w(4.5)) { text("NE", X(200), X(86) + 4, 44, "#5a6070", { shadow: false }); label("BOSTON MINT · 1652", X(200), 160, { k: seg(lt, w(4), w(4) + 0.35), size: 32 }); body("silver coins", X(200), 870, 34, C.ink); }
     } else if (lt < p3) {
       // a respectful still: the belt, warmly lit

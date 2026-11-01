@@ -17,6 +17,7 @@
 <header class="topbar">
   <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
   <div class="daybox pixel"><span id="day-label">DAY 1</span><span id="phase-label" class="muted"></span></div>
+  <button class="mute" id="mute" title="Music and sound on/off" aria-label="Music and sound on/off">🔊</button>
   <div class="family" id="family"></div>
 </header>
 <div class="status" id="status" role="button"></div>
@@ -27,11 +28,12 @@
       <canvas id="world" class="px" width="384" height="224"></canvas>
       <div class="overlay" id="overlay"></div>
       <div class="route-banner" id="route-banner" hidden></div>
+      <div class="toast" id="toast" hidden></div>
     </div>
     <div class="controls">
       <span class="hint muted" id="hint">Walk with <b>WASD</b>/arrows or tap. Press <b>E</b> next to a stall to talk.</span>
       <span class="spacer"></span>
-      <button class="btn ghost small" id="btn-auto" title="Let your villager trade on their own for a day">⏩ AUTO DAY</button>
+      <button class="btn ghost small" id="btn-auto" title="Days pass on their own (you trade on autopilot) until something happens">⏩ AUTO DAYS</button>
       <button class="btn small" id="btn-home">🏠 GO HOME</button>
     </div>
     <div class="ticker" id="ticker"></div>
@@ -86,10 +88,11 @@
 <div class="modal" id="story" hidden>
   <div class="card story">
     <div id="story-body"></div>
-    <div class="story-actions"><button class="btn" id="story-ok">OK</button></div>
+    <div class="story-actions"><button class="btn ghost" id="story-alt" hidden></button><button class="btn" id="story-ok">OK</button></div>
   </div>
 </div>
 
+<script src="../../assets/js/chip.js"></script>
 <script src="sim.js"></script>
 <script src="art.js"></script>
 <script src="game.js"></script>

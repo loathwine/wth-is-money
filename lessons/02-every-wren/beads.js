@@ -35,6 +35,7 @@
   try { S.best = +localStorage.getItem("wth-ep02-beads-best") || 0; } catch {}
   const P = () => S.M / M0, price = (base) => Math.round(base * S.M / M0);
   const fmt = (n) => Math.round(n).toLocaleString("en-US");
+  const KEYS = !matchMedia("(pointer: coarse)").matches;   // phones get no "keys 1–4" hint
 
   /* ---------- pixel kit (320×180) ---------- */
   const px = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
@@ -166,7 +167,7 @@
   }
   function flashUp() { if (RM) return; for (const tl of tiles) if (tl.kind === "cargo" || tl.kind === "food") { tl.el.classList.remove("up"); void tl.el.offsetWidth; tl.el.classList.add("up"); } }
   function shake(tl) { tl.el.classList.remove("shake"); void tl.el.offsetWidth; tl.el.classList.add("shake"); }
-  const float = (s, x, y, c = "#1a1026") => S.floats.push({ s, x, y, c, t0: S.clock });
+  const float = (s, x, y, c = "#1a1026") => { S.floats = S.floats.filter((f) => f.x !== x); S.floats.push({ s, x, y, c, t0: S.clock }); };   // one per spot, so fast taps don't stack into a smudge
 
   function tap(i) {
     const tl = tiles[i];
@@ -210,9 +211,9 @@
     Object.assign(S, { phase: "start", half: 1, M: M0, t: 0, crate: CRATE });
     panel(out, "");
     showCard(`<h3>THE BEAD SHIP</h3>
-      <p>You are <b class="pen">Wren</b>. Your crate holds <b>4,000 glass beads</b>. They cost pennies in Liverpool.</p>
+      <p>You are <b class="pen">Wren</b>. Your crate holds <b>4,000 glass beads</b>. Back in Europe they cost next to nothing.</p>
       <p>Buy as much cargo as you can. <b>Hurry:</b> every ship that lands brings more beads, and then prices jump.</p>
-      <p class="tiny">25 seconds · tap the tiles (keys 1–4)${S.best ? ` · your best: ${S.best} cargo` : ""}</p>`, "▶ START").onclick = start1;
+      <p class="tiny">25 seconds · tap the tiles${KEYS ? " (keys 1–4)" : ""}${S.best ? ` · your best: ${S.best} cargo` : ""}</p>`, "▶ START").onclick = start1;
   }
   function start1() {
     Chip.sfx("pop"); Chip.song(Chip.SONGS.beads);
@@ -237,7 +238,7 @@
     showCard(`<h3>NOW YOU ARE ESI</h3>
       <p>Imagine Esi. She makes and sells pots. Ten years of work: <b>300 beads</b> on a string, plus one old <b style="color:#7fc8ee">accori</b>.</p>
       <p>Last year, that string fed her family for the whole dry season: <b>${DAYS} days</b>. Same market, at the prices you just left. And one more ship is coming.</p>
-      <p class="tiny">20 seconds · buy what the family needs (keys 1–5)</p>`, "▶ FEED THE FAMILY").onclick = start2;
+      <p class="tiny">20 seconds · buy what the family needs${KEYS ? " (keys 1–5)" : ""}</p>`, "▶ FEED THE FAMILY").onclick = start2;
   }
   function start2() {
     Chip.sfx("pop");
@@ -265,18 +266,18 @@
       ${S.firstGold ? `<p>Your first gold cost <b>${S.firstGold} beads</b>. Your last cost <b>${S.lastGold}</b>.</p>` : ""}
       <div class="bg-res">
         <div><b class="h gold">WREN · SPENT FIRST</b><span class="bnum">${S.cargo}</span> cargo<br><span class="tiny">bought at prices ×1.0 to ×${S.P1.toFixed(1)}</span></div>
-        <div><b class="h pen">ESI · SAVED</b><span class="bnum">${days} days</span> of food<br><span class="tiny">last year, same string: ${DAYS} days</span>
+        <div><b class="h pen">ESI · SAVED</b><span class="bnum">${days} days</span> of food<br><span class="tiny">${S.why.toLowerCase()} · last year, same string: ${DAYS} days<br>a basket of yams: <s>20</s> → <b>${price(20)}</b> beads</span>
           <div class="bar"><span style="width:${Math.round(100 * days / DAYS)}%;background:var(--pen)"></span></div></div>
       </div>
       <p><b>Same string. ${lazy ? "The other ships set these prices." : "You set these prices."}</b> ${S.accori ? `★ She never used the accori. It would still have bought 2 yams and 1 salt (about ${accoriDays} days), whatever the prices.` : `★ Her accori still bought what it always did: 2 yams and 1 salt, about ${accoriDays} days of food.`}</p>
       <p class="twist">${lazy ? "You hardly spent, but the other ships still came. Inflation doesn't need you." : "The better you played Wren, the shorter Esi's season."}</p>
       <canvas class="bg-chart" id="bchart" width="320" height="120"></canvas>
-      <p class="real"><b>In real life:</b> prices here went ×${Pend.toFixed(1)}. If prices go ×${Pend.toFixed(1)}, then €100 of savings buys what €${eur} used to.</p>
+      <p class="real"><b>In real life:</b> if prices go ×${Pend.toFixed(1)}, €100 of savings buys only what €${eur} used to.</p>
       <p class="tiny">Game numbers, and a what-if: no one recorded bead prices like these. Real: around 1770, one Liverpool firm sold these beads at about 9 pence a pound. A real case of money flooding a market: cowries, chapter 4.</p>
       <div class="row"><button class="btn ghost" data-again>PLAY AGAIN</button><button class="btn" data-done>CONTINUE</button></div>`);
     drawChart($("#bchart"));
     out.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); startCard(); $("#game").scrollIntoView({ block: "start" }); };
-    out.querySelector("[data-done]").onclick = () => { panel(out, ""); startCard(); revealWren(); };
+    out.querySelector("[data-done]").onclick = () => { panel(out, ""); Chip.stop(); startCard(); revealWren(); };
     requestAnimationFrame(() => requestAnimationFrame(() => out.scrollIntoView({ block: "start", behavior: RM ? "auto" : "smooth" })));
   }
   // one price line over both halves, with where each of you bought
@@ -334,7 +335,7 @@
     if (!S.hist.length || gt - S.hist[S.hist.length - 1][0] >= 0.25) S.hist.push([gt, P()]);
     hud.innerHTML = half === 1
       ? `<span>CRATE <b>${fmt(S.crate)}</b></span><span>CARGO <b class="gold">${S.cargo}</b></span><span>PRICES <b class="${P() > 1.5 ? "pen" : ""}">×${P().toFixed(1)}</b></span><div class="bar"><span style="width:${100 * (1 - S.t / len)}%"></span></div>`
-      : `<span>STRING <b>${S.esi}</b></span><span>FOOD <b class="gold">${Math.round(DAYS * FOOD.reduce((a, f) => a + Math.min(S.got[f.id], f.need) * f.base, 0) / NEED)}/${DAYS} days</b></span><span>PRICES <b class="pen">×${P().toFixed(1)}</b></span><div class="bar"><span style="width:${100 * (1 - S.t / len)}%"></span></div>`;
+      : `<span>STRING <b>${S.esi}</b></span><span>DAYS OF FOOD <b class="gold">${Math.round(DAYS * FOOD.reduce((a, f) => a + Math.min(S.got[f.id], f.need) * f.base, 0) / NEED)}/${DAYS}</b></span><span>PRICES <b class="pen">×${P().toFixed(1)}</b></span><div class="bar"><span style="width:${100 * (1 - S.t / len)}%"></span></div>`;
     updateTiles();
     if (S.t >= len) half === 1 ? end1() : end2("THE DRY SEASON IS HERE");
   }

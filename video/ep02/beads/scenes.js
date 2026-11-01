@@ -285,7 +285,7 @@
       return;
     }
     if (lt < coast) {
-      // Liverpool: 28 grams of gold buys nearly 50 kilos of beads
+      // Liverpool: one (troy) ounce of gold, 31 grams, buys nearly 50 kilos of beads
       sky(0, 100, "#7a8698", "#9aa6b6");
       for (let i = 0; i < 6; i++) px(i * 44 - 4, 30 + (i % 3) * 8, 36, 70, i % 2 ? "#6a4030" : "#7a4a38");
       for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) px(i * 44 + 4 + (j % 2) * 14, 40 + (i % 3) * 8 + Math.floor(j / 2) * 18, 6, 8, "#2a2030");
@@ -299,8 +299,9 @@
       if (cam > 0) wren(lerp(260, 216, easeOut(cam)), 134, t, { s: 2, hat: true });
       blitLo();
       where("LIVERPOOL", "1760s–1780s", lt - liver, coast - liver);
+      ctx.fillStyle = "rgba(18,13,29,.7)"; ctx.fillRect(X(64) - 300, 340, 600, 210); ctx.fillRect(X(160) - 300, 340, 600, 210);   // dark cards so the numbers don't sit on windows
       text("1 OUNCE OF GOLD", X(64), 390, 40, C.ink);
-      text("28 GRAMS", X(64), 490, 84, C.gold);
+      text("31 GRAMS", X(64), 490, 84, C.gold);   // a troy ounce, the unit of the 1717 gold price
       text("BUYS", 980, 690, 50, C.muted, { alpha: seg(lt, w(27), w(28)) });
       const kg = Math.round(47 * Math.min(n, 7) / 7);
       text("BEADS", X(160), 390, 40, C.ink);
@@ -344,7 +345,7 @@
     lx.restore();
     ctx.filter = "saturate(0.55) brightness(0.85)"; blitLo(); ctx.filter = "none";
     where("THE ATLANTIC", "1700s", lt, w(14));
-    ["CLOTH", "IRON", "GUNS"].forEach((str, i) => body(str, X(sx + items[i][2]), X(74), 38, C.ink, { alpha: gone * seg(lt, items[i][1], items[i][1] + 0.3) }));
+    ["CLOTH", "IRON", "GUNS"].forEach((str, i) => body(str, X(sx + items[i][2]), X(104), 38, C.ink, { alpha: gone * seg(lt, items[i][1], items[i][1] + 0.3) }));
     body("gold · ivory", X(216), X(46), 36, C.ink, { alpha: gone * seg(lt, w(11), w(11) + 0.3) });
     const kt = seg(lt, w(20), w(20) + 1.0);
     body("Glass beads helped pay for", WIDTH / 2, 230, 60, C.ink, { alpha: kt });
@@ -398,14 +399,14 @@
       lx.save(); lx.globalAlpha = kb; basketRow(left, gone, { ring: lt > w(31) ? C.bad : null }); lx.restore();
     }
     blitLo();
-    text("IMAGINE", 70, 60, 36, C.muted, { align: "left", alpha: seg(lt, w(4), w(4) + 0.4) });
+    text("IMAGINE", 70, 60, 36, "#5a3a5a", { align: "left", alpha: seg(lt, w(4), w(4) + 0.4), shadow: false });
     lab(lt > w(29) ? "SAME STRING" : "YOUR FAMILY'S SAVINGS", X(STR.x + 57), X(STR.y) - 90, seg(lt, w(4), w(4) + 0.3) * (lt > w(29) ? seg(lt, w(29), w(29) + 0.3) : 1), 1, { size: 40, bg: lt > w(29) ? "#ffffff" : C.gold });
     if (kb > 0) {
-      const at = shipsIn ? ships[shipsIn - 1] + 0.6 : w(11);
-      lab(`BUYS ${left} BASKETS OF FOOD`, X(150), X(96) - 6, seg(lt, at, at + 0.3), 1, { size: 44, bg: shipsIn ? "#ffb3b3" : C.gold });
-      if (shipsIn) { text("WAS 12", X(150), X(96) + 76, 36, C.muted); ctx.fillStyle = C.muted; ctx.fillRect(X(150) - 90, X(96) + 74, 180, 5); }
+      const sh = ships.filter((a) => lt > a + 1.0).length, shown = counts[sh], at = sh ? ships[sh - 1] + 1.0 : w(11);   // relabel once the baskets are gone
+      lab(`BUYS ${shown} BASKETS OF FOOD`, X(150), X(96) - 6, seg(lt, at, at + 0.3), 1, { size: 44, bg: shown < 12 ? "#ffb3b3" : C.gold });
+      if (shown < 12) { text("WAS 12", X(150), X(96) + 76, 36, "#3a2030", { shadow: false }); ctx.fillStyle = "#3a2030"; ctx.fillRect(X(150) - 90, X(96) + 74, 180, 5); }
     }
-    if (lt > ships[0] - 0.4) text(`SHIPS WITH NEW BEADS: ${shipsIn}`, 1860, 60, 34, C.ink, { align: "right" });
+    if (lt > ships[0] - 0.4) text(`SHIPS WITH NEW BEADS: ${shipsIn}`, 1860, 60, 34, "#3a2030", { align: "right", shadow: false });
     stamp("LESS FOOD", 1420, 930, seg(lt, w(31), w(31) + 0.25), { size: 64 });
   };
 
@@ -413,17 +414,21 @@
   SC.accorihold = (lt, d, t, s) => {
     const w = (n) => word(s, n), scaleAt = w(10) - 0.1;
     if (lt < scaleAt) {
+      // one more ship: the ordinary beads' row drops 3 → 2; the accori's 3 baskets (linked to it) stay put
       compound(t);
-      for (let j = 0; j < 3; j++) for (let i = 0; i < 26; i++) px(70 + hash(i + j * 40) * 160, 78 + hash(i + j * 40 + 7) * 22, 2, 2, BEADC[(i + j) % 5]);
+      const ship = w(3), drop = ship + 0.8, kd = seg(lt, drop, drop + 0.4);
+      for (let j = 0; j < 4; j++) for (let i = 0; i < 26 * (j < 3 ? 1 : kd); i++) { const bx = 70 + hash(i + j * 40) * 160, by = 78 + hash(i + j * 40 + 7) * 22;
+        if (!(bx > 104 && bx < 164)) px(bx, by, 2, 2, BEADC[(i + j) % 5]); }   // keep the accori's baskets clear of the ships' beads
       const g = seg(lt, w(1), w(5));
       savingsString(t, { accori: g > 0 ? 10 : null, glow: g > 0 ? 0.6 + 0.4 * Math.sin(t * 5) : 0 });
-      const ka = seg(lt, w(4), w(4) + 0.4);
-      basketRow(3, {});
-      if (ka > 0) { lx.save(); lx.globalAlpha = ka; for (let i = 0; i < 3; i++) bigBasket(124 + i * 14, 84, { ring: C.gold }); lx.restore(); }
-      const k = seg(lt, w(5), w(5) + 2.4); if (k > 0 && k < 1) miniShip(lerp(250, -12, k), 53);
+      const ka = seg(lt, w(3) - 0.2, w(3) + 0.2);
+      basketRow(lt > drop ? 2 : 3, { 2: kd });
+      if (ka > 0) { lx.save(); lx.globalAlpha = ka; for (let y = 72; y < 82; y += 2) px(133, y, 1, 1, C.gold); for (let i = 0; i < 3; i++) bigBasket(113 + i * 14, 84, { ring: C.gold }); lx.restore(); }
+      const k = seg(lt, ship, ship + 1.6); if (k > 0 && k < 1) miniShip(lerp(250, -12, k), 53);
       blitLo();
-      text("IMAGINE", 70, 60, 36, C.muted, { align: "left" });
-      lab("THE ACCORI STILL BUYS 3", X(144), X(84) - 70, ka, 1, { size: 40, bg: "#9fe0ff" });
+      text("IMAGINE", 70, 60, 36, "#5a3a5a", { align: "left", shadow: false });
+      lab(lt < drop + 0.3 ? "THE ACCORI BUYS 3" : "NEW SHIP. ACCORI: STILL 3", X(133), X(84) + 130, lt < drop + 0.3 ? ka : seg(lt, drop + 0.3, drop + 0.6), 1, { size: 40, bg: "#9fe0ff" });
+      if (kd > 0) text("OTHER BEADS: NOW 2", X(91), X(122) + 16, 30, "#3a2030", { shadow: false, alpha: kd });
       stamp("CAN'T BE COPIED", 1500, 940, seg(lt, w(6), w(6) + 0.25), { size: 56, color: C.leaf });
       fadeOut(lt, scaleAt, 0.3);
       return;
@@ -484,6 +489,8 @@
     wren(166, 122, t, { s: 2, sad: sad > 0.5 }); for (let i = 0; i < 3; i++) icon("pen", 178 + i * 8, 108 - (i % 2) * 4);
     blitLo();
     text("1700s", X(60), 620, 34, "#1a1026", { shadow: false }); text("ULM HOLLOW", X(180), 620, 34, C.muted);
+    const win = seg(lt, split, split + 0.4) * (1 - seg(lt, w(23) - 0.5, w(23) - 0.1));
+    if (win > 0) { ctx.fillStyle = `rgba(18,13,29,${0.75 * win})`; ctx.fillRect(0, 90, WIDTH, 200); }   // a band, so gold text reads on the peach sky
     body("When you're Wren,", WIDTH / 2, 150, 64, C.gold, { alpha: seg(lt, split, split + 0.4) * (1 - seg(lt, w(23) - 0.5, w(23) - 0.1)) });
     body("it feels like winning.", WIDTH / 2, 235, 64, C.gold, { alpha: seg(lt, split + 0.3, split + 0.7) * (1 - seg(lt, w(23) - 0.5, w(23) - 0.1)) });
     if (sad > 0) { ctx.fillStyle = `rgba(18,13,29,${0.85 * sad})`; ctx.fillRect(0, 90, WIDTH, 200); }

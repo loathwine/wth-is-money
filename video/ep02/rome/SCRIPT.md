@@ -2,8 +2,7 @@
 
 **Purpose:** show that you don't need a cave if you own the mint. Rome's emperors made the silver coin thinner over about 200 years (from Nero around AD 64 to the 270s) to pay their armies. In Roman Egypt the price of wheat in coins crept up for a long time and then leapt, about 37-fold in all by the 290s. Savers who held a sum of money lost almost everything without anyone stealing a coin, and when the emperor finally capped prices by law, goods vanished from the market.
 
-The narration is in `narration.json`: 10 segments, 230 words, about 90–100 s of speech. Sound cues are in `cues.py`, a draft written before TTS. **Its word indices are out of date since the fact-check edit** (see "Cue index changes" below). Scenes still need writing in `scenes.js` (none exist yet). Their visuals are described below.
-Wren's sprite is still `alien("rod")` in the code until the rename lands. Wren is drawn with a small laurel wreath in this chapter.
+The narration is in `narration.json`: 10 segments, 230 words. After TTS + trim the timeline is **about 101 s** (`timeline.json`). Scenes are in `scenes.js` (one `SC.<scene>` per segment, drawn as described below); music and sound effects are in `cues.py`, on the same word indices as the visuals. Wren (`alien("wren")`) wears a small laurel wreath and a purple cloak in this chapter.
 
 **Novice rules used here:** every percentage also appears as a picture (a coin with a silver fill gauge). "Inflation" is never said in the video; it's shown instead: the same sack of wheat, more coins. The loss is made personal through a jar of savings and a shelf of bread. The base metal is called "copper" everywhere (it was a copper alloy; "copper" is plainer and closer than "bronze").
 
@@ -40,7 +39,7 @@ Word numbers are 0-based over the whitespace-split text (the same as `word()` / 
 | Word | Visual |
 |---|---|
 | 0–7 | A treasury chest with a silver pile that shrinks as soldiers' hands reach in and battle icons flash at the screen edge. Label `SILVER IN: A LITTLE · ARMY: A LOT`. |
-| 12 "Wren" | **Wren cameo:** Wren pops up from behind the chest, holds up a pentaja and points at it, with a speech bubble: `HEY, THAT'S MY MOVE!`. Wren slides out by word 14. |
+| 11–12 "what Wren" | **Wren cameo:** Wren pops up from behind the chest, holds up a pentaja and points at it, with a speech bubble: `HEY, THAT'S MY MOVE!`. Wren slides out by word 14. |
 | 14 "melt" | Inside a palace room: a crucible over a fire. 4 silver coins drop in and turn into glowing liquid (sizzle). |
 | 17–19 "add cheap copper" | A reddish-brown copper ingot thuds into the crucible and the liquid shifts from white towards orange. |
 | 20–22 "stamp out more" | A hammer and die strike 3 times (clanks). Each strike spits out more coins: 4 → 8 → 16 coins in a heap, all slightly duller than the originals. Label `SAME SILVER · MORE COINS`. |
@@ -52,7 +51,7 @@ Word numbers are 0-based over the whitespace-split text (the same as `word()` / 
 | 3 "two" | Slot 3 pops in: `AD 194 · ~50%`, the gauge half full and the coin greyer. |
 | 11 "two" (seventy) | Slot 4 pops in: `AD 270 · UNDER 5%`. Its gauge drains on screen from the top (falling tone) down to a thin line. |
 | 16 "copper" | Slot 4 zooms to fill the screen. It still looks silver. |
-| 19–21 "thin silver skin" | A thumb rubs it: the silver skin flakes off in pixels and reveals reddish copper underneath. Stamp `SILVER SKIN, COPPER INSIDE`. |
+| 19–21 "thin silver skin" | A thumb rubs it: the silver skin flakes off in pixels and reveals reddish copper underneath. Beside the coin, `still looks like silver…` turns into `UNDER 5% SILVER`. Stamp `SILVER SKIN, COPPER INSIDE`. |
 
 ### r6 · `wheat` · "In Roman Egypt, a sack of wheat cost about eight drachmas in the year one hundred. Prices crept up for a long time, then leapt: by three hundred, about three hundred."
 | Word | Visual |
@@ -88,15 +87,15 @@ Word numbers are 0-based over the whitespace-split text (the same as `word()` / 
 | 0 | A row of 4 market stalls, full of bread, amphorae and cloth, each with a `MAX` price tag. A guard with a spear stands in front. Caption, small: `LACTANTIUS, A CRITIC OF DIOCLETIAN`. |
 | 6 "blood" | A brief red flash on one stall (no gore: the stall's awning drops). |
 | 13–18 "people were too scared to sell" | One by one, the sellers pack their goods into sacks and walk off screen (whooshes). The stalls are left bare, with the price tags still hanging. Label `PRICE: CAPPED · GOODS: GONE`. |
-| 23 "dropped" | The stone tablet from r8 cracks and slides down. Stamp `LAW DROPPED`. |
+| 22–23 "finally dropped" | The small `PRICE LAW` tablet (top centre all through the scene) cracks and slides down. Stamp `LAW DROPPED`. |
 
 ### r10 · `callback` · "Wren needed luck to find a cave of pentaja. An emperor owned one. It was called the mint. Next: is there money with no cave at all?" (pad 1.5)
 | Word | Visual |
 |---|---|
-| 0–8 | Split screen. Left: Ulm Hollow at night (EP 01's cave from `SC.rodcave`), with Wren and pentaja spilling (clinks). Label `ULM HOLLOW · LUCK`. |
+| 0–8 | Split screen. Left: Ulm Hollow at night (the EP 01 cave, drawn with `TR.cave`), with Wren and pentaja spilling (clinks). Label `ULM HOLLOW · LUCK`. |
 | 9–12 | Right: a Roman building with columns and a hammering sound. Label `ROME · NO LUCK NEEDED`. |
 | 17 "mint" | The Roman building's sign flips to `MINT` and a cave-shaped door is drawn over it. Text `CAVE = MINT`. Wren, still in the laurel, gives a sheepish shrug. |
-| 18 "Next" | Everything dims. A single gold bar glows centre-screen with a `?` above it. `NEXT · FINALE: A MONEY WITH NO CAVE?`. |
+| 18 "Next" | Everything dims. A single gold bar glows centre-screen with a `?` above it. `NEXT · FINALE` / `MONEY WITH NO CAVE?`. `CAVE = MINT` stays lit above the dim, so the chapter's point is on screen to the end. |
 
 ## Props needed (new for this chapter)
 Laurel wreath (2–3 px gold, sits on Wren's head), legionary (red tunic, grey helmet, rectangular shield), a column, crucible and fire, copper ingot, hammer and die, stone tablet with chiselled lines, clay jar, loaf (4×3 px), market stall with awning, amphora, a silver gauge (vertical bar plus a % label), a Nile strip with palms (reuse `palm`). Existing: `coin`, `sack`, `chart`, `stamp`, `label`, `where`, `cave`, `icon("pen")`, `person`.
@@ -113,19 +112,7 @@ Laurel wreath (2–3 px gold, sits on Wren's head), legionary (red tunic, grey h
 - r9: 3 whooshes as the sellers leave; a thud on "dropped".
 - r10: a pentaja clink spill (EP 01 callback); a mint clank on "mint"; an unresolved major-7 chime on "Next".
 
-### Cue index changes (cues.py still uses the old text's indices)
-The fact-check edit changed the wording of r3, r4, r6–r10. `cues.py` was not edited (outside this pass's files). Update these `w(seg, i)` calls before TTS:
-
-| Segment | Old index → new index |
-|---|---|
-| r1, r2, r5 | unchanged (r5's 11 is now "two" of "two seventy", 19 is now "thin") |
-| r3 | boots `w("r3", 5)…w("r3", 13)` → `4…11`; cascade "rich" `16` → `15` |
-| r4 | Wren pop `13` → `12`; sizzle "melt" `18` → `14`; thud `23` → `19` ("copper"); clanks `24` → `20` |
-| r6 | tick range `16…21` → `25…29` (optionally 4 slow ticks over `16…22`); thud `22` → `30` |
-| r7 | pop range start `13` → `9` (end stays `18`, "days"); sad note `18` unchanged; chime `26` unchanged ("made") |
-| r8 | chisel range `11…18` → `11…17`; thud "die" `24` → `23` |
-| r9 | whooshes from `12` → `13` ("people"); thud "dropped" `21` → `23` |
-| r10 | spill `6` unchanged; "mint" `19` → `17`; "Next" `20` → `18` |
+Pipeline: `./tts.sh rome`, `nix shell nixpkgs#ffmpeg -c ./trim.sh rome`, `python3 build.py rome` (numpy shell), stills with `./prev.sh rome`. The full render is left to `make.sh rome`.
 
 ## Music idea
 **D minor, march, about 96 bpm** (`style="march"`): square-wave bass on D–B♭–C–A, a snare-ish noise on beats 2 and 4, and a brassy square melody that rises then falls (in `ROME_MEL`). It is proud at first and then sounds hollow as the chapter goes on. From **r8** (the edict) it switches to a low **drone** on D/B♭: cold and still while the stalls empty. For **r10** a soft **mystery** arp (D minor → B♭ → F → A) ends on an unresolved F major-7 chime for the finale teaser. For the minigame, the same melody runs faster (≈120 bpm) and the bass pitch drops a semitone each time the player adds copper (a cheap "sour" effect that you can hear).
@@ -151,7 +138,7 @@ Checked adversarially on 2026-10-31 against sources independent of the first dra
 | r7 | "The emperor just made more." | r4/r5 sources. | ✓ Summary line. Egypt had its own coin (the Alexandrian tetradrachm, struck at the emperor's mint in Alexandria), debased alongside the denarius in the 3rd century; that is why the drachma prices of r6 belong in this story. |
 | r8 | In 301, Diocletian blamed greedy sellers, capped over a thousand prices and wages, and made breaking it a capital crime. | *Edict on Maximum Prices*, trans. A. Kropff (2016), https://www.ancientportsantiques.com/wp-content/uploads/Documents/AUTHORS/DiocletianPriceEdict-Kropff2016.docx: issued late 301; preface rails against "this unrestrained lust for stealing"; "he shall undergo a capital penalty"; buyers and hoarders also punishable. Wikipedia, *Edict on Maximum Prices*. | ✓ Counts differ because the edict survives in fragments: "over 900 commodities, 130 grades of labour" plus freight rates (older count) up to Kropff's "more than 1,200". "Over a thousand prices and wages" holds for all of them; the draft's "over a thousand **goods**" did not quite. Issued in the names of all four tetrarchs; Diocletian led them. |
 | r8 (screen) | Wheat 100 denarii per army measure (*kastrensis modius*); farm worker 25 a day with meals; pork 12 a pound. | Kropff (2016): I.1a, IV.1a, VII.1a. | ✓ The litre size of the *kastrensis modius* is disputed (about 13 or 17.5 L), so the screen no longer prints `17.5 L`. Prices are in *denarii communes*, a unit of account by 301. The edict also priced slaves; that is not shown. |
-| r9 | A writer of the time says blood was spilled over small things, people were too scared to sell, and the law was dropped. | Lactantius, *De Mortibus Persecutorum* 7.6–7 (ANF trans.), https://www.newadvent.org/fathers/0705.htm: "much blood was shed for the veriest trifles; men were afraid to expose anything to sale … the ordinance … was from mere necessity abrogated." | ⚠️ Lactantius was a Christian writing against Diocletian, the persecutor, so he's hostile; the caption names him as a critic. Whether the edict was formally repealed or just ignored is unclear (he gives no date), so "dropped" is used, not "repealed". |
+| r9 | A writer of the time says blood was spilled over small things, people were too scared to sell, and the law was dropped. | Lactantius, *De Mortibus Persecutorum* 7.6–7 (ANF trans.), https://www.newadvent.org/fathers/0705.htm: "much blood was shed for the veriest trifles; men were afraid to expose anything to sale … the ordinance … was from mere necessity abrogated." | ⚠️ Lactantius was a Christian writing against Diocletian, the persecutor, so he's hostile; the caption names him as a critic. The on-screen quote (video and game) modernises the ANF wording "expose anything to sale" to "put anything up for sale". Whether the edict was formally repealed or just ignored is unclear (he gives no date), so "dropped" is used, not "repealed". |
 | r10 | (Callback; no factual claim.) | n/a | "Owned one" refers to emperors in general. |
 
 **Numbers deliberately not used:** the "120,000 drachmas per artaba under Diocletian" figure from popular articles (FEE) is real only for the 330s–340s. The Severus and Caracalla pay figures are disputed. A specific figure for the Claudius II antoninianus (often "2%") has no good source. The AD 277 wheat price of 200 is marked uncertain in the source.

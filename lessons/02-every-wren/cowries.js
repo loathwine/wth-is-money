@@ -24,9 +24,10 @@
   ];
   const CAP = 10000;      // shells per head-load (20 kg of Zanzibar shells): a game value, a rough real head-load
   const TAU = 0.5;        // seconds for the sway to settle
+  const FULL = 0.25;      // a step needs this long for its full length: mashing faster only shuffles (light trips must not beat careful heavy ones)
   const kick = (kg) => 0.06 + 0.5 * kg / 20;             // sway added per step
   const stepsFor = (kg) => 7 + 21 * Math.min(kg, 20) / 20; // steps for the whole walk
-  const holdDt = (kg) => Math.max(0.16, -TAU * Math.log(1 - Math.min(0.95, kick(kg))) * 1.22);   // holding = a safe, slower rhythm
+  const holdDt = (kg) => Math.max(FULL, -TAU * Math.log(1 - Math.min(0.95, kick(kg))) * 1.22);   // holding = a safe, slower rhythm
 
   const S = { phase: "idle", r: 0, x: 0, dir: 1, carry: 0, delivered: 0, sway: 0, swayT: 0, stagger: 0, left: 0, t: 0, steps: 0, walk: 0, holding: false, holdNext: 0,
     parts: [], spilled: [], goats: 0, got: [], log: [], msg: "", msgT: 0, best: 0, end: 0 };
@@ -135,7 +136,7 @@
   const wx = () => 86 + S.x * 232;
 
   /* ---------- flow: start → card → walk → bought / sunset → next card … → result ---------- */
-  function panel(html) { ui.innerHTML = html ? `<div class="panel">${html}</div>` : ""; }
+  function panel(html, res = false) { ui.innerHTML = html ? `<div class="panel">${html}</div>` : ""; ui.classList.toggle("cw-res", res); }   // cw-res: the tall result panel
   function startPanel() {
     S.phase = "idle";
     const b = decode(S.best);
@@ -165,7 +166,8 @@
     card.innerHTML = `<div class="cw-in"><p class="cw-year pixel">${r.year}</p>${lines}<p class="cw-sun pixel">SUNSET IN ${r.time} s</p>${S.r === 1 ? `<p class="muted">Heavy now: rush and it spills.</p>` : ""}<button class="btn" data-go>${S.r ? "GO" : "TAP TO GO"}</button></div>`;
     card.hidden = false;
     card.querySelectorAll("canvas[data-f]").forEach(drawJarGoat);
-    const go = () => { card.hidden = true; card.onclick = null; beginRound(); };
+    const shown = performance.now();   // a mashing thumb must not skip the jar: ignore taps for the first 0.9 s
+    const go = () => { if (performance.now() - shown < 900) return; card.hidden = true; card.onclick = null; beginRound(); };
     card.onclick = go;
     Chip.song(Chip.SONGS[r.song]);
   }
@@ -175,13 +177,13 @@
     for (let i = 0; i < 16; i++) { const u = i / 16, hw = Math.round(u > 0.85 ? 3 : 3 + 4 * Math.sin(Math.PI * u / 0.85)); P(10 - hw, 22 - i, hw * 2, 1, i % 3 ? "#a0522d" : "#8a4322"); }
     P(7, 5, 6, 1, SHELL);
     P(20, 11, 6, 2, "#ab9fcb"); P(20, 14, 6, 2, "#ab9fcb");   // "="
-    const gx = 32, cut = gx + Math.round(28 * f);
+    const gx = 32, cut = gx + 2 + Math.max(2, Math.round(23 * f));   // goat spans gx+2..gx+25
     const goatPx = [[gx + 2, 8, 18, 8], [gx + 18, 3, 7, 7], [gx + 19, 0, 1, 3], [gx + 23, 0, 1, 3], [gx + 3, 16, 2, 6], [gx + 8, 16, 2, 6], [gx + 13, 16, 2, 6], [gx + 17, 16, 2, 6]];
-    for (const [a, b, w, h] of goatPx) { const w1 = Math.max(0, Math.min(w, cut - a)); if (w1) P(a, b, w1, h, "#f2ead6"); if (w - w1 > 0) P(a + w1, b, w - w1, h, "#3a2d5c"); }
+    for (const [a, b, w, h] of goatPx) { const w1 = Math.max(0, Math.min(w, cut - a)); if (w1) P(a, b, w1, h, "#ffd23f"); if (w - w1 > 0) P(a + w1, b, w - w1, h, "#4a3d70"); }
   }
   function beginRound() {
     const r = R();
-    Object.assign(S, { phase: "walk", x: 0, dir: 1, delivered: 0, carry: Math.min(CAP, r.shells), sway: 0, stagger: 0, left: r.time, steps: 0, walk: 0, trips: 1, spills: 0, holdNext: 0, parts: [], spilled: [], msgT: 0 });
+    Object.assign(S, { phase: "walk", x: 0, dir: 1, delivered: 0, carry: Math.min(CAP, r.shells), sway: 0, stagger: 0, left: r.time, steps: 0, walk: 0, trips: 1, spills: 0, holdNext: 0, lastStep: 0, parts: [], spilled: [], msgT: 0 });
     flash(S.r === 0 ? "TAP TO WALK →" : "→ TO THE GOAT SELLER", "#ffd23f", 1.6);
     renderHud();
   }
@@ -193,14 +195,15 @@
     S.sway += kick(k); S.steps++; S.walk++;
     beep(900 - 500 * Math.min(1, k / 20), 0.06, "square", 0.035);
     if (S.sway > 1) return spill();
-    S.x = Math.max(0, Math.min(1, S.x + S.dir / stepsFor(k)));
+    const now = performance.now() / 1000, f = Math.min(1, (now - S.lastStep) / FULL); S.lastStep = now;
+    S.x = Math.max(0, Math.min(1, S.x + S.dir * f / stepsFor(k)));
     if (S.dir > 0 && S.x >= 1) arriveSeller();
     else if (S.dir < 0 && S.x <= 0) arriveHut();
     renderHud();
   }
   function spill() {
     const lost = Math.max(100, Math.round(S.carry * 0.1 / 100) * 100);
-    S.carry -= lost; S.sway = 0; S.stagger = 0.7; S.spills++;
+    S.carry -= lost; S.sway = 0; S.stagger = 0.9; S.spills++;
     for (let i = 0; i < 14; i++) S.parts.push({ x: wx() + (Math.random() - 0.5) * 8, y: 88, vx: (Math.random() - 0.5) * 60, vy: -30 - Math.random() * 40 });
     flash(`SPILL! −${fmt(lost)} SHELLS`, "#ff5a5a", 1.4);
     Chip.sfx("clink"); setTimeout(() => Chip.sfx("clink"), 90); setTimeout(() => Chip.sfx("thud"), 160);
@@ -254,21 +257,22 @@
     if (newBest) { S.best = score; try { localStorage.setItem("wth-ep02-cowries-best", score); } catch {} }
     Chip.song(Chip.SONGS.mystery);
     const head = last.ok ? `${S.goats} GOAT${S.goats === 1 ? "" : "S"} · ${spare.toFixed(1)} s TO SPARE` : `SUNSET · ${S.goats} GOAT${S.goats === 1 ? "" : "S"}`;
-    const taps = (l) => (l.steps ? `${l.steps} steps` : "");
+    const taps = (l) => (l.steps ? `${l.steps} steps` : ""), most = Math.max(1, first.steps || 0, last.steps || 0);
+    const bar = (l) => `<i style="width:${Math.max(4, Math.round(100 * (l.steps || 0) / most))}%"></i>`;   // bar = steps walked
     panel(`<h3>${head}</h3>
-      ${last.ok ? `<p>Same goat, same silver dollar.</p>` : `<p>Twenty thousand shells is a lot to carry before the market closes. The seller would rather have the silver dollar. Wouldn't you?</p>`}
+      ${last.ok ? `<p>Same goat, same silver dollar.</p>` : `<p>Twenty thousand shells is a lot to carry before the market closes. The seller would rather have the silver dollar. Wouldn't you?</p><p class="muted">Tip: steady steps beat mashing. Let the bar over your head settle.</p>`}
       <div class="cw-cmp">
-        <div><b class="gold">1840s</b>2,000 shells · 2 kg<br><span class="muted">${taps(first)}</span><i style="width:10%"></i></div>
-        <div><b class="bad">1890</b>20,000 shells · 40 kg<br><span class="muted">${last.trips || 2} trips · ${taps(last)}</span><i style="width:100%"></i></div>
+        <div><b class="gold">1840s</b>2,000 shells · 2 kg<br><span class="muted">${taps(first)}</span>${bar(first)}</div>
+        <div><b class="bad">1890</b>20,000 shells · 40 kg<br><span class="muted">${last.trips || 2} trips · ${taps(last)}</span>${bar(last)}</div>
       </div>
       <p>Grandmother's <b>2,000 shells</b> bought a goat in the 1840s. By 1890: <b>a tenth of one</b>. She never spent a shell.</p>
       <p class="cw-real"><b>In real life:</b> like €2,000 saved in a drawer that, a lifetime later, buys what €200 used to.</p>
       <p class="muted cw-note">Real: shells per silver dollar on the Dahomey coast (about 2,000, 10,000, 20,000). Game: the goat's price, the loads, the timer.${newBest ? " · New best!" : ""}</p>
-      <div class="row"><button class="btn ghost" data-again>${last.ok ? "PLAY AGAIN" : "TRY AGAIN"}</button><button class="btn" data-done>CONTINUE</button></div>`);
+      <div class="row"><button class="btn ghost" data-again>${last.ok ? "PLAY AGAIN" : "TRY AGAIN"}</button><button class="btn" data-done>CONTINUE</button></div>`, true);
     ui.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); start(); };
-    ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealWren(); };
+    ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; Chip.stop(); revealWren(); };
     Chip.sfx(last.ok ? "chime" : "sad");
-    ui.scrollIntoView({ block: PHONE ? "start" : "center" });
+    (ui.firstElementChild || ui).scrollIntoView({ block: PHONE ? "start" : "center" });   // phones: the panel's top at the top, so its buttons fit too
   }
   function revealWren() {
     $("#wren-step").hidden = false; $("#wren-card").hidden = false;

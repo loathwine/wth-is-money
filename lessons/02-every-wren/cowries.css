@@ -41,7 +41,7 @@
 
 /* phones during a run: full screen */
 html:has(body.cw-play), body.cw-play { overflow: hidden; }
-body.cw-play .cw-card { background: rgba(18, 13, 29, .97); }
+body.cw-play .cw-card { background: #120d1d; }   /* solid: the big gold STEP button must not show through as a box */
 body.cw-play .cw { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; touch-action: none; }
 body.cw-play .cw-stage { max-width: none; margin: 0; flex: none; }
 body.cw-play .cw-stage canvas { width: 100%; border: 0; border-bottom: 2px solid var(--line-2); }
@@ -59,4 +59,16 @@ body.cw-play .game-ui { display: none; }
   .cw-cmp { grid-template-columns: 1fr 1fr; gap: 6px; }
   .cw-cmp div { padding: 6px 8px; font-size: 13px; }
   .cw-in p { font-size: 16px; }
+}
+
+/* the result panel sits over a busy sky: make it solid so the sun does not show through */
+#game-ui .panel { background: #120d1d; }
+
+/* phones held sideways: the canvas fits the screen height; the tall result panel goes under it (as in portrait), so its buttons stay reachable */
+@media (pointer: coarse) and (max-height: 500px) {
+  body:not(.cw-play) .cw-stage { max-width: calc((100dvh - 16px) * 3 / 2); }
+  #game .game-ui.cw-res { position: static; display: block; margin: 8px auto 0; max-width: 760px; }
+  #game .game-ui.cw-res .panel { max-height: none; max-width: 100%; }
+  .cw-cmp { margin: 6px 0; }
+  .cw-cmp div { padding: 5px 8px; font-size: 13px; }
 }

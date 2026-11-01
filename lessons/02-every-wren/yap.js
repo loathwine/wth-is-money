@@ -100,7 +100,7 @@
     if (value > S.best) { S.best = value; try { localStorage.setItem("wth-ep02-yap-best", value); } catch {} }
     Chip.song(Chip.SONGS.mystery);
     panel(sunk ? `<h3>LOST AT SEA</h3>
-        <p>The storm took your ${s.name.toLowerCase()} stone. It's on the bottom of the ocean now.</p>
+        <p>The sea took your ${s.name.toLowerCase()} stone. It's on the bottom of the ocean now.</p>
         <p class="long">On Yap, that might not even matter. Furness heard of a family whose fortune was a stone lost in a storm generations earlier, and <b>the village still counted it</b>.</p>
         <p class="short">On Yap, a stone lost at sea <b>could still count</b> as someone's fortune.</p>
         <p>Meanwhile O'Keefe's ship brought <b>ten</b> that trip. One the size of yours traded for only ~${ok} baskets: there were suddenly lots of them.</p>
@@ -111,7 +111,7 @@
           <div><b class="gold">YOUR STONE</b>worth ~${value} baskets of food<div class="bar"><span class="fill" style="width:100%"></span></div></div>
           <div><b class="muted">AN O'KEEFE STONE, SAME SIZE</b>worth ~${ok} baskets: a ship could bring ten at a time<div class="bar"><span class="fill" style="width:${OKEEFE_SHARE * 100}%;background:var(--muted)"></span></div></div>
         </div>
-        <p class="muted" style="font-size:13px">"~${ok}" is a game number. The sources only say his stones traded for "an appropriately reduced value".</p>
+        <p class="muted" style="font-size:13px">“~${ok}” is a made-up game number. Sources only say his stones traded at “an appropriately reduced value”.</p>
         <div class="row"><button class="btn ghost" data-again>PLAY AGAIN</button><button class="btn" data-done>CONTINUE</button></div>`);
     ui.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); pickPanel(); };
     ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealWren(); };

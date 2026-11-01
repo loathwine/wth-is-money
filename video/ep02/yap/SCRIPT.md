@@ -1,8 +1,8 @@
 # EP 02 · Every Wren in History: script notes (hook + chapter 1, Yap)
 
-The narration lives in `narration.json` (11 lines, about 2:38). It set the style, voice and music for the other chapters.
+The narration lives in `narration.json` (11 lines, about 2:38). `out/ep02-yap.mp4` was re-rendered from it on 1 Nov (157.8 s, says Wren, in sync with `out/captions.vtt`). It set the style, voice and music for the other chapters.
 
-Build (from `video/ep02`): `./make.sh yap` → `yap/out/ep02-yap.mp4`. It needs the site served at 127.0.0.1:8931 (or `SCENE_URL`). To check stills without a full render: `./prev.sh yap [ids…]` → `yap/prev/sheet*.png`. `build.py` also writes `out/captions.srt` (YouTube) and `out/captions.vtt` (the page's caption track; long sentences split at a comma so each cue fits a phone). y3, y6 and y7 have a `cap` with digits (1871, 13,000, 50 baskets) for the captions; the voice still reads `text`.
+Build (from `video/ep02`): `./make.sh yap` → `yap/out/ep02-yap.mp4`. It needs the site served at 127.0.0.1:8931 (or `SCENE_URL`). To check stills without a full render: `./prev.sh yap [ids…]` → `yap/prev/sheet*.png`. `build.py` also writes `out/captions.srt` (YouTube) and `out/captions.vtt` (the page's caption track; each line split at sentence ends, and an over-long sentence at its middle comma, so a cue fits a phone). y3, y6 and y7 have a `cap` with digits (1871, 13,000, 50 baskets) for the captions; the voice still reads `text`.
 Pipeline: `tts.sh` (Gemini TTS via the speak skill) → `trim.sh` → `build.py` (timeline, voice, chiptune music ducked under the voice, sound cues, captions) → `render.mjs` (headless Chrome → ffmpeg) → `mux.sh`.
 Visuals are timed to words (`TR.word` in `scene.js`, mirrored by `word()` in `build.py`), so sound cues and visuals land together.
 

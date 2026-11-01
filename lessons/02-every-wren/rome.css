@@ -28,10 +28,10 @@
 .panel .small { font-size: 12px !important; }
 
 /* phones, during a run: the game fills the screen; portrait stacks canvas over the buttons, sideways puts them on the right */
-body.playing #game.mint-game { padding: 8px; gap: 0; }
+body.playing #game.mint-game { padding: 8px; gap: 0; background: #120d1d; }
 body.playing #mint-cv { width: auto; height: auto; max-width: 100%; aspect-ratio: auto; border: 0; }
 @media (orientation: portrait) {
-  body.playing #mint-cv { width: min(100%, calc((100dvh - 120px) * 9 / 16)); max-height: calc(100dvh - 120px); }
+  body.playing #mint-cv { width: min(100%, calc((100dvh - 180px) * 9 / 16)); max-height: calc(100dvh - 180px); }
   body.playing #mint-cv:not(.tall) { width: 100%; }
   body.playing .controls { width: 100%; max-width: 480px; flex-direction: column-reverse; gap: 8px; }
   body.playing .ctl.mint { padding: 18px 10px; font-size: 18px; }
