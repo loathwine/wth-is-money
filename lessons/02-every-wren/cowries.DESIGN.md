@@ -82,7 +82,7 @@ The game is set in an ordinary 1840s–1890 market (goats, shells, a grandmother
 - Sprites: a goat (walks behind you after a purchase, 1 extra frame of bleating), a clay jar, a pouch, a head-load basket (two sizes), a grandmother at the hut door, the seller under an awning, shells scattering on a spill (8–12 `cowrie` pixels), and a sunset gradient that shifts as the timer runs.
 - Sound: `pop` per step (pitch drops as the load grows: 900 Hz at 2 kg, 400 Hz at 40 kg), a `clink` burst on a spill, a `chime` on a purchase, a goat bleat (a square wave with a fast vibrato), and the `sad` sting on sunset. Music: the chapter's F-pentatonic 12/8 loop. Each round pitches down a step and drops a layer (bell, then hats), so the music gets heavier with the money.
 
-## As built (cowries.js)
+## As built (cowries.js, first version; the rework below changes the timers, steps, spills and hold)
 
 - **Loads:** 1840s 2,000 × 1 g = 2 kg (pouch); 1871 10,000 × 2 g = 20 kg (one head-load); 1890 20,000 × 2 g = 40 kg = two 20 kg trips (cap 10,000 shells a trip).
 - **Steps per walk:** `7 + 21 × kg / 20` (about 9 at 2 kg, 28 at 20 kg, 7 walking home empty).
@@ -94,3 +94,13 @@ The game is set in an ordinary 1840s–1890 market (goats, shells, a grandmother
 - **Timers:** 25 s / 22 s / 34 s. Score = goats × 1000 + tenths of a second left in 1890, stored in `localStorage["wth-ep02-cowries-best"]`.
 - **Phones:** during a run the game takes the whole screen (canvas on top and a big STEP button under it in portrait; side by side when held sideways). No orientation lock. Cards between rounds show the jar (2,000 shells = 1 goat → 1/5 → 1/10).
 - **Result:** the 1840s vs 1890 boxes (shells, kg, trips, steps from the run), the jar line, an "In real life" line (€2,000 in a drawer that a lifetime later buys what €200 used to), and the real-vs-game note.
+
+## Rework after phone playtest (first-timer pacing)
+
+Feedback: the later games were "good but a bit too fast, and might need a tutorial". Changes:
+- **Try-it practice** before the first real round (sun frozen, nothing lost): 1) tap once, 2) hold to keep walking, 3) a 20 kg basket: three steps on STEP, 4) "Now the real thing" (taps ignored for 0.9 s). Skippable ("skip practice"), remembered in `localStorage["wth-ep02-cowries-tut"]`; the start panel then offers PRACTICE next to START.
+- **The button says when to step:** with 5 kg or more it turns red **WAIT** (with the sway filling a bar) whenever one more step would push the sway over 0.9, and gold **STEP** otherwise. A tap on STEP never spills (a spill needs > 1).
+- **A spill costs time, not shells:** you put the basket down and scoop for 1.2 s. No surprise "walk home for 1,000 more" in 1871; only 1890 has a second trip, and its card says so before the timer starts.
+- **No reading while the sun moves:** in-game messages are one glance ("SPILL!", "← HOME FOR MORE", "GOAT BOUGHT!") in a bigger font; how the last round went ("✓ 1871: goat bought, 9.0 s of sun to spare") moves to the next card, which waits for a tap. HUD labels are 12 px+ (GOATS moved into the button between rounds).
+- **Slower numbers:** steps per walk `7 + 17 × kg / 20` (24 at 20 kg, was 28); hold rhythm 0.83 s a step at 20 kg (safe but slow); a step needs 0.3 s (was 0.25) for its full length; timers 25 / **28** / **50** s (were 25 / 22 / 34). Strategy sim (`STEP` reaction 0.18–0.43 s, 10% too-early taps): 1871 ≈ 8 s left, 1890 ≈ 10 s; slow reactions (0.3–0.6 s, 20% early): ≈ 5 s and ≈ 3 s; holding: ≈ 7 s and ≈ 6 s; mashing every 0.14–0.17 s: 1871 with ≈ 2 s after ~15 spills, sunset in 1890 (≈ 4 s short); every 0.12 s: sunset in both. Measured on a phone emulator with bots (before FULL went to 0.3, which only slows mashers): react 7.7 s / 12.8 s, slow 9.0 s / 3.0 s, hold 7.7 s / 6.8 s.
+

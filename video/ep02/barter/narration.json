@@ -1,0 +1,70 @@
+[
+ {
+  "id": "i1",
+  "scene": "valley",
+  "text": "This is Ulm Hollow, a village on a faraway world. Nobody here has heard of money.",
+  "dip": true,
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses.",
+  "pad": 0.6
+ },
+ {
+  "id": "i2",
+  "scene": "family",
+  "text": "This is you, and your family: Gran, Little Tam and Aunt Ola. Each night, they need one lumfruit.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ },
+ {
+  "id": "i3",
+  "scene": "bogwool",
+  "text": "You raise bogwool, two a day. It keeps forever. But nobody can eat it.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses.",
+  "pad": 0.4
+ },
+ {
+  "id": "i4",
+  "scene": "market",
+  "text": "So every morning, you go to the market and swap: your bogwool for someone's lumfruit.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ },
+ {
+  "id": "i5",
+  "scene": "refusal",
+  "text": "But a swap only works if they want what you have. Today, Mira has lumfruit, but doesn't want bogwool. Now what?",
+  "pad": 0.4,
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ },
+ {
+  "id": "i6",
+  "scene": "chain",
+  "text": "Maybe Sela takes your bogwool for milk, and Mira takes the milk. Find the chain, and dinner is saved.",
+  "pad": 0.4,
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ },
+ {
+  "id": "i7",
+  "scene": "medicine",
+  "text": "Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die.",
+  "style": "The same storyteller, now quieter and serious, no smile; a steady pace, not slow. Let the last sentence land softly.",
+  "pad": 0.8
+ },
+ {
+  "id": "i8",
+  "scene": "jar",
+  "text": "Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ },
+ {
+  "id": "i9",
+  "scene": "goal",
+  "text": "The harvest festival is on day twelve. Get there with everyone still at the table.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses.",
+  "pad": 0.5
+ },
+ {
+  "id": "i10",
+  "scene": "go",
+  "text": "There is no money in Ulm Hollow. Not yet. Can you keep your family fed until the festival?",
+  "pad": 1.6,
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+ }
+]

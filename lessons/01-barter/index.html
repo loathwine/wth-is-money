@@ -30,17 +30,19 @@
       <div class="route-banner" id="route-banner" hidden></div>
       <div class="toast" id="toast" hidden></div>
     </div>
-    <div class="controls">
-      <span class="hint muted" id="hint">Walk with <b>WASD</b>/arrows or tap. Press <b>E</b> next to a stall to talk.</span>
-      <span class="spacer"></span>
-      <button class="btn ghost small" id="btn-auto" title="Days pass on their own (you trade on autopilot) until something happens">⏩ AUTO DAYS</button>
-      <button class="btn small" id="btn-home">🏠 GO HOME</button>
+    <!-- the pack strip and the day's buttons: always on screen -->
+    <div class="dock" id="dock">
+      <div class="strip" id="strip"></div>
+      <div class="actionbar">
+        <span class="hint muted" id="hint">Walk with <b>WASD</b>/arrows or click. <b>E</b> next to a stall to talk, <b>H</b> to go home.</span>
+        <button class="btn ghost" id="btn-help" title="Find a way to get what home needs">🧭 HELP</button>
+        <button class="btn home" id="btn-home">🏠 GO HOME ▶</button>
+      </div>
     </div>
     <div class="ticker" id="ticker"></div>
   </section>
 
   <aside class="side" id="side">
-    <button class="sheet-close" id="sheet-close" aria-label="Close">▾</button>
     <nav class="tabs">
       <button class="tab on" data-tab="pack">PACK</button>
       <button class="tab" data-tab="notes">NOTEBOOK</button>
@@ -51,15 +53,6 @@
     <div class="tabpane" id="pane-village" hidden></div>
   </aside>
 </main>
-
-<!-- phones only: the controls live in a bar under the village -->
-<nav class="phonebar" id="phonebar">
-  <button data-sheet="pack"><span>🎒</span>PACK</button>
-  <button data-sheet="notes"><span>📓</span>NOTES</button>
-  <button data-sheet="village" id="pb-village" hidden><span>📈</span>VILLAGE</button>
-  <button id="pb-auto"><span>⏩</span>AUTO</button>
-  <button id="pb-home" class="home"><span>🏠</span>HOME</button>
-</nav>
 
 <!-- trade table: their stall on top, your pack at the bottom -->
 <div class="modal" id="dialog" hidden>
@@ -78,7 +71,7 @@
       <div class="cards" id="d-theirs"></div>
       <div class="deal" id="d-deal"></div>
       <div class="cards" id="d-mine"></div>
-      <div class="table-label pixel">YOUR PACK</div>
+      <div class="table-label pixel mine-label">YOUR PACK</div>
     </div>
     <div class="takes" id="d-takes"></div>
   </div>
@@ -93,8 +86,42 @@
 </div>
 
 <script src="../../assets/js/chip.js"></script>
+<!-- evening at home: the family, a picture, a few lines, NEXT DAY -->
+<div class="modal" id="evening" hidden>
+  <div class="card eve">
+    <div class="eve-head pixel" id="eve-head"></div>
+    <div class="eve-pic"><canvas id="eve-canvas" class="px" width="176" height="132"></canvas></div>
+    <div class="eve-kin" id="eve-kin"></div>
+    <p class="eve-q" id="eve-q"></p>
+    <div class="eve-lines" id="eve-lines"></div>
+    <p class="eve-facts" id="eve-facts"></p>
+    <div class="eve-actions" id="eve-actions"></div>
+  </div>
+</div>
+
+<!-- the first screen: a short welcome, the one-minute movie, or straight to the market -->
+<div class="modal" id="intro" hidden>
+  <div class="card intro-card">
+    <div id="intro-body"></div>
+    <div class="movie-wrap" id="movie-wrap" hidden>
+      <video id="movie" class="movie" playsinline webkit-playsinline preload="none" poster="../../video/ep02/barter/out/poster.jpg">
+        <track kind="captions" src="../../video/ep02/barter/out/captions.vtt" srclang="en" label="English" default>
+      </video>
+      <p class="movie-cap" id="movie-cap"></p>
+    </div>
+    <div class="intro-actions">
+      <button class="btn" id="btn-watch">▶ WATCH: HOW THE MARKET WORKS (80 s)</button>
+      <button class="btn ghost" id="btn-skip">SKIP, LET ME PLAY</button>
+    </div>
+  </div>
+</div>
+
+<!-- day one: one pointer at a time -->
+<div class="pointer" id="pointer" hidden><div class="pbubble" id="pointer-text"></div><div class="arrow">▼</div></div>
+
 <script src="sim.js"></script>
 <script src="art.js"></script>
+<script src="evening.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

@@ -6,25 +6,54 @@
 .cw-side { max-width: 760px; margin: 8px auto 0; display: flex; flex-direction: column; gap: 8px; }
 .cw-hud { display: flex; gap: 6px; align-items: stretch; }
 .cw-hud > span { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-2); border: 2px solid var(--line); padding: 4px 2px; line-height: 1.1; min-width: 0; }
-.cw-hud small { font-family: var(--font-pixel); font-size: 9px; color: var(--muted); }
-.cw-hud b { font-size: 18px; white-space: nowrap; }
-.cw-hud .cw-y { flex: .8; font-size: 13px; color: var(--gold); }
+.cw-hud small { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.cw-hud b { font-size: 20px; white-space: nowrap; }
+.cw-hud .cw-y { flex: .8; font-size: 14px; color: var(--gold); }
 .cw-hud .bad b { color: var(--bad); }
 .cw-tap {
   min-height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   background: var(--gold); color: #1a1026; border: 0; box-shadow: 4px 4px 0 #000; font-size: 22px; cursor: pointer;
   touch-action: none; -webkit-tap-highlight-color: transparent;
 }
-.cw-tap small { font-family: var(--font-body); font-size: 13px; font-weight: 700; opacity: .7; }
+.cw-tap { position: relative; transition: background-color .08s; }
+.cw-tap .cw-lbl { font-weight: 400; }
+.cw-tap small { font-family: var(--font-body); font-size: 14px; font-weight: 700; opacity: .75; min-height: 1.2em; }
 .cw-tap:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+/* the button says when to step: gold STEP, red WAIT while the load sways (the bar fills with the sway) */
+.cw-tap[data-state="wait"] { background: #c0392b; color: #fff4ec; }
+.cw-tap[data-state="idle"] { background: var(--bg-2); color: var(--muted); box-shadow: none; }
+.cw-tap[data-state="go"] { background: var(--leaf, #8fd16a); }
+.cw-meter { position: absolute; left: 12px; right: 12px; top: 12px; height: 12px; background: rgba(0, 0, 0, .35); }
+.cw-meter[hidden] { display: none; }
+.cw-meter i { display: block; height: 100%; width: 0; background: #fff4ec; }
+.cw-tap[data-state="step"] .cw-meter i { background: #1a1026; }
+
+/* the try-it coach: one instruction at a time, above the button */
+.cw-coach { background: var(--bg-2); border: 2px solid var(--gold); padding: 10px 12px; text-align: center; }
+.cw-coach[hidden] { display: none; }
+.cw-coach p { margin: 0; }
+.cw-tag { font-size: 12px; color: var(--gold); margin-bottom: 6px !important; }
+.cw-say { font-size: 19px; line-height: 1.35; }
+.cw .ok { color: var(--leaf, #8fd16a); }
+.cw .no { color: #ff7a6a; }
+.cw-dots { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+.cw-dots i { width: 14px; height: 14px; border: 2px solid var(--gold); }
+.cw-dots i.on { background: var(--gold); }
+.cw-skip { background: none; border: 0; color: var(--muted); font: inherit; font-size: 14px; text-decoration: underline; min-height: 44px; padding: 0 12px; margin-top: 2px; cursor: pointer; }
 .cw-tap[hidden], .cw-hud[hidden] { display: none; }
 
 /* the card between rounds: covers the whole game box */
 .cw-card { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(18, 13, 29, .9); cursor: pointer; padding: 12px; }
 .cw-in { max-width: 440px; text-align: center; }
 .cw-in p { margin: 6px 0; font-size: 17px; }
-.cw-year { font-size: 30px; color: var(--gold); margin: 0 0 8px; }
-.cw-sun { font-size: 11px; color: var(--muted); margin: 10px 0 !important; }
+.cw-in .cw-year { font-size: 30px; color: var(--gold); margin: 0 0 8px; }
+.cw-sun { font-size: 13px; color: var(--muted); margin: 10px 0 !important; }
+.cw-prev { font-size: 15px !important; padding: 6px 10px; border: 1px solid var(--line-2); margin: 0 0 14px !important; }
+.cw-prev.ok { color: var(--leaf, #8fd16a); }
+.cw-prev.no { color: #ff7a6a; }
+.cw-tip { background: var(--bg-2); border-left: 3px solid var(--gold); padding: 6px 10px; text-align: left; }
+.cw-go[disabled] { opacity: .45; }
+.cw-go { min-height: 52px; min-width: 60%; justify-content: center; margin-top: 4px; font-size: 18px; }
 .cw-jar { display: flex; gap: 10px; align-items: center; text-align: left; background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; margin: 10px 0; }
 .cw-jar canvas { width: 128px; height: 48px; flex: none; }
 .cw-jar span { font-size: 15px; line-height: 1.35; }
@@ -71,4 +100,12 @@ body.cw-play .game-ui { display: none; }
   #game .game-ui.cw-res .panel { max-height: none; max-width: 100%; }
   .cw-cmp { margin: 6px 0; }
   .cw-cmp div { padding: 5px 8px; font-size: 13px; }
+}
+/* short screens (phones held sideways): the 1890 card must fit 390 px with room for a two-line "last round" line */
+@media (max-height: 500px) {
+  .cw-in .cw-year { font-size: 22px; margin: 0 0 2px; }
+  .cw-in p { margin: 4px 0; }
+  .cw-prev { margin: 0 0 6px !important; padding: 4px 10px; }
+  .cw-jar { margin: 6px 0; padding: 6px 10px; }
+  .cw-sun { margin: 6px 0 !important; }
 }

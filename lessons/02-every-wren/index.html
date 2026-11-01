@@ -10,6 +10,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="lesson.css">
+<style>
+/* Canoe run only: the coach (practice steps, the "ready?" card, the story beats after the run) over the sea */
+.yap-coach { position: absolute; z-index: 3; left: 50%; top: 10px; transform: translateX(-50%); width: max-content; max-width: 92%;
+  background: rgba(18, 13, 29, .92); border: 2px solid var(--gold); box-shadow: 4px 4px 0 #000; padding: 10px 16px;
+  text-align: center; font-size: 18px; line-height: 1.35; color: var(--ink); }
+.yap-coach[hidden] { display: none; }
+.yap-coach.low { top: auto; bottom: 10px; }
+.yap-coach.card { top: 50%; transform: translate(-50%, -50%); padding: 14px 20px; }
+.yap-coach p { margin: 4px 0; }
+.yap-coach .big { display: block; font-family: var(--font-pixel); font-weight: 400; color: var(--gold); font-size: 20px; margin-bottom: 6px; }
+.yap-coach .step-n { display: block; font-family: var(--font-pixel); color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+.yap-coach .say { display: block; }
+.yap-coach .say b { color: var(--gold); }
+.yap-coach small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+.yap-coach .hearts { color: #ff5a7a; letter-spacing: 1px; }
+.yap-coach .btn { margin-top: 10px; min-height: 44px; justify-content: center; }
+.yap-coach .skip { display: inline-block; margin-top: 4px; min-height: 44px; padding: 0 12px; background: none; border: 0; color: var(--muted);
+  font: 13px var(--font-body); text-decoration: underline; cursor: pointer; }
+.yap-again { display: inline-block; min-height: 44px; padding: 0 12px; margin-top: 6px; background: none; border: 0; color: var(--zir);
+  font: 14px var(--font-body); text-decoration: underline; cursor: pointer; }
+/* phone held upright, during play: the sea is a strip, so the coach goes under it, big */
+@media (orientation: portrait) {
+  /* the sea stays put while coach lines of different heights come and go (it used to jump up and down) */
+  body.playing #game { justify-content: flex-start; padding-top: max(12px, calc(50dvh - 28.2vw - 140px)); }
+  body.playing .yap-coach { position: static; transform: none; width: auto; max-width: none; margin: 18px 16px 0; padding: 14px 16px; font-size: 20px; }
+  body.playing .yap-coach .big { font-size: 22px; }
+  body.playing .yap-coach .btn { display: flex; width: 100%; padding: 14px; font-size: 16px; }
+  body.playing .yap-coach:not([hidden]) ~ .turn { display: none; }
+}
+/* phone held sideways: the sea fills the screen height, so keep the coach compact */
+@media (orientation: landscape) and (max-height: 500px) {
+  .yap-coach { font-size: 16px; padding: 6px 12px; }
+  .yap-coach .big { font-size: 16px; margin-bottom: 2px; }
+  .yap-coach.card { padding: 8px 16px; }
+  .yap-coach .btn { margin-top: 6px; }
+}
+</style>
 </head>
 <body data-ch="yap">
 
@@ -40,6 +77,7 @@
     <p class="lead"><span class="long">Bring a stone home from Palau. A bigger stone is worth more, but it makes your canoe heavy. </span><span class="short">Bigger stone: worth more, steers slower. </span><span id="steer-hint">Steer with <b>↑ ↓</b> / <b>W S</b>, or drag.</span></p>
     <div class="game" id="game">
       <canvas id="canoe" class="px" width="320" height="180"></canvas>
+      <div class="yap-coach" id="yap-coach" hidden aria-live="polite"></div>
       <div class="turn">↻ Turn your phone sideways for a bigger sea</div>
       <div class="game-ui" id="game-ui"></div>
     </div>

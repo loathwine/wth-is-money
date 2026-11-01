@@ -2,14 +2,16 @@
 // move to zirnet after Wren's cave, before the harvest festival ends the lesson? Mirrors the game:
 // the player only trades on autopilot in the afternoon (as with the AUTO DAY button).
 // Also: on which day the game's story cards would fire (money, cave, zirnet), and how much
-// Gran's jar (Sim.JAR pentaja) buys before the cave and at the festival, in medicines.
+// Gran's jar (Sim.JAR pentaja) buys before the cave and at the festival, in driftcap mushrooms
+// (Sim.SICK.DOSES of them cure one sickness). And when the second sickness comes, and how many
+// family members an autopilot player (who never opens the jar) loses.
 // Usage: node tools/simstats.js [seeds=40] [days=FESTIVAL-1]
 const Sim = require('../lessons/01-barter/sim.js');
 const seeds = +(process.argv[2] ?? 40), days = +(process.argv[3] ?? Sim.FESTIVAL - 1);
 const avg = (H, g) => H.reduce((s, h) => s + h.moneyness[g], 0) / Math.max(1, H.length);
 const med = a => { const b = a.filter(isFinite).sort((x, y) => x - y); return b[b.length >> 1]; };
 const top = h => Sim.IDS.reduce((a, b) => (h.moneyness[b] > h.moneyness[a] ? b : a));
-let penMoney = 0, zirSwitch = 0, zirCard = 0; const rise = [], rows = [], moneyDay = [], caveDay = {}, zirDay = [], jar = [];
+let penMoney = 0, zirSwitch = 0, zirCard = 0, deadVillages = 0; const rise = [], rows = [], moneyDay = [], caveDay = {}, zirDay = [], jar = [], sick2 = [], deaths = [], medP = []; let third = 0; const thirdNot = [];
 for (let s = 1; s <= seeds; s++) {
   const w = Sim.createWorld({ seed: s });
   for (let d = 0; d < days; d++) { Sim.startDay(w); w.playerAuto = true; Sim.endDay(w); w.playerAuto = false; }
@@ -29,7 +31,12 @@ for (let s = 1; s <= seeds; s++) {
   const price = a => { const v = a.map(h => h.price.pen).filter(x => x != null); return v.reduce((x, y) => x + y, 0) / v.length; };
   rise.push(price(H.slice(-5)) / price(H.slice(1, r)));
   const before = Sim.medPriceBefore(w), now = Sim.medPriceNow(w).pen;
-  jar.push(`${Math.floor(Sim.JAR / before)}→${Math.floor(Sim.JAR / now)}`);
+  jar.push(`${Math.floor(Sim.JAR * Sim.SICK.DOSES / before)}→${Sim.jarDoses(w, Sim.medTrend(w), { pen: Sim.JAR, zir: 0 })}`);
+  medP.push(`${before}→${Sim.medTrend(w).pen}`);
+  if (3 * Sim.jarDoses(w, Sim.medTrend(w), { pen: Sim.JAR, zir: 0 }) <= Math.floor(Sim.JAR * Sim.SICK.DOSES / before)) third++; else thirdNot.push(s);
+  const e2 = w.family.episodes[1]; sick2.push(e2 ? e2.since : Infinity);
+  if (w.family.dead.length) deadVillages++;
+  deaths.push(...w.family.dead.map(d => `s${s}:${d.who}@${d.day}`));
   rows.push(`${s}:${pp.toFixed(1)}/${pz.toFixed(1)}→${qp.toFixed(1)}/${qz.toFixed(1)}`);
 }
 console.log(rows.join(' '));
@@ -37,4 +44,8 @@ console.log(`pentaja is money before the cave: ${penMoney}/${seeds}`);
 console.log(`village switches to zirnet by the festival (day ${Sim.FESTIVAL}): ${zirSwitch}/${seeds}; the zirnet card fires in ${zirCard}/${seeds}, median ${med(zirDay)} days after the cave`);
 console.log(`money card on day (median) ${med(moneyDay)}; cave on day: ${JSON.stringify(caveDay)}`);
 console.log(`lumfruit price rise (×), median: ${med(rise).toFixed(1)}`);
-console.log(`Gran's jar of ${Sim.JAR} pentaja in medicines, before the cave → at the festival: ${jar.join(' ')}`);
+console.log(`second sickness on night (median) ${med(sick2)}: ${sick2.join(',')}`);
+console.log(`Gran's jar of ${Sim.JAR} pentaja in mushrooms, before the cave → at the festival (median ${med(jar.map(j => +j.split('→')[0]))} → ${med(jar.map(j => +j.split('→')[1]))}): ${jar.join(' ')}`);
+console.log(`Dov's price for the medicine in pentaja, before the cave → at the festival (median ${med(medP.map(j => +j.split('→')[0]))} → ${med(medP.map(j => +j.split('→')[1]))}): ${medP.join(' ')}`);
+console.log(`the jar buys at most a third of what it did before the cave in ${third}/${seeds} villages (not in: ${thirdNot.join(',') || '-'})`);
+console.log(`autopilot player (no jar, no route finder): someone died in ${deadVillages}/${seeds} villages: ${deaths.join(' ') || '-'}`);

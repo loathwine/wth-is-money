@@ -4,7 +4,30 @@
 .bg-stage canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border: 2px solid var(--line-2); background: #000; image-rendering: pixelated; }
 .bg-side { grid-area: side; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .bg-out { grid-area: out; }
-.bg-out:empty, .bg-card:empty, .bg-tiles:empty, .bg-hud:empty { display: none; }
+.bg-out:empty, .bg-card:empty, .bg-tiles:empty, .bg-hud:empty, .bg-coach:empty { display: none; }
+
+/* big words over the scene: ships, the 3-2-1, the fake bead (a few words, never something you must read to play) */
+.bg-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none;
+  font-family: var(--font-pixel); font-size: clamp(20px, 4.4vw, 30px); line-height: 1.15; color: #fff; text-align: center; width: max-content; max-width: 92%;
+  background: rgba(18, 13, 29, .85); border: 2px solid var(--gold); padding: 6px 12px; box-shadow: 4px 4px 0 #000; transition: transform .15s, opacity .15s; }
+.bg-banner.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bg-banner.bad { border-color: var(--bad); color: #ffb3b3; }
+.bg-banner.star { border-color: #7fc8ee; color: #bfe8ff; }
+.bg-banner.count { font-size: clamp(34px, 8vw, 54px); padding: 4px 22px; color: var(--gold); }
+
+/* the "try it" coach: one instruction, and the clock waits */
+.bg-coach { background: rgba(18, 13, 29, .92); border: 2px solid var(--gold); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.bg-coach p { margin: 0; font-size: 17px; line-height: 1.35; }
+.bg-coach .btn { align-self: stretch; justify-content: center; min-height: 48px; }
+.tile.me { border-color: var(--gold); animation: bg-pulse 1s infinite; }
+.tile.me::after { content: "TAP"; position: absolute; top: 6px; right: 8px; font-family: var(--font-pixel); font-size: 12px; color: #1a1026; background: var(--gold); padding: 2px 6px; }
+.tile.hint { animation: bg-glow 1s infinite; }
+@keyframes bg-pulse { 0%, 100% { box-shadow: 4px 4px 0 #000, 0 0 0 0 rgba(255, 210, 63, .7); } 50% { box-shadow: 4px 4px 0 #000, 0 0 0 6px rgba(255, 210, 63, 0); } }
+@keyframes bg-glow { 0%, 100% { box-shadow: 4px 4px 0 #000, 0 0 0 0 rgba(127, 200, 238, .8); } 50% { box-shadow: 4px 4px 0 #000, 0 0 0 7px rgba(127, 200, 238, 0); } }
+/* tap feedback, big, right on the tile */
+.tile .pop { position: absolute; right: 10px; top: 6px; font-family: var(--font-pixel); font-size: 20px; color: var(--gold); pointer-events: none; animation: bg-pop .8s forwards; text-shadow: 2px 2px 0 #000; }
+.tile .pop.bad { color: #ff8a8a; font-size: 16px; }
+@keyframes bg-pop { 0% { transform: translateY(6px); opacity: 0; } 20% { transform: none; opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
 
 .bg-hud { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 10px; font-family: var(--font-pixel); font-size: 12px; color: var(--muted); }
 .bg-hud > span { display: flex; flex-direction: column; }
@@ -69,4 +92,8 @@
   .tile { min-height: 58px; padding: 5px 8px; }
   .tile .k { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .tile.up, .tile.shake { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tile.up, .tile.shake, .tile.me, .tile.hint, .tile .pop { animation: none; } .bg-banner { transition: none; } }
+.tile.me .k { display: none; }
+.tile.hint:disabled { opacity: 1; }
+.tile.poor { opacity: .5; }
+.tile.poor .d { color: #ff8a8a; }

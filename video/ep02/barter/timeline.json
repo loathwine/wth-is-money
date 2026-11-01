@@ -1,0 +1,93 @@
+[
+ {
+  "id": "i1",
+  "scene": "valley",
+  "t0": 0.0,
+  "t1": 6.666,
+  "voice": 0.6,
+  "speech": 5.716,
+  "text": "This is Ulm Hollow, a village on a faraway world. Nobody here has heard of money.",
+  "dip": true
+ },
+ {
+  "id": "i2",
+  "scene": "family",
+  "t0": 6.666,
+  "t1": 14.221,
+  "voice": 6.666,
+  "speech": 7.205,
+  "text": "This is you, and your family: Gran, Little Tam and Aunt Ola. Each night, they need one lumfruit."
+ },
+ {
+  "id": "i3",
+  "scene": "bogwool",
+  "t0": 14.221,
+  "t1": 19.852,
+  "voice": 14.221,
+  "speech": 4.881,
+  "text": "You raise bogwool, two a day. It keeps forever. But nobody can eat it."
+ },
+ {
+  "id": "i4",
+  "scene": "market",
+  "t0": 19.852,
+  "t1": 26.154,
+  "voice": 19.852,
+  "speech": 5.952,
+  "text": "So every morning, you go to the market and swap: your bogwool for someone's lumfruit."
+ },
+ {
+  "id": "i5",
+  "scene": "refusal",
+  "t0": 26.154,
+  "t1": 35.956,
+  "voice": 26.154,
+  "speech": 9.052,
+  "text": "But a swap only works if they want what you have. Today, Mira has lumfruit, but doesn't want bogwool. Now what?"
+ },
+ {
+  "id": "i6",
+  "scene": "chain",
+  "t0": 35.956,
+  "t1": 43.914,
+  "voice": 35.956,
+  "speech": 7.207,
+  "text": "Maybe Sela takes your bogwool for milk, and Mira takes the milk. Find the chain, and dinner is saved."
+ },
+ {
+  "id": "i7",
+  "scene": "medicine",
+  "t0": 43.914,
+  "t1": 57.493,
+  "voice": 43.914,
+  "speech": 12.43,
+  "text": "Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die."
+ },
+ {
+  "id": "i8",
+  "scene": "jar",
+  "t0": 57.493,
+  "t1": 64.725,
+  "voice": 57.493,
+  "speech": 6.882,
+  "text": "Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day."
+ },
+ {
+  "id": "i9",
+  "scene": "goal",
+  "t0": 64.725,
+  "t1": 70.315,
+  "voice": 64.725,
+  "speech": 4.74,
+  "text": "The harvest festival is on day twelve. Get there with everyone still at the table."
+ },
+ {
+  "id": "i10",
+  "scene": "go",
+  "t0": 70.315,
+  "t1": 78.637,
+  "voice": 70.315,
+  "speech": 6.372,
+  "text": "There is no money in Ulm Hollow. Not yet. Can you keep your family fed until the festival?"
+ }
+]

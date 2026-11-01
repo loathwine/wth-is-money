@@ -5,7 +5,7 @@
 (function () {
   "use strict";
   const $ = (s) => document.querySelector(s);
-  const cv = $("#cw"), g = cv.getContext("2d"), ui = $("#game-ui"), card = $("#cw-card"), hud = $("#cw-hud"), tapBtn = $("#cw-tap"), game = $("#game");
+  const cv = $("#cw"), g = cv.getContext("2d"), ui = $("#game-ui"), card = $("#cw-card"), hud = $("#cw-hud"), tapBtn = $("#cw-tap"), coach = $("#cw-coach"), game = $("#game");
   const W = cv.width, H = cv.height;
   g.imageSmoothingEnabled = false;
   const params = new URLSearchParams(location.search);
@@ -17,24 +17,34 @@
   Chip.SONGS.cowries3 = { bpm: 84, style: "mystery", chords: [50, 46, 48, 45], melody: [[74, _, _, 72, 69, _, _, _], [70, _, _, 69, 67, _, _, _], [72, _, 74, _, 72, _, 69, _], [69, _, _, _, 62, _, _, _]] };
 
   // Real: shells per silver dollar, Dahomey coast (Law 1995; Skertchly 1874; via Pont Cháfer 2025). Game: the goat price (1 dollar), loads, timers.
+  // Timers tuned for a first try on a phone (tools: a strategy sim in the DESIGN note): a player who waits for STEP and
+  // reacts makes 1871 with ~5–9 s and 1890 with ~3–10 s left; holding the button makes both with ~6–7 s; mashing (~7 taps a second) scrapes 1871 with ~2 s after ~15 spills and loses 1890.
   const ROUNDS = [
     { year: "THE 1840s", short: "1840s", shells: 2000, g: 1, time: 25, song: "cowries", jar: 1 },
-    { year: "1871", short: "1871", shells: 10000, g: 2, time: 22, song: "cowries2", jar: 1 / 5 },
-    { year: "1890", short: "1890", shells: 20000, g: 2, time: 34, song: "cowries3", jar: 1 / 10 },
+    { year: "1871", short: "1871", shells: 10000, g: 2, time: 28, song: "cowries2", jar: 1 / 5 },
+    { year: "1890", short: "1890", shells: 20000, g: 2, time: 50, song: "cowries3", jar: 1 / 10 },
   ];
   const CAP = 10000;      // shells per head-load (20 kg of Zanzibar shells): a game value, a rough real head-load
   const TAU = 0.5;        // seconds for the sway to settle
-  const FULL = 0.25;      // a step needs this long for its full length: mashing faster only shuffles (light trips must not beat careful heavy ones)
+  const FULL = 0.3;       // a step needs this long for its full length: mashing faster only shuffles (light trips must not beat careful heavy ones)
+  const SAFE = 0.9;       // the button says STEP only when one more step keeps the sway under this (a spill needs > 1), so a tap on STEP never spills
+  const SCOOP = 1.2;      // seconds on your knees picking up the shells after a spill (nothing is lost, only time)
+  const HEAVY = 5;        // kg: from here the load sways, and the button shows STEP / WAIT
   const kick = (kg) => 0.06 + 0.5 * kg / 20;             // sway added per step
-  const stepsFor = (kg) => 7 + 21 * Math.min(kg, 20) / 20; // steps for the whole walk
-  const holdDt = (kg) => Math.max(FULL, -TAU * Math.log(1 - Math.min(0.95, kick(kg))) * 1.22);   // holding = a safe, slower rhythm
+  const stepsFor = (kg) => 7 + 17 * Math.min(kg, 20) / 20; // steps for the whole walk (9 with the pouch, 24 with a 20 kg basket)
+  const holdDt = (kg) => Math.max(FULL, -TAU * Math.log(1 - Math.min(0.95, kick(kg) / SAFE)) * 1.7);   // holding = safe but slow (0.83 s a step at 20 kg)
+  const TUT_KEY = "wth-ep02-cowries-tut";
 
   const S = { phase: "idle", r: 0, x: 0, dir: 1, carry: 0, delivered: 0, sway: 0, swayT: 0, stagger: 0, left: 0, t: 0, steps: 0, walk: 0, holding: false, holdNext: 0,
-    parts: [], spilled: [], goats: 0, got: [], log: [], msg: "", msgT: 0, best: 0, end: 0 };
+    parts: [], spilled: [], goats: 0, got: [], log: [], msg: "", msgT: 0, best: 0, end: 0, tut: 0, tutN: 0, g: 0 };
   try { S.best = +localStorage.getItem("wth-ep02-cowries-best") || 0; } catch {}
+  let tutDone = false;
+  try { tutDone = localStorage.getItem(TUT_KEY) === "1"; } catch {}
+  const TOUCH = matchMedia("(pointer: coarse)").matches;
   const fmt = (n) => Math.round(n).toLocaleString("en-US");
   const R = () => ROUNDS[S.r];
-  const kg = () => S.carry * R().g / 1000;
+  const kg = () => S.carry * (S.g || R().g) / 1000;
+  const mustWait = () => kg() >= HEAVY && (S.stagger > 0 || S.sway + kick(kg()) > SAFE);
   const decode = (b) => ({ goats: Math.floor(b / 1000), spare: (b % 1000) / 10 });
 
   /* ---------- tiny synth for steps and the goat (Chip has no pitch control); respects the mute button ---------- */
@@ -94,7 +104,7 @@
     });
   }
   function scene(t) {
-    const r = R(), lim = r.time, sunK = S.phase === "walk" ? 1 - S.left / lim : S.phase === "sunset" ? 1 : S.phase === "bought" ? 1 - S.left / lim : 0.05;
+    const r = R(), lim = r.time, sunK = S.phase === "walk" ? 1 - S.left / lim : S.phase === "sunset" ? 1 : S.phase === "bought" ? Math.min(0.85, 1 - S.left / lim) : 0.05;
     const sky1 = sunK < 0.6 ? mix("#7fc4f0", "#f0a860", sunK / 0.6) : mix("#f0a860", "#3a2a5c", (sunK - 0.6) / 0.4);
     const sky2 = sunK < 0.6 ? mix("#cfe9f8", "#f8d890", sunK / 0.6) : mix("#f8d890", "#8a4a6a", (sunK - 0.6) / 0.4);
     for (let i = 0; i < 8; i++) px(0, i * 14, W, 15, mix(rgbHex(sky1), rgbHex(sky2), i / 7));
@@ -114,23 +124,28 @@
     for (const p of S.spilled) px(p.x - cam, p.y, 2, 1, SHELL);
     // the player
     const k = kg(), sx = Math.round(S.sway * 4 * Math.sin(S.swayT * 9)), facing = S.dir;
+    const down = S.stagger > 0 && k >= HEAVY;   // after a spill: the basket is on the ground while you scoop the shells back in
     at2(wx() - cam, 128, () => {
-      folk({ cloth: "#2e86c1", face: facing, walk: true, step: S.steps, arms: k >= 5 ? "up" : null });
-      if (k >= 5) {   // head-load basket, heaped with shells
-        const bw = Math.round(8 + k * 0.4), bh = Math.round(3 + k * 0.15);
-        px(-bw / 2 + sx, -19 - bh, bw, bh, "#b8862e"); px(-bw / 2 + sx, -19 - bh, bw, 1, "#d9a84a");
-        for (let i = 0; i < bw - 2; i += 2) px(-bw / 2 + 1 + i + sx, -20 - bh - (i % 4 ? 1 : 0), 2, 1, SHELL);
+      folk({ cloth: "#2e86c1", face: facing, walk: !down, step: S.steps, arms: k >= HEAVY && !down ? "up" : null });
+      if (k >= HEAVY) {   // head-load basket, heaped with shells
+        const bw = Math.round(8 + k * 0.4), bh = Math.round(3 + k * 0.15), bx = down ? (facing > 0 ? 3 : -3 - bw) : -bw / 2 + sx, by = down ? -bh : -19 - bh;
+        px(bx, by, bw, bh, "#b8862e"); px(bx, by, bw, 1, "#d9a84a");
+        for (let i = 0; i < bw - 2; i += 2) px(bx + 1 + i, by - 1 - (i % 4 ? 1 : 0), 2, 1, SHELL);
       } else if (k > 0) { px(2, -9, 3, 4, "#8a5a2b"); px(2, -9, 3, 1, SHELL); }
     });
     if (S.phase === "bought") at2(wx() - cam - 16 * S.dir, 128, () => goat(S.dir, 0));
     for (const p of S.parts) px(p.x - cam, p.y, 2, 1, SHELL);
     // sway meter over the player's head
-    if (S.phase === "walk" && k >= 5) {
-      const mx = wx() - cam - 10, my = 70 - k * 0.3;
-      px(mx, my, 20, 3, "#1a1026"); px(mx + 1, my + 1, Math.round(18 * Math.min(1, S.sway)), 1, S.sway > 0.7 ? "#ff5a5a" : S.sway > 0.45 ? "#ffd23f" : "#8fd16a");
+    if ((S.phase === "walk" || S.phase === "tut") && k >= HEAVY && !down) {
+      const mx = wx() - cam - 12, my = 66 - k * 0.3;
+      px(mx, my, 24, 5, "#1a1026"); px(mx + 1, my + 1, Math.round(22 * Math.min(1, S.sway)), 3, mustWait() ? "#ff5a5a" : "#8fd16a");
     }
     if (sunK > 0.75) px(0, 0, W, H, `rgba(20,10,40,${(sunK - 0.75) * 1.4})`);
-    if (S.msgT > 0) { g.font = "8px Silkscreen"; g.textAlign = "center"; g.fillStyle = "#1a1026"; g.fillText(S.msg, W / 2 + 1, 41); g.fillStyle = S.msgC || "#ffd23f"; g.fillText(S.msg, W / 2, 40); g.textAlign = "left"; }
+    if (S.msgT > 0) {   // short messages only (one glance); big when they fit
+      g.textAlign = "center"; g.font = "16px Silkscreen";
+      if (g.measureText(S.msg).width > W - 12) g.font = "8px Silkscreen";
+      g.fillStyle = "#1a1026"; g.fillText(S.msg, W / 2 + 1, 37); g.fillStyle = S.msgC || "#ffd23f"; g.fillText(S.msg, W / 2, 36); g.textAlign = "left";
+    }
   }
   function rgbHex(c) { if (c[0] === "#") return c; const [r, gg, b] = c.match(/\d+/g).map(Number); return "#" + [r, gg, b].map((v) => v.toString(16).padStart(2, "0")).join(""); }
   const wx = () => 86 + S.x * 232;
@@ -141,32 +156,86 @@
     S.phase = "idle";
     const b = decode(S.best);
     panel(`<h3>GOAT MONEY</h3><p>Buy one goat before sunset, in the 1840s, 1871 and 1890. You pay in cowrie shells.</p>
-      <p class="muted">${matchMedia("(pointer: coarse)").matches ? "Tap to take a step, or hold." : "Space, → or click to step, or hold."} Heavy loads spill if you rush.</p>
-      <div class="row"><button class="btn" data-go>START</button></div>
+      <p class="muted">${TOUCH ? "Tap the big button to step." : "Space, → or click to step."} Heavy loads spill if you rush.</p>
+      <div class="row">${tutDone ? `<button class="btn ghost" data-tut>PRACTICE</button>` : ""}<button class="btn" data-go>START</button></div>
       ${S.best ? `<p class="muted">Best: ${b.goats} goat${b.goats === 1 ? "" : "s"}${b.goats === 3 ? ` · ${b.spare.toFixed(1)} s to spare` : ""}</p>` : ""}`);
     ui.querySelector("[data-go]").onclick = start;
+    const t = ui.querySelector("[data-tut]"); if (t) t.onclick = () => { Chip.sfx("pop"); panel(""); play(true); tutorial(); };
   }
   function start() {
     Chip.sfx("pop");
     Object.assign(S, { r: 0, goats: 0, got: [], log: [], spilled: [] });
-    panel(""); play(true); showCard();
+    panel(""); play(true);
+    if (!tutDone) tutorial(); else showCard();
   }
   // Phones: the run takes over the screen (portrait or sideways); the menus come back to the page after.
   const PHONE = Ep02.PHONE;
   function play(on) {
-    if (!PHONE) { hud.hidden = tapBtn.hidden = !on; return; }
-    document.body.classList.toggle("cw-play", on); hud.hidden = tapBtn.hidden = !on;
+    if (PHONE) document.body.classList.toggle("cw-play", on);
+    hud.hidden = tapBtn.hidden = !on; coach.hidden = true;
+    if (on && !PHONE) game.scrollIntoView({ block: "start", behavior: "smooth" });   // desktop: the canvas, the coach and the button all in view
   }
-  function jarHTML(f) { return `<div class="cw-jar"><canvas class="px" width="64" height="24" data-f="${f}"></canvas><span>Grandmother's jar: still <b>2,000 shells</b>. Now that's <b>${f === 1 ? "1 goat" : f > 0.15 ? "1/5 of a goat" : "1/10 of a goat"}</b>.</span></div>`; }
+
+  /* ---------- the try-it tutorial: one instruction at a time, the sun stands still, nothing is lost ---------- */
+  const TUT = [
+    null,
+    { say: TOUCH ? "Tap the yellow button.<br>One tap = one step." : "Press Space (or click the button).<br>One press = one step.", need: 1 },
+    { say: TOUCH ? "Now <b>hold</b> it down.<br>You keep walking." : "Now <b>hold</b> Space down.<br>You keep walking.", need: 2 },
+    { say: "A <b>20 kg</b> basket of shells!<br>Step only when it says <b class=\"ok\">STEP</b>.<br>On <b class=\"no\">WAIT</b> it spills.", need: 3 },
+    { say: "Good! Now the real thing.<br>Buy a goat <b>before sunset</b>.", need: 0 },
+  ];
+  function tutorial() {
+    Object.assign(S, { phase: "tut", r: 0, g: 1, tut: 0, carry: 2000, delivered: 0, x: 0, dir: 1, sway: 0, stagger: 0, steps: 0, lastStep: 0, holding: false, parts: [], spilled: [], msgT: 0, left: ROUNDS[0].time });
+    Chip.song(Chip.SONGS.cowries);
+    hud.hidden = true; coach.hidden = false;
+    tutStep(1);
+  }
+  function tutStep(n) {
+    S.tut = n; S.tutN = 0; S.tutTaps = 0; S.holding = false; S.tutAt = performance.now();
+    if (n === 3) { S.g = 2; S.carry = CAP; S.sway = 0; Chip.sfx("thud"); }
+    const t = TUT[n], dots = t.need > 1 ? `<span class="cw-dots">${"<i></i>".repeat(t.need)}</span>` : "";
+    coach.innerHTML = `<p class="cw-tag pixel">PRACTICE ${n < 4 ? `${n}/3` : "✓"}</p><p class="cw-say">${t.say}</p>${dots}
+      ${n < 4 ? `<button class="cw-skip" data-skip>skip practice ›</button>` : ""}`;
+    const sk = coach.querySelector("[data-skip]"); if (sk) sk.onclick = (e) => { e.stopPropagation(); endTutorial(); };
+    renderBtn(true);
+  }
+  function tutCount() {   // one more good try of the current instruction
+    const t = TUT[S.tut]; if (!t || !t.need) return;
+    S.tutN++;
+    coach.querySelectorAll(".cw-dots i").forEach((d, i) => d.classList.toggle("on", i < S.tutN));
+    if (S.tutN >= t.need) { const n = S.tut; S.tut = -n; Chip.sfx("chime"); setTimeout(() => { if (S.phase === "tut" && S.tut === -n) tutStep(n + 1); }, 650); }
+  }
+  function endTutorial() {
+    tutDone = true; try { localStorage.setItem(TUT_KEY, "1"); } catch {}
+    Object.assign(S, { g: 0, tut: 0, holding: false, spilled: [], parts: [] });
+    coach.hidden = true; coach.innerHTML = ""; hud.hidden = false;
+    Object.assign(S, { r: 0, goats: 0, got: [], log: [] });
+    showCard();
+  }
+
+  function jarHTML(f, first) {
+    const txt = first ? `Grandmother saved <b>2,000 shells</b> in her jar. That's <b>1 goat</b>. She keeps them.`
+      : `Grandmother's jar: still <b>2,000 shells</b>. Now that's <b>${f > 0.15 ? "1/5 of a goat" : "1/10 of a goat"}</b>.`;
+    return `<div class="cw-jar"><canvas class="px" width="64" height="24" data-f="${f}"></canvas><span>${txt}</span></div>`;
+  }
+  function lastRoundLine() {   // how the round before went, so nobody has to read it while the sun is moving
+    const p = S.log[S.r - 1]; if (!p) return "";
+    const y = ROUNDS[S.r - 1].short;
+    return p.ok ? `<p class="cw-prev ok">✓ ${y}: goat bought${p.left >= 0.05 ? `, ${p.left.toFixed(1)} s of sun to spare` : ""}${p.spills ? ` · ${p.spills} spill${p.spills === 1 ? "" : "s"}` : ""}</p>`
+      : `<p class="cw-prev no">✗ ${y}: the sun set. No goat.</p>`;
+  }
   function showCard() {
-    const r = R(); Object.assign(S, { phase: "card", delivered: 0, carry: 0, left: r.time, x: 0, dir: 1, parts: [], spilled: [] }); renderHud();
+    const r = R(); Object.assign(S, { phase: "card", delivered: 0, carry: 0, left: r.time, x: 0, dir: 1, parts: [], spilled: [], g: 0, holding: false }); renderHud();
     const lines = S.r === 0
-      ? `<p>A goat costs <b>1 silver dollar</b>.<br>That's <b class="gold">2,000 shells</b>: a 2 kg pouch.</p>`
-      : `<p>Same goat. Same silver dollar.<br>Now: <b class="gold">${fmt(r.shells)} shells</b>, ${r.shells * r.g / 1000} kg${r.shells > CAP ? ": <b>two trips</b>" : " on your head"}.</p>${jarHTML(r.jar)}`;
-    card.innerHTML = `<div class="cw-in"><p class="cw-year pixel">${r.year}</p>${lines}<p class="cw-sun pixel">SUNSET IN ${r.time} s</p>${S.r === 1 ? `<p class="muted">Heavy now: rush and it spills.</p>` : ""}<button class="btn" data-go>${S.r ? "GO" : "TAP TO GO"}</button></div>`;
+      ? `<p>A goat costs <b>1 silver dollar</b>.<br>That's <b class="gold">2,000 shells</b>: a 2 kg pouch.</p>${jarHTML(r.jar, true)}`
+      : S.r === 1
+        ? `<p>Same goat. Same silver dollar.<br>Now: <b class="gold">10,000 shells</b>.<br>20 kg on your head.</p>${jarHTML(r.jar)}<p class="cw-tip">Step on <b class="ok">STEP</b>. Wait on <b class="no">WAIT</b>.</p>`
+        : `<p>Same goat. Same silver dollar.<br>Now: <b class="gold">20,000 shells</b>. 40 kg.</p><p class="cw-tip">Too much for one head: <b>two trips</b>.<br>Carry 10,000, walk home, carry 10,000.</p>${jarHTML(r.jar)}`;
+    card.innerHTML = `<div class="cw-in">${lastRoundLine()}<p class="cw-year pixel">${r.year}</p>${lines}<p class="cw-sun pixel">SUNSET IN ${r.time} s</p><button class="btn cw-go" data-go>GO ›</button></div>`;
     card.hidden = false;
     card.querySelectorAll("canvas[data-f]").forEach(drawJarGoat);
     const shown = performance.now();   // a mashing thumb must not skip the jar: ignore taps for the first 0.9 s
+    const goBtn = card.querySelector("[data-go]"); goBtn.disabled = true; setTimeout(() => { goBtn.disabled = false; }, 900);
     const go = () => { if (performance.now() - shown < 900) return; card.hidden = true; card.onclick = null; beginRound(); };
     card.onclick = go;
     Chip.song(Chip.SONGS[r.song]);
@@ -183,57 +252,66 @@
   }
   function beginRound() {
     const r = R();
-    Object.assign(S, { phase: "walk", x: 0, dir: 1, delivered: 0, carry: Math.min(CAP, r.shells), sway: 0, stagger: 0, left: r.time, steps: 0, walk: 0, trips: 1, spills: 0, holdNext: 0, lastStep: 0, parts: [], spilled: [], msgT: 0 });
-    flash(S.r === 0 ? "TAP TO WALK →" : "→ TO THE GOAT SELLER", "#ffd23f", 1.6);
-    renderHud();
+    Object.assign(S, { phase: "walk", x: 0, dir: 1, delivered: 0, carry: Math.min(CAP, r.shells), sway: 0, stagger: 0, left: r.time, steps: 0, walk: 0, trips: 1, spills: 0, holdNext: 0, lastStep: 0, parts: [], spilled: [], msgT: 0, g: 0 });
+    flash("→ TO THE GOAT", "#ffd23f", 1.6);
+    renderHud(); renderBtn(true);
   }
   function flash(msg, c, dur = 1.2) { S.msg = msg; S.msgC = c; S.msgT = dur; }
   function step() {
     if (S.phase === "card") { card.onclick && card.onclick(); return; }
-    if (S.phase !== "walk" || S.stagger > 0) return;
-    const k = kg();
+    if (S.phase === "tut" && S.tut === 4) { if (performance.now() - S.tutAt > 900) { Chip.sfx("pop"); endTutorial(); } return; }   // a thumb still tapping must not skip "now the real thing"
+    if ((S.phase !== "walk" && S.phase !== "tut") || S.stagger > 0 || S.tut < 0) return;
+    const k = kg(), onStep = !mustWait();   // what the button said when the thumb came down
     S.sway += kick(k); S.steps++; S.walk++;
     beep(900 - 500 * Math.min(1, k / 20), 0.06, "square", 0.035);
     if (S.sway > 1) return spill();
     const now = performance.now() / 1000, f = Math.min(1, (now - S.lastStep) / FULL); S.lastStep = now;
+    if (S.phase === "tut") {   // practice: walk up and down the yard, never reaching the seller
+      S.x = Math.max(0, Math.min(0.75, S.x + S.dir * f / stepsFor(k)));
+      if (S.x >= 0.75) S.dir = -1; else if (S.x <= 0) S.dir = 1;
+      if (S.tut === 1 || (S.tut === 2 && S.holdStep) || (S.tut === 3 && onStep)) tutCount();
+      else if (S.tut === 2 && !S.holdStep && ++S.tutTaps === 3) coach.querySelector(".cw-say").innerHTML = TOUCH ? "Don't let go!<br>Keep your thumb <b>on</b> the button." : "Don't let go!<br>Keep Space <b>pressed down</b>.";
+      else if (S.tut === 3 && !onStep) coach.querySelector(".cw-say").innerHTML = "Lucky, it didn't spill!<br>That one doesn't count.<br>Wait for <b class=\"ok\">STEP</b>.";
+      return;
+    }
     S.x = Math.max(0, Math.min(1, S.x + S.dir * f / stepsFor(k)));
     if (S.dir > 0 && S.x >= 1) arriveSeller();
     else if (S.dir < 0 && S.x <= 0) arriveHut();
     renderHud();
   }
+  // A spill costs time, not shells: you put the basket down and scoop them back in (SCOOP seconds).
   function spill() {
-    const lost = Math.max(100, Math.round(S.carry * 0.1 / 100) * 100);
-    S.carry -= lost; S.sway = 0; S.stagger = 0.9; S.spills++;
+    S.sway = 0; S.stagger = SCOOP; S.spills = (S.spills || 0) + 1; S.holding = false;
     for (let i = 0; i < 14; i++) S.parts.push({ x: wx() + (Math.random() - 0.5) * 8, y: 88, vx: (Math.random() - 0.5) * 60, vy: -30 - Math.random() * 40 });
-    flash(`SPILL! −${fmt(lost)} SHELLS`, "#ff5a5a", 1.4);
+    flash("SPILL!", "#ff5a5a", SCOOP);
     Chip.sfx("clink"); setTimeout(() => Chip.sfx("clink"), 90); setTimeout(() => Chip.sfx("thud"), 160);
     if (navigator.vibrate) try { navigator.vibrate(60); } catch {}
-    renderHud();
+    if (S.phase === "tut") coach.querySelector(".cw-say").innerHTML = "Spilled! Too fast.<br>Wait until it says <b class=\"ok\">STEP</b>.";
+    renderBtn(true);
   }
   function arriveSeller() {
     S.delivered += S.carry; S.carry = 0; S.dir = -1;
     const r = R();
     if (S.delivered >= r.shells) return buy();
-    const short = r.shells - S.delivered;
     Chip.sfx("chime");
-    flash(`PAID ${fmt(S.delivered)} · ${fmt(short)} MORE: BACK HOME`, "#ffd23f", 1.8);
+    flash("← HOME FOR MORE", "#ffd23f", 1.8);
   }
   function arriveHut() {
     S.carry = Math.min(CAP, R().shells - S.delivered); S.dir = 1; S.trips++; S.sway = 0;
-    Chip.sfx("pop"); flash(`LOADED: ${fmt(S.carry)} SHELLS`, "#f4ecff", 1.2);
+    Chip.sfx("pop"); flash("LOADED! →", "#f4ecff", 1.2);
   }
   function buy() {
-    S.goats++; S.got.push(S.r); S.phase = "bought"; S.end = 0;
+    S.goats++; S.got.push(S.r); S.phase = "bought"; S.end = 0; S.holding = false;
     S.log[S.r] = { ok: true, left: S.left, steps: S.steps, trips: S.trips, spills: S.spills };
     Chip.sfx("chime"); bleat();
-    flash(`GOAT BOUGHT! ${S.left.toFixed(1)} s OF SUN LEFT`, "#8fd16a", 2);
-    renderHud();
+    flash("GOAT BOUGHT!", "#8fd16a", 2.2);
+    renderHud(); renderBtn(true);
   }
   function sunset() {
-    S.phase = "sunset"; S.end = 0;
+    S.phase = "sunset"; S.end = 0; S.holding = false;
     S.log[S.r] = { ok: false, left: 0, steps: S.steps, trips: S.trips, spills: S.spills };
-    Chip.sfx("sad"); flash("SUNSET. THE MARKET IS CLOSED.", "#ff8a7a", 2.4);
-    renderHud();
+    Chip.sfx("sad"); flash("SUNSET!", "#ff8a7a", 2.4);
+    renderHud(); renderBtn(true);
   }
   function nextRound() {
     if (S.r < ROUNDS.length - 1) { S.r++; showCard(); } else finish();
@@ -241,11 +319,26 @@
   function renderHud() {
     const r = R(), k = kg();
     hud.innerHTML = `<span class="cw-y pixel">${r.short}</span>
-      <span><small>PAID</small><b>${fmt(Math.min(S.delivered, r.shells))}</b><small>/ ${fmt(r.shells)}</small></span>
-      <span><small>CARRYING</small><b>${k ? (k < 10 ? k.toFixed(1) : Math.round(k)) + " kg" : "–"}</b></span>
-      <span class="${S.left < 6 && S.phase === "walk" ? "bad" : ""}"><small>SUN</small><b>${Math.ceil(S.left)} s</b></span>
-      <span><small>GOATS</small><b>${S.goats}</b></span>`;
-    tapBtn.querySelector("small").textContent = k >= 5 ? "steady: let the bar settle" : "tap · or hold";
+      <span><small>PAID</small><b>${fmt(Math.min(S.delivered, r.shells))}</b><small>of ${fmt(r.shells)}</small></span>
+      <span><small>LOAD</small><b>${k ? (k < 10 ? k.toFixed(1) : Math.round(k)) + " kg" : "–"}</b></span>
+      <span class="${S.left < 6 && S.phase === "walk" ? "bad" : ""}"><small>SUN</small><b>${Math.ceil(S.left)} s</b></span>`;
+  }
+  // The big button tells you when to step: STEP (gold) or WAIT (red, with the sway filling a bar) for heavy loads.
+  const lbl = tapBtn.querySelector(".cw-lbl"), sub = tapBtn.querySelector("small"), meter = tapBtn.querySelector(".cw-meter"), fill = meter.querySelector("i");
+  let btnKey = "";
+  function renderBtn(force) {
+    const k = kg(), heavy = k >= HEAVY && (S.phase === "walk" || S.phase === "tut") && S.tut !== 4;
+    let state = "step", text = "STEP", small = TOUCH ? "tap · or hold" : "Space · or hold";
+    if (S.phase === "tut" && S.tut === 4) { state = performance.now() - S.tutAt > 900 ? "go" : "idle"; text = "START ›"; small = "the 1840s"; }
+    else if (S.phase === "bought" || S.phase === "sunset" || S.tut < 0) { state = "idle"; text = S.phase === "sunset" ? "SUNSET" : "✓"; small = S.phase === "tut" ? "" : `goats: ${S.goats} of 3`; }
+    else if (S.stagger > 0) { state = "wait"; text = "WAIT"; small = "picking up shells…"; }
+    else if (heavy && mustWait()) { state = "wait"; text = "WAIT"; small = "the load is swaying"; }
+    else if (heavy) small = "tap · or hold";
+    if (heavy) fill.style.width = `${Math.round(100 * Math.min(1, S.sway))}%`;
+    const key = state + text + small + heavy;
+    if (!force && key === btnKey) return;
+    btnKey = key;
+    tapBtn.dataset.state = state; lbl.textContent = text; sub.textContent = small; meter.hidden = !heavy;
   }
 
   function finish() {
@@ -260,12 +353,12 @@
     const taps = (l) => (l.steps ? `${l.steps} steps` : ""), most = Math.max(1, first.steps || 0, last.steps || 0);
     const bar = (l) => `<i style="width:${Math.max(4, Math.round(100 * (l.steps || 0) / most))}%"></i>`;   // bar = steps walked
     panel(`<h3>${head}</h3>
-      ${last.ok ? `<p>Same goat, same silver dollar.</p>` : `<p>Twenty thousand shells is a lot to carry before the market closes. The seller would rather have the silver dollar. Wouldn't you?</p><p class="muted">Tip: steady steps beat mashing. Let the bar over your head settle.</p>`}
+      ${last.ok ? `<p>Same goat, same silver dollar.</p>` : `<p>Twenty thousand shells is a lot to carry before the market closes. The seller would rather have the silver dollar. Wouldn't you?</p><p class="muted">Tip: tap only when the button says STEP, or just hold it down.</p>`}
       <div class="cw-cmp">
         <div><b class="gold">1840s</b>2,000 shells · 2 kg<br><span class="muted">${taps(first)}</span>${bar(first)}</div>
         <div><b class="bad">1890</b>20,000 shells · 40 kg<br><span class="muted">${last.trips || 2} trips · ${taps(last)}</span>${bar(last)}</div>
       </div>
-      <p>Grandmother's <b>2,000 shells</b> bought a goat in the 1840s. By 1890: <b>a tenth of one</b>. She never spent a shell.</p>
+      <p>Grandmother's <b>2,000 shells</b> bought a goat in the 1840s. By 1890: <b>a tenth of one</b>. She never spent a shell. Why? Traders shipped in <b>billions</b> of cheap shells, so each shell bought less.</p>
       <p class="cw-real"><b>In real life:</b> like €2,000 saved in a drawer that, a lifetime later, buys what €200 used to.</p>
       <p class="muted cw-note">Real: shells per silver dollar on the Dahomey coast (about 2,000, 10,000, 20,000). Game: the goat's price, the loads, the timer.${newBest ? " · New best!" : ""}</p>
       <div class="row"><button class="btn ghost" data-again>${last.ok ? "PLAY AGAIN" : "TRY AGAIN"}</button><button class="btn" data-done>CONTINUE</button></div>`, true);
@@ -285,19 +378,20 @@
   }
 
   /* ---------- input: one button. Tap = one step; hold = steady safe steps ---------- */
+  const live = () => S.phase === "walk" || S.phase === "card" || S.phase === "tut";
   function down(e) {
-    if (S.phase !== "walk" && S.phase !== "card") return;
+    if (!live()) return;
     if (e) e.preventDefault();
-    if (S.phase === "card") { step(); return; }
+    if (S.phase === "card" || (S.phase === "tut" && S.tut === 4)) { step(); return; }
     S.holding = true; S.holdNext = holdDt(kg()); step();
   }
   const up = () => { S.holding = false; };
   tapBtn.addEventListener("pointerdown", down);
-  cv.addEventListener("pointerdown", (e) => { if (S.phase === "walk") down(e); });
+  cv.addEventListener("pointerdown", (e) => { if (S.phase === "walk" || S.phase === "tut") down(e); });
   addEventListener("pointerup", up); addEventListener("pointercancel", up);
   addEventListener("keydown", (e) => {
     if (![" ", "ArrowRight", "Enter", "d", "D"].includes(e.key)) return;
-    if (S.phase !== "walk" && S.phase !== "card") return;
+    if (!live()) return;
     e.preventDefault(); if (!e.repeat) down();
   });
   addEventListener("keyup", (e) => { if ([" ", "ArrowRight", "Enter", "d", "D"].includes(e.key)) up(); });
@@ -308,12 +402,12 @@
     S.swayT += dt;
     S.msgT = Math.max(0, S.msgT - dt);
     S.sway *= Math.exp(-dt / TAU);
-    S.stagger = Math.max(0, S.stagger - dt);
+    if (S.stagger > 0) { S.stagger = Math.max(0, S.stagger - dt); if (!S.stagger) S.spilled = []; }   // scooped back in
     for (const p of S.parts) { p.vy += 160 * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.y >= 120 + (p.x % 5)) { S.spilled.push({ x: p.x, y: 120 + (p.x % 5) }); p.dead = true; } }
     S.parts = S.parts.filter((p) => !p.dead);
+    if (S.holding && (S.phase === "walk" || S.phase === "tut")) { S.holdNext -= dt; if (S.holdNext <= 0) { S.holdNext = holdDt(kg()); S.holdStep = true; step(); S.holdStep = false; } }
     if (S.phase === "walk") {
       S.left -= dt;
-      if (S.holding) { S.holdNext -= dt; if (S.holdNext <= 0) { S.holdNext = holdDt(kg()); step(); } }
       if (S.left <= 0 && S.phase === "walk") { S.left = 0; sunset(); }
       if (Math.ceil(S.left) !== S._lastSec) { S._lastSec = Math.ceil(S.left); renderHud(); if (S.left < 5 && S.left > 0) Chip.sfx("pop"); }
     } else if (S.phase === "bought") {
@@ -326,10 +420,10 @@
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    update(dt); scene(now / 1000);
+    update(dt); scene(now / 1000); renderBtn();
     requestAnimationFrame(frame);
   }
-  if (matchMedia("(pointer: coarse)").matches) $("#cw-hint").textContent = "Tap the big button to step, or hold it.";
+  if (TOUCH) $("#cw-hint").textContent = "Tap the big button to step, or hold it.";
   startPanel(); renderHud(); play(false);
   requestAnimationFrame(frame);
   if (params.has("done")) revealWren();

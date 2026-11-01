@@ -1,139 +1,127 @@
 /* ============================================================
-   EP 01 on a phone: the portrait village fills the screen,
-   controls sit in a bar at the bottom, panels slide up as sheets.
-   Everything here is scoped to body.phone (set by game.js).
+   EP 01 on a phone: the portrait village fills the screen; under it
+   the pack strip and GO HOME are always visible. No side panel,
+   no sheets, no trade log. Everything here is scoped to body.phone
+   (set by game.js).
    ============================================================ */
-.phonebar, .sheet-close { display: none; }
-
 body.phone { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; overscroll-behavior: none; }
-body.phone .topbar { position: static; flex-wrap: nowrap; gap: 10px; padding: 6px 10px; padding-top: max(6px, env(safe-area-inset-top)); }
+body.phone .side, body.phone .ticker, body.phone .actionbar .hint { display: none; }
+
+/* top bar: back, day, sound, the family with their strength */
+body.phone .topbar { position: static; flex-wrap: nowrap; gap: 4px; padding: 4px 6px 4px 4px; padding-top: max(4px, env(safe-area-inset-top)); min-height: 52px; }
 body.phone .brand { font-size: 0; }
-body.phone .brand::before { content: "←"; font-family: var(--font-body); font-size: 22px; color: var(--muted); padding: 0 4px; }
-body.phone .daybox { order: 0; margin: 0; font-size: 12px; flex-direction: column; gap: 0; line-height: 1.2; }
-body.phone .family { order: 1; width: auto; margin-left: auto; flex-wrap: nowrap; gap: 12px; font-size: 15px; }
-body.phone .family > span:first-child { display: none; }
-body.phone .family { gap: 8px; }
-body.phone .face { width: 30px; height: 30px; }
-body.phone .family .jar { padding: 3px 6px; font-size: 14px; }
-body.phone .status { padding: 4px 10px; font-size: 13px; min-height: 28px; }
+body.phone .brand::before { content: "←"; font-family: var(--font-body); font-size: 22px; color: var(--muted); display: inline-block; padding: 10px 6px; }
+body.phone .daybox { order: 0; margin: 0; font-size: 13px; flex-direction: column; gap: 0; line-height: 1.2; }
+body.phone .daybox .of { font-size: 12px; }
+body.phone .mute { width: 44px; height: 44px; padding: 0; font-size: 18px; border: 0; flex: none; }
+body.phone .family { order: 1; width: auto; margin-left: auto; flex-wrap: nowrap; gap: 4px; }
+body.phone .family .faces { gap: 4px; min-height: 44px; }
+body.phone .face { width: 32px; height: 32px; }
+body.phone .status { padding: 4px 10px; font-size: 14px; min-height: 40px; line-height: 1.25; }
+body.phone .status .go { padding: 6px 8px; flex: none; }
 
-body.phone .game { flex: 1; min-height: 0; display: block; position: relative; }
-body.phone .world { height: 100%; padding: 0; gap: 0; position: relative; }
-body.phone .world-frame { flex: 1; aspect-ratio: auto; max-height: none; height: 100%; align-items: flex-start; }
-body.phone .route-banner .st { white-space: nowrap; }
-body.phone .route-banner .steps { flex-wrap: nowrap; }
+/* the village, then the dock */
+body.phone .game { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+body.phone .world { flex: 1; min-height: 0; padding: 0; gap: 0; position: relative; display: flex; flex-direction: column; }
+body.phone .world-frame { flex: 1; min-height: 0; aspect-ratio: auto; max-height: none; align-items: flex-start; overflow: hidden; }
 body.phone #world { border: 0; }
-body.phone .controls { display: none; }
+body.phone .route-banner { top: 4px; padding: 4px 8px; font-size: 13px; gap: 6px; }
+body.phone .route-banner .st { white-space: nowrap; }
+body.phone .route-banner .st:not(.now) { display: none; }
+body.phone .route-banner .steps { flex-wrap: nowrap; }
+body.phone .route-banner button { min-height: 44px; min-width: 44px; }
 
-/* the trade log floats over the bottom of the village, newest at the bottom */
-body.phone .ticker {
-  position: absolute; left: 0; right: 0; bottom: 0; height: auto; max-height: 62px; z-index: 4; pointer-events: none;
-  border: 0; padding: 14px 8px 4px; font-size: 12px; color: var(--ink);
-  background: linear-gradient(to bottom, transparent, rgba(18, 13, 29, .9) 40%);
-}
-body.phone .ticker div { min-height: 18px; }
-body.phone .ticker div:nth-child(n + 4) { display: none; }
-body.phone .ticker .tag { display: none; }
+body.phone .dock { position: relative; z-index: 55; gap: 0; background: var(--bg-2); border-top: 2px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+body.phone .strip { border: 0; border-bottom: 2px solid var(--line); padding: 6px 8px; gap: 6px; min-height: 64px; }
+body.phone .strip.full { box-shadow: inset 0 0 0 2px #ff8a3d; }
+body.phone .sgs { gap: 5px; }
+body.phone .sg { flex: 1 1 0; max-width: 64px; }
+body.phone .sgs.many .sg { max-width: 48px; }
+body.phone .sjar { min-width: 88px; }
+body.phone .actionbar { padding: 8px; gap: 8px; }
+body.phone #btn-help { flex: 1; justify-content: center; min-height: 52px; padding: 8px; font-size: 13px; }
+body.phone #btn-home { flex: 2; justify-content: center; min-height: 52px; padding: 8px; font-size: 16px; }
+body.phone #btn-home.armed { font-size: 12px; }
 
-/* bottom bar */
-body.phone .phonebar {
-  display: flex; background: var(--bg-2); border-top: 2px solid var(--line);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.phonebar button {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 9px;
-  background: none; border: 0; color: var(--muted); font-family: var(--font-pixel); font-size: 10px; cursor: pointer;
-}
-.phonebar button span { font-size: 20px; line-height: 1; }
-.phonebar button.on { color: var(--gold); }
-.phonebar button.home { color: #1a1026; background: var(--gold); }
-.phonebar button.new { animation: blink 1s steps(2) infinite; }
-.phonebar button:disabled { opacity: .4; }
-
-/* pack / notebook / village as a sheet over the village */
-body.phone .side {
-  position: fixed; left: 0; right: 0; bottom: 0; height: 78dvh; z-index: 30; min-height: 0;
-  border: 0; border-top: 2px solid var(--gold); box-shadow: 0 -8px 30px rgba(0, 0, 0, .6);
-  transform: translateY(105%); transition: transform .22s ease-out;
-}
-body.phone .side.open { transform: none; }
-body.phone .sheet-close {
-  display: block; width: 100%; background: var(--bg-2); border: 0; color: var(--muted); font-size: 22px; line-height: 1; padding: 6px 0 2px; cursor: pointer;
-}
-body.phone .tabpane { padding: 10px 14px 30px; }
-body.phone .inv-row .meta { display: none; }
-body.phone .legend, body.phone .hint-line { display: none; }
-
-/* trade table: fewer words */
-body.phone .takes .lbl { font-size: 0; margin-bottom: 4px; }
-body.phone .takes .lbl::before { content: "Also takes · tap to find a way:"; font-size: 13px; }
+/* trade table: a top sheet that ends above the dock, so you watch your pack change while you trade */
+body.phone #dialog { padding: 0; align-items: stretch; bottom: var(--dock, 128px); background: rgba(8, 4, 16, .55); }
+body.phone .card.trade { width: 100%; height: auto; max-height: 100%; box-shadow: 0 6px 20px rgba(0, 0, 0, .6); border: 0; border-bottom: 2px solid var(--gold); padding: 10px 12px 14px; align-self: flex-start; }
+body.phone .trade-head { gap: 10px; padding-right: 44px; margin-bottom: 8px; }
+body.phone .portrait { width: 40px; height: 48px; }
+body.phone .trade-head h2 { font-size: 18px; margin: 0; }
+body.phone .say { font-size: 14px; }
+body.phone .looking { font-size: 13px; margin-top: 2px; }
+body.phone .looking .gi { width: 16px; height: 16px; }
+body.phone .close { top: 4px; right: 4px; min-width: 44px; min-height: 44px; font-size: 24px; }
+body.phone .table { padding: 8px; gap: 8px; grid-template-columns: minmax(0, 1fr); }
+body.phone .table-label { font-size: 12px; }
+body.phone #d-theirs { flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 4px 2px 6px; }
+body.phone #d-theirs .gcard { flex: none; width: 80px; padding: 4px 2px; }
+body.phone .gcard .nm { font-size: 12px; }
+body.phone .gcard .badge { font-size: 12px; }
+body.phone #d-mine, body.phone .mine-label, body.phone #d-takes { display: none; }
+body.phone .deal { padding: 8px; }
+body.phone .deal h4 { font-size: 12px; line-height: 1.3; }
+body.phone .deal-row { flex-wrap: nowrap; font-size: 18px; min-height: 56px; gap: 6px; }
+body.phone .deal-row .gn { display: none; }
+body.phone .deal-row .btn { margin-left: auto; padding: 12px 14px; min-height: 48px; font-size: 13px; }
+body.phone .deal-row .tag { font-size: 12px; }
+body.phone .deal .btn.find { width: 100%; justify-content: center; min-height: 48px; margin-top: 4px; }
+body.phone .nodeal { font-size: 15px; }
 
 /* story cards rise from the bottom and drop the extra paragraphs */
 body.phone #story { align-items: flex-end; padding: 0; }
-body.phone .card.story { width: 100%; max-height: 88dvh; border: 0; border-top: 2px solid var(--gold); box-shadow: none; padding: 16px 16px 0; }
-body.phone .story-actions { padding-bottom: max(16px, env(safe-area-inset-bottom)); }   /* not the card's: sticky buttons with text showing under them */
+body.phone .card.story { width: 100%; max-height: 90dvh; border: 0; border-top: 2px solid var(--gold); box-shadow: none; padding: 16px 16px 0; }
+body.phone .story-actions { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 body.phone .story h2 { font-size: 20px; }
 body.phone .story p { margin-bottom: 9px; font-size: 16px; }
 body.phone .story .big { font-size: 18px; }
 body.phone .story .muted { font-size: 14px; }
-body.phone .face.big { width: 36px; height: 36px; }
-body.phone .story .goal { font-size: 15px; }
+body.phone .face.big { width: 40px; height: 40px; }
 body.phone .long { display: none; }
 body:not(.phone) .short { display: none; }
-body.phone .story-actions .btn { flex: 1; justify-content: center; padding: 15px; }
-body.phone .say { font-size: 14px; }
-body.phone .looking { font-size: 12px; }
-body.phone .deal-row { flex-wrap: nowrap; font-size: 16px; }
-body.phone .deal-row .gn { display: none; }
-body.phone .deal-row .btn { padding: 10px 14px; }
-body.phone .deal h4 { font-size: 11px; }
-body.phone .gcard { padding: 4px 2px; }
+body.phone .story-actions .btn { flex: 1; justify-content: center; padding: 15px; min-height: 52px; }
 
-/* tap targets: at least 40px */
-body.phone .brand::before { display: inline-block; padding: 10px 12px 10px 4px; }
-body.phone .mute { width: 40px; height: 40px; padding: 0; font-size: 18px; border: 0; flex: none; }
-body.phone .family .faces, body.phone .family .jar { min-height: 40px; }
-body.phone .status { min-height: 38px; }
-body.phone .status .go { padding: 4px 8px; }
-body.phone .prompt { padding: 10px 12px; font-size: 12px; }
-body.phone .route-banner button { min-height: 40px; min-width: 44px; }
-body.phone .btn.small { min-height: 40px; }
-body.phone button.chip { min-height: 40px; }
-body.phone .close { min-width: 44px; min-height: 44px; }
-body.phone .phonebar button { min-height: 52px; }
-body.phone .phonebar #pb-auto { border-left: 2px solid var(--line); }
-body.phone .toast { bottom: 70px; font-size: 13px; }
+/* evening and the first screen: the whole screen */
+body.phone #evening, body.phone #intro { padding: 0; align-items: stretch; }
+body.phone .card.eve, body.phone .card.intro-card { width: 100%; max-height: 100dvh; height: 100dvh; border: 0; box-shadow: none; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+body.phone .card.eve { justify-content: flex-start; }
+body.phone .eve-actions { margin-top: auto; }
+body.phone .intro-card { display: flex; flex-direction: column; }
+body.phone .intro-card h2 { font-size: 22px; margin-top: 8px; }
+body.phone .intro-card p { font-size: 17px; }
+body.phone .intro-actions { margin-top: auto; }
+body.phone .intro-actions .btn { font-size: 14px; }
+body.phone .movie-wrap { margin: 24px -16px 0; }
+body.phone .movie-wrap.playing { margin-top: auto; }
+
+/* small things */
+body.phone .prompt { padding: 10px 12px; white-space: nowrap; font-size: 12px; }
+body.phone .nametag { font-size: 12px; }
+body.phone .bubble { font-size: 13px; }
+body.phone .toast { bottom: 10px; font-size: 14px; max-width: calc(100% - 20px); }
+body.phone .float { font-size: 18px; }
 body.phone .endscreen .stars { font-size: 26px; }
 body.phone .srow { font-size: 15px; }
 body.phone .take li { font-size: 15px; }
+body.phone .btn.small { min-height: 44px; }
 
-/* a phone held sideways: the wide village, the bar as a rail on the right, sheets slide in from the right */
-body.phone.land { display: grid; grid-template-columns: minmax(0, 1fr) 76px; grid-template-rows: auto auto minmax(0, 1fr); }
+/* a phone held sideways: the wide village on the left, the dock as a rail on the right */
+body.phone.land { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); }
 body.phone.land .topbar, body.phone.land .status { grid-column: 1 / -1; }
-body.phone.land .topbar { padding-top: 2px; padding-bottom: 2px; padding-left: max(10px, env(safe-area-inset-left)); }
+body.phone.land .topbar { min-height: 0; padding-top: 2px; padding-bottom: 2px; padding-left: max(10px, env(safe-area-inset-left)); }
 body.phone.land .daybox { flex-direction: row; gap: 6px; }
 body.phone.land .status { min-height: 34px; padding-left: max(10px, env(safe-area-inset-left)); }
-body.phone.land .game { grid-column: 1; grid-row: 3; }
+body.phone.land .world { flex-direction: row; }
 body.phone.land .world-frame { align-items: center; }
-body.phone.land .phonebar { grid-column: 2; grid-row: 3; flex-direction: column; border-top: 0; border-left: 2px solid var(--line); padding-bottom: 0; padding-right: env(safe-area-inset-right); }
-body.phone.land .phonebar button { min-height: 0; padding: 4px 2px; }
-body.phone.land .phonebar #pb-auto { border-left: 0; border-top: 2px solid var(--line); }
-body.phone.land .ticker { max-height: 42px; }
-body.phone.land .ticker div:nth-child(n + 3) { display: none; }
-body.phone.land .toast { bottom: 10px; }
-body.phone.land .side { left: auto; top: 0; width: min(440px, 70vw); height: 100dvh; border-top: 0; border-left: 2px solid var(--gold); transform: translateX(105%); }
-body.phone.land .side.open { transform: none; }
+body.phone.land .dock { width: 230px; flex: none; border-top: 0; border-left: 2px solid var(--line); display: flex; flex-direction: column; padding-right: env(safe-area-inset-right); }
+body.phone.land .strip { flex: 1; flex-direction: column; overflow-y: auto; }
+body.phone.land .sgs { flex: none; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; }
+body.phone.land .sg { flex: 0 0 64px; max-width: 64px; }
+body.phone.land .sjar { flex: none; min-height: 52px; }
+body.phone.land #btn-home { font-size: 13px; }
+body.phone.land #dialog { bottom: 0; right: 232px; }
+body.phone.land .card.trade { max-height: 100dvh; }
+body.phone.land .card.eve, body.phone.land .card.intro-card { overflow-y: auto; }
 body.phone.land #story { align-items: center; padding: 8px; }
 body.phone.land .card.story { width: min(640px, 100%); max-height: calc(100dvh - 16px); border: 2px solid var(--gold); padding-top: 12px; }
-body.phone.land #dialog { padding: 0; align-items: stretch; }
-body.phone.land .card.trade { width: 100%; max-height: none; height: 100dvh; box-shadow: none; border: 0; padding: 10px 14px 20px; }
-body.phone.land .portrait { width: 40px; height: 48px; }
-/* the top bar is tight at 390px: back, day, sound, faces, jar */
-body.phone .topbar { gap: 4px; padding-left: 4px; padding-right: 6px; }
-body.phone .brand::before { padding: 10px 6px 10px 6px; }
-body.phone .family { gap: 4px; }
-body.phone .family .faces { gap: 0; }
-body.phone .face { width: 28px; height: 28px; }
-body.phone .family .jar { white-space: nowrap; padding: 3px 5px; }
-body.phone .float { font-size: 18px; }
-body.phone .prompt { padding: 9px 10px; white-space: nowrap; font-size: 11px; }

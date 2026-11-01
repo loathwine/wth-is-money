@@ -16,6 +16,24 @@
 .ctl.honest { background: var(--panel-2); color: var(--muted); opacity: .6; cursor: not-allowed; box-shadow: none; }
 @keyframes glow { from { box-shadow: 4px 4px 0 #000, 0 0 0 rgba(255, 210, 63, 0); } to { box-shadow: 4px 4px 0 #000, 0 0 18px rgba(255, 210, 63, .8); } }
 
+/* "do this now" and "not now" hints on the two buttons */
+.ctl.pulse { animation: nudge .7s ease-in-out infinite alternate; }
+.ctl.off { filter: grayscale(.8) brightness(.7); }
+@keyframes nudge { from { outline: 3px solid rgba(255, 255, 255, 0); outline-offset: 0; } to { outline: 3px solid #fff; outline-offset: 3px; } }
+
+/* cards that pause the game and wait for a tap; they sit high, so the market stays in view */
+.mint-pop { position: absolute; inset: 0; z-index: 110; display: flex; align-items: flex-start; justify-content: center; padding: 56px 14px 14px; background: rgba(10, 6, 18, .45); }
+.mint-pop[hidden] { display: none; }
+.pop-card { width: 100%; max-width: 420px; background: #120d1d; border: 2px solid var(--gold); box-shadow: 5px 5px 0 #000; padding: 16px 16px 14px; text-align: center; animation: popin .18s ease-out; }
+.pop-card h3 { font-family: var(--font-pixel); font-weight: 400; color: var(--gold); font-size: 20px; margin: 0 0 8px; }
+.pop-card p { margin: 6px 0; font-size: 18px; line-height: 1.35; }
+.pop-card p.small { font-size: 14px; }
+.pop-card .bad { color: var(--bad); }
+.pop-card .btn { display: flex; justify-content: center; width: 100%; margin-top: 14px; padding: 14px; min-height: 50px; font-size: 16px; }
+@keyframes popin { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mint-skip { position: absolute; top: 6px; right: 6px; z-index: 105; min-height: 44px; min-width: 64px; padding: 8px 12px; font-size: 13px; background: rgba(18, 13, 29, .85); color: var(--muted); border: 2px solid var(--line-2); cursor: pointer; }
+.mint-skip[hidden] { display: none; }
+
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; text-align: left; }
 .facts div { background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; font-size: 18px; font-weight: 700; }
 .facts b { display: block; font-family: var(--font-pixel); font-weight: 400; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
