@@ -2,7 +2,8 @@
 
 usage (needs numpy):  nix-shell -p "python3.withPackages(ps: [ps.numpy])" --run "python3 build.py <chapter dir>"
 reads <ch>/narration.json, <ch>/audio/trim_*.wav and <ch>/cues.py (that chapter's music + sound effects)
-outputs: <ch>/timeline.json, <ch>/out/voice.wav, <ch>/out/bed.wav (music + sfx, already ducked under the voice), <ch>/out/captions.srt
+outputs: <ch>/timeline.json, <ch>/out/voice.wav, <ch>/out/bed.wav (music + sfx, already ducked under the voice),
+         <ch>/out/captions.srt (YouTube) and <ch>/out/captions.vtt (the page's <track>)
 Sound cues use word(): the same even-pace word timing as scene.js, so sounds land with the visuals.
 """
 import json, os, re, sys, wave
@@ -145,8 +146,27 @@ write(f"{OUT}/bed.wav", bed, 0.9)
 def ts(x):
     h, r = divmod(x, 3600); m, s = divmod(r, 60)
     return f"{int(h):02}:{int(m):02}:{int(s):02},{int((s % 1) * 1000):03}"
+CAP = {s["id"]: s["cap"] for s in narr if s.get("cap")}   # optional caption text (e.g. "1871" where the voice says "eighteen seventy-one")
+cues = [(s["voice"], s["voice"] + len(clips[s["id"]]) / SR, re.sub(r"\b(LESS)\b", lambda m: m.group(1).lower(), CAP.get(s["id"], s["text"]))) for s in timeline]
 with open(f"{OUT}/captions.srt", "w") as f:
-    for i, s in enumerate(timeline, 1):
-        txt = re.sub(r"\b(LESS)\b", lambda m: m.group(1).lower(), s["text"])
-        f.write(f"{i}\n{ts(s['voice'])} --> {ts(s['voice'] + len(clips[s['id']]) / SR)}\n{txt}\n\n")
-print(f"wrote {OUT}/voice.wav, {OUT}/bed.wav, {OUT}/captions.srt")
+    for i, (a, b, txt) in enumerate(cues, 1): f.write(f"{i}\n{ts(a)} --> {ts(b)}\n{txt}\n\n")
+# WebVTT for the page: same cues, '.' for milliseconds, long lines split at sentences so each cue fits a phone
+def vtt_lines(txt):
+    parts = re.split(r"(?<=[.?!:])\s+", txt); out, cur = [], ""
+    def halve(p):   # a sentence too long for a phone: split at the comma nearest its middle (else the space)
+        if len(p) <= 80: return [p]
+        cs = [m.end() for m in re.finditer(r",\s", p) if 25 <= m.end() <= len(p) - 25] or [m.end() for m in re.finditer(r"\s", p)]
+        c = min(cs, key=lambda i: abs(i - len(p) / 2)); return halve(p[:c].strip()) + halve(p[c:].strip())
+    parts = [q for p in parts for q in halve(p)]
+    for p in parts:
+        if cur and len(cur) + 1 + len(p) > 80: out.append(cur); cur = p
+        else: cur = f"{cur} {p}".strip()
+    return out + [cur] if cur else out
+with open(f"{OUT}/captions.vtt", "w") as f:
+    f.write("WEBVTT\n\n")
+    for a, b, txt in cues:
+        chunks = vtt_lines(txt); n = sum(len(c) for c in chunks); t0 = a
+        for c in chunks:   # split a long line's time by its share of characters
+            t1 = t0 + (b - a) * len(c) / n
+            f.write(f"{ts(t0).replace(',', '.')} --> {ts(t1).replace(',', '.')}\n{c}\n\n"); t0 = t1
+print(f"wrote {OUT}/voice.wav, {OUT}/bed.wav, {OUT}/captions.srt, {OUT}/captions.vtt")

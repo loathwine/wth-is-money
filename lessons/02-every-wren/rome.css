@@ -1,0 +1,47 @@
+/* EP 02 · chapter 5 (Rome) page bits: the Emperor's Mint game box, its buttons, the result panel. */
+#game.mint-game { aspect-ratio: auto; border: 0; background: none; }
+#mint-cv { display: block; width: 100%; height: auto; aspect-ratio: auto; border: 2px solid var(--line-2); background: #120d1d; image-rendering: pixelated; touch-action: none; }
+#game.mint-game .game-ui { position: static; display: block; margin-top: 10px; }
+#game.mint-game .game-ui:empty { display: none; }
+.mint-game .panel { max-width: 100%; box-shadow: none; }
+.mint-game .panel p { font-size: 15px; }
+
+.controls { display: flex; gap: 10px; padding: 10px 0 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.ctl { flex: 1; font-family: var(--font-pixel); font-size: 16px; padding: 14px 10px; border: 2px solid #000; box-shadow: 4px 4px 0 #000; cursor: pointer; color: #1a1026; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.ctl small { display: block; font-family: var(--font-body); font-size: 12px; font-weight: 500; opacity: .75; margin-top: 2px; }
+.ctl:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.ctl.mint { background: var(--gold); flex: 1.6; }
+.ctl.copper { background: #e59a63; }
+.ctl.fix { background: var(--gold); animation: glow 1s ease-in-out infinite alternate; }
+.ctl.honest { background: var(--panel-2); color: var(--muted); opacity: .6; cursor: not-allowed; box-shadow: none; }
+@keyframes glow { from { box-shadow: 4px 4px 0 #000, 0 0 0 rgba(255, 210, 63, 0); } to { box-shadow: 4px 4px 0 #000, 0 0 18px rgba(255, 210, 63, .8); } }
+
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; text-align: left; }
+.facts div { background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; font-size: 18px; font-weight: 700; }
+.facts b { display: block; font-family: var(--font-pixel); font-weight: 400; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.facts i { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-top: 4px; }
+.panel .bad { color: var(--bad); }
+.panel .irl { background: var(--bg-2); border-left: 3px solid var(--zir); padding: 6px 10px; text-align: left; }
+.panel .score { font-family: var(--font-pixel); font-size: 14px; margin-top: 12px; }
+.panel .score b { color: var(--gold); font-size: 20px; font-weight: 400; }
+.panel .score .muted { display: block; font-family: var(--font-body); font-size: 12px; }
+.panel .small { font-size: 12px !important; }
+
+/* phones, during a run: the game fills the screen; portrait stacks canvas over the buttons, sideways puts them on the right */
+body.playing #game.mint-game { padding: 8px; gap: 0; }
+body.playing #mint-cv { width: auto; height: auto; max-width: 100%; aspect-ratio: auto; border: 0; }
+@media (orientation: portrait) {
+  body.playing #mint-cv { width: min(100%, calc((100dvh - 120px) * 9 / 16)); max-height: calc(100dvh - 120px); }
+  body.playing #mint-cv:not(.tall) { width: 100%; }
+  body.playing .controls { width: 100%; max-width: 480px; flex-direction: column-reverse; gap: 8px; }
+  body.playing .ctl.mint { padding: 18px 10px; font-size: 18px; }
+  body.playing .ctl { padding: 10px; }
+}
+@media (orientation: landscape) {
+  body.playing #game.mint-game { flex-direction: row; }
+  body.playing #mint-cv { height: calc(100dvh - 16px); max-height: calc(100dvh - 16px); max-width: calc(100vw - 170px); }
+  body.playing .controls { flex-direction: column; justify-content: flex-end; width: 150px; height: calc(100dvh - 16px); padding: 0 0 0 10px; }
+  body.playing .ctl { flex: 0 0 auto; }
+  body.playing .ctl.mint { flex: 1 1 auto; max-height: 55%; }
+}
+@media (max-width: 700px) { .facts { grid-template-columns: 1fr; } .ctl { font-size: 14px; } }

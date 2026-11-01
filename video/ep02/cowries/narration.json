@@ -29,17 +29,20 @@
  {
   "id": "c5",
   "scene": "shellflood",
-  "text": "German and French firms followed. Coastal merchants bought them: they were cheap. By one estimate, sixteen billion shells poured in."
+  "text": "German and French firms followed. Coastal merchants bought them: they were cheap. By one estimate, sixteen billion shells poured in.",
+  "pad": 0.5
  },
  {
   "id": "c6",
   "scene": "jar",
-  "text": "In Dahomey, a silver dollar cost about two thousand shells in the eighteen forties. By the eighteen eighties: twenty thousand. A family that had saved two thousand shells now held a tenth of a dollar. They hadn't spent a single one."
+  "text": "In Dahomey, a silver dollar cost about two thousand shells in the eighteen forties. By the eighteen eighties: twenty thousand. A family that had saved two thousand shells now held a tenth of a dollar. They hadn't spent a single one.",
+  "pad": 1.2
  },
  {
   "id": "c7",
   "scene": "heavy",
-  "text": "And the money got heavy. Around nineteen hundred in Lagos, one small silver shilling was worth four thousand shells. A coin in your fist... or a sack on your head."
+  "text": "And the money got heavy. Around nineteen hundred in Lagos, one small silver shilling was worth four thousand shells. A coin in your fist... or a sack on your head.",
+  "pad": 1.4
  },
  {
   "id": "c8",

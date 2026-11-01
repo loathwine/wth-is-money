@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glass Beads · Every Wren in History · WTH Is Money?</title>
+<meta name="description" content="Chapter 2: glass beads in West Africa. This time you are Wren: spend the new money first, then see who pays.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="beads.css">
+</head>
+<body data-ch="beads">
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <span class="pixel muted ep">EP 02 · EVERY WREN IN HISTORY</span>
+  <button class="mute pixel" id="mute" title="Sound on/off">♪ ON</button>
+</header>
+
+<nav class="chapters" id="chapters"></nav>
+
+<main class="page">
+  <section class="chapter" id="beads">
+    <p class="kicker pixel">CHAPTER 2 · WEST AFRICA</p>
+    <h1>Glass beads: this time, you are Wren</h1>
+
+    <div class="step">
+      <span class="num pixel">1</span><h2>Watch</h2>
+    </div>
+    <video class="movie" controls playsinline preload="metadata" poster="../../video/ep02/beads/out/poster.jpg" src="../../video/ep02/beads/out/ep02-beads.mp4">
+      <track kind="captions" srclang="en" label="English" default src="../../video/ep02/beads/out/captions.vtt">
+    </video>
+
+    <div class="step">
+      <span class="num pixel">2</span><h2>Play: The bead ship</h2>
+    </div>
+    <p class="lead"><span class="long">First you're Wren, with a crate of cheap beads: buy as much as you can before the other ships arrive. Then you're someone who saved in beads. </span><span class="short">Be Wren: spend your beads fast. Then be a saver. </span><span id="tap-hint">Tap the tiles, or press <b>1–6</b>.</span></p>
+    <div class="bead-game" id="game">
+      <div class="bg-stage"><canvas id="beadcv" class="px" width="320" height="180"></canvas></div>
+      <div class="bg-side" id="side">
+        <div class="bg-hud" id="hud"></div>
+        <div class="bg-tiles" id="tiles"></div>
+        <div class="bg-card" id="card"></div>
+      </div>
+      <div class="bg-out" id="out"></div>
+    </div>
+
+    <div class="step" id="wren-step" hidden>
+      <span class="num pixel">3</span><h2>Wren moment</h2>
+    </div>
+    <div class="wren-card" id="wren-card" hidden>
+      <canvas id="wren-portrait" class="px" width="20" height="24"></canvas>
+      <div>
+        <p class="big">When you're Wren, it feels like winning. Somebody always pays.</p>
+        <p>New money buys at <b>old prices</b> for whoever spends it first. By the time it reaches everyone else, prices have gone up. <b>Whoever saved the old money pays the difference</b>, just like the pentaja savers of Ulm Hollow.</p>
+        <p class="real"><b>In real life:</b> when lots of new euros or dollars are made, the people who get them first spend them at today's prices. Your savings meet tomorrow's prices.</p>
+        <p class="muted" id="next-line">Next: wampum, where the cave was a metal drill.</p>
+        <a class="btn" id="next-ch" href="wampum.html" hidden>NEXT: WAMPUM ▶</a>
+      </div>
+    </div>
+
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li>P. Francis Jr., “Beads in Ghana, part 2: The Mysterious Aggrey Bead”, <i>The Margaretologist</i> 3(2), 1990: the accori was “often worth its weight in gold” on the early-1500s Gold Coast; glass copies, and a Portuguese pilot (c. 1540, via Blake 1942) saying they “will not bear the heat of fire”. <a href="https://beadresearch.org/wp-content/uploads/Repeating_Material/CBR/Margaretologist/The-Margaretologist-1990-3-2.pdf">PDF</a></li>
+        <li>G. Chouin, “Accori Beads”, <i>Perspectives on History</i> (AHA), 2023: bead-making had stopped long before; the old beads “could never be imitated”. <a href="https://www.historians.org/perspectives-article/accori-beads/">Article</a></li>
+        <li>S. Guerrero, “Venetian Glass Beads and the Slave Trade from Liverpool, 1750–1800”, <i>BEADS</i> 22 (2010): tens of millions of beads a year; about 9 pence a pound in one Liverpool firm's books; beads were one of eight main goods traded for enslaved people; African traders bargained hard. <a href="https://journals.uoregon.edu/beads/article/view/6232">Article</a></li>
+        <li>I. Newton, mint report (1717): gold at £3 17s 10½d an ounce. “Nearly 50 kg of beads for an ounce of gold” is our own arithmetic from these two prices (≈ 47 kg), for Liverpool only. <a href="https://www.gold.org/sites/default/files/documents/1717sep21.pdf">PDF</a></li>
+        <li>W. Bosman, <i>A New and Accurate Description of the Coast of Guinea</i> (1705), Letter IX: the accori is “generally weighed against Gold”. <a href="https://archive.org/details/newaccuratedescr00bosm">Archive.org</a></li>
+        <li>V&amp;A, “From culture to currency: glass beads and the transatlantic slave trade”. <a href="https://www.vam.ac.uk/articles/from-culture-to-currency-glass-beads-and-the-transatlantic-slave-trade">Article</a></li>
+        <li>The family saving in ordinary beads, and Esi in the game, are a <b>what-if</b>: no one recorded bead prices like these. The documented West African case of money losing value from oversupply is cowries in the 1800s (Hogendorn &amp; Johnson 1986, cited in A. Ogundiran 2002): chapter 4. All game numbers (crate, ships, prices, days) are made up to show the mechanism.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script src="../../assets/js/chip.js"></script>
+<script src="../01-barter/art.js"></script>
+<script src="chapters.js"></script>
+<script src="beads.js"></script>
+</body>
+</html>

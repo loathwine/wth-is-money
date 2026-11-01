@@ -2,12 +2,12 @@
  {
   "id": "h1",
   "scene": "wrencave",
-  "text": "Remember Wren? He found a cave full of pentaja... and the money of a whole village stopped working."
+  "text": "Remember Wren? Wren found a cave full of pentaja... and the money of a whole village stopped working."
  },
  {
   "id": "h2",
   "scene": "montage",
-  "text": "Wren is made up. But every money in history has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, somebody found a cheaper way to make more of it."
+  "text": "Wren is made up. But again and again in history, money has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, someone found a cheaper way to make more of it."
  },
  {
   "id": "h3",
@@ -29,7 +29,8 @@
  {
   "id": "y3",
   "scene": "prices",
-  "text": "A rai was worth what it had cost: its size, the whiteness of the stone, and how hard it had been to bring home. A stone about two feet across could buy a big pig, or fifty baskets of food."
+  "text": "Every rai cost a dangerous voyage, so there were never many. That's what made them precious: their size, the whiteness of the stone, and how few ever made it home. A stone about two feet across could buy a big pig, or fifty baskets of food.",
+  "cap": "Every rai cost a dangerous voyage, so there were never many. That's what made them precious: their size, the whiteness of the stone, and how few ever made it home. A stone about 2 feet across could buy a big pig, or 50 baskets of food."
  },
  {
   "id": "y4",
@@ -39,22 +40,24 @@
  {
   "id": "y6",
   "scene": "schooner",
-  "text": "Then, in eighteen seventy-one, an Irish-American captain called David O'Keefe was shipwrecked on Yap. He came back with a sailing ship and iron tools, and made the islanders an offer: he would bring their stones home from Palau, in exchange for dried coconut."
+  "text": "Then, in eighteen seventy-one, an Irish-American captain called David O'Keefe was shipwrecked on Yap. He came back with a sailing ship and iron tools, and made the islanders an offer: he would bring their stones home from Palau, in exchange for dried coconut.",
+  "cap": "Then, in 1871, an Irish-American captain called David O'Keefe was shipwrecked on Yap. He came back with a sailing ship and iron tools, and made the islanders an offer: he would bring their stones home from Palau, in exchange for dried coconut."
  },
  {
   "id": "y7",
   "scene": "flood",
-  "text": "Stones that had been rare in eighteen forty became common. By nineteen twenty-nine, there were more than thirteen thousand on the island. The biggest were twelve feet across."
+  "text": "Stones that had been rare in eighteen forty became common. By nineteen twenty-nine, there were more than thirteen thousand on the island. The biggest were twelve feet across.",
+  "cap": "Stones that had been rare in 1840 became common. By 1929, there were more than 13,000 on the island. The biggest were 12 feet across."
  },
  {
   "id": "y8",
   "scene": "discount",
-  "text": "Sound familiar? It's Wren's cave, all over again. But this time, the islanders noticed. By later accounts, O'Keefe's stones, so much easier to get, traded for LESS than the old ones that had cost lives. Yap had spotted its Wren."
+  "text": "Sound familiar? It's Wren's cave, all over again. But this time, the islanders noticed. By later accounts, O'Keefe's stones, easy to get and suddenly everywhere, traded for LESS than the old ones. Yap had spotted its Wren."
  },
  {
   "id": "y9",
   "scene": "callback",
-  "text": "Just like Ulm Hollow switching from pentaja to zirnet. When money gets easy to make, people quietly stop treating it as money. Yap got lucky. As we'll see... most places didn't.",
+  "text": "On Yap, everyone knew each stone's story, so new stones could be priced lower, and old savings stayed safe. In Ulm Hollow, a pentaja is a pentaja: Wren's cave made everyone's pentaja worth less. Yap's money had a memory. Most money doesn't.",
   "pad": 1.5
  }
 ]

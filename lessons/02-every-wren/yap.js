@@ -1,6 +1,6 @@
 /* EP 02 · Chapter 1 minigame: Canoe run.
    Pick a stone, paddle it from Palau to Yap through reefs and a storm, then watch O'Keefe's
-   schooner sail past with ten. A stone's worth comes from what it cost to bring home. */
+   ship sail past with ten. Few stones ever made it home, so each was precious; his made them common. */
 (function () {
   "use strict";
   const $ = (s) => document.querySelector(s);
@@ -103,25 +103,29 @@
         <p>The storm took your ${s.name.toLowerCase()} stone. It's on the bottom of the ocean now.</p>
         <p class="long">On Yap, that might not even matter. Furness heard of a family whose fortune was a stone lost in a storm generations earlier, and <b>the village still counted it</b>.</p>
         <p class="short">On Yap, a stone lost at sea <b>could still count</b> as someone's fortune.</p>
+        <p>Meanwhile O'Keefe's ship brought <b>ten</b> that trip. One the size of yours traded for only ~${ok} baskets: there were suddenly lots of them.</p>
         <div class="row"><button class="btn" data-again>TRY AGAIN</button><button class="btn ghost" data-done>CONTINUE</button></div>`
       : `<h3>HOME, WITH A ${s.name} STONE</h3>
-        <p>You risked your crew and your canoe. Then O'Keefe's schooner sailed past with <b>ten</b>.</p>
+        <p>You risked your crew and your canoe. Then O'Keefe's sailing ship went past with <b>ten</b>.</p>
         <div class="versus">
           <div><b class="gold">YOUR STONE</b>worth ~${value} baskets of food<div class="bar"><span class="fill" style="width:100%"></span></div></div>
-          <div><b class="muted">AN O'KEEFE STONE, SAME SIZE</b>worth ~${ok} baskets: anyone with a ship could get one<div class="bar"><span class="fill" style="width:${OKEEFE_SHARE * 100}%;background:var(--muted)"></span></div></div>
+          <div><b class="muted">AN O'KEEFE STONE, SAME SIZE</b>worth ~${ok} baskets: a ship could bring ten at a time<div class="bar"><span class="fill" style="width:${OKEEFE_SHARE * 100}%;background:var(--muted)"></span></div></div>
         </div>
-        <p class="muted" style="font-size:13px">The 30% is a game number. The sources only say his stones traded for "an appropriately reduced value".</p>
+        <p class="muted" style="font-size:13px">"~${ok}" is a game number. The sources only say his stones traded for "an appropriately reduced value".</p>
         <div class="row"><button class="btn ghost" data-again>PLAY AGAIN</button><button class="btn" data-done>CONTINUE</button></div>`);
     ui.querySelector("[data-again]").onclick = () => { Chip.sfx("pop"); pickPanel(); };
     ui.querySelector("[data-done]").onclick = () => { panel(""); S.phase = "done"; revealWren(); };
     Chip.sfx(sunk ? "sad" : "chime");
-    if (PHONE) ui.scrollIntoView({ block: "center" });
+    // phones: leaving full screen resets the scroll, so wait for the layout to settle, then show the result
+    if (PHONE) { const show = () => ui.scrollIntoView({ block: "start" }); requestAnimationFrame(() => requestAnimationFrame(show)); setTimeout(show, 350); }
   }
   function revealWren() {
     $("#wren-step").hidden = false; $("#wren-card").hidden = false;
     Art.drawPortrait($("#wren-portrait"), "wren", 0);
-    $("#wren-card").scrollIntoView({ behavior: "smooth", block: "center" });
-    Ep02.done("yap");
+    const nx = Ep02.next(), a = $("#next-ch");
+    if (nx && a) { a.href = nx.href; a.textContent = `NEXT: ${nx.name.toUpperCase()} ▶`; }
+    Ep02.done("yap");   // re-renders the chapter bar: do it before scrolling, so nothing interrupts the scroll
+    $("#wren-step").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   /* ---------- input ---------- */
@@ -189,7 +193,8 @@
     const shake = S.t - S.hitAt < 0.25 ? Math.round(Math.sin(S.t * 90) * 2) : 0;
     g.save(); g.translate(shake, 0);
     seaBg(t, storm);
-    if (S.phase === "arrive" || S.phase === "result") {
+    const home = !S.sunk && (S.phase === "arrive" || S.phase === "result");   // a lost run stays out at sea
+    if (home) {
       const k = Math.min(1, (S.t - S.end) / 2);
       island(W - 120 * k, 66);
       const sk = (S.t - S.end - 1.2) / 3.5;
@@ -197,9 +202,9 @@
     }
     for (const r of S.rocks) rock(r);
     const sinking = S.phase === "sinking" ? Math.min(1, (S.t - S.end) / 1.5) : 0;
-    const bx = S.phase === "arrive" || S.phase === "result" ? 60 + Math.min(1, (S.t - S.end) / 2) * 120 : 60;
+    const bx = home ? 60 + Math.min(1, (S.t - S.end) / 2) * 120 : 60;
     const blink = S.t - S.hitAt < 1.6 && Math.floor(S.t * 12) % 2;
-    if (!blink) canoe(bx, S.y + Math.sin(t * 3) * 1.2, t, sinking ? null : S.stone, storm * 4 * Math.sin(t * 3));
+    if (!blink) canoe(bx, S.y + Math.sin(t * 3) * 1.2, t, sinking || S.sunk ? null : S.stone, storm * 4 * Math.sin(t * 3));
     if (sinking) rai(bx, S.y + sinking * 40, S.stone.r);
     g.restore();
     // HUD: hearts, progress Palau → Yap
@@ -209,7 +214,7 @@
     g.font = "8px Silkscreen"; g.fillStyle = "#f4ecff"; g.fillText("PALAU", 80, 12); g.fillText("YAP", 256, 12);
     if (S.phase === "run" && S.t < 2.5) { g.font = "10px Silkscreen"; g.textAlign = "center"; g.fillStyle = "#1a1026"; g.fillText("STEER: ↑ ↓  OR DRAG", W / 2, 34); g.textAlign = "left"; }
     if (storm > 0.3 && S.t < 22) { g.font = "10px Silkscreen"; g.textAlign = "center"; g.fillStyle = "#ffd23f"; g.fillText("STORM!", W / 2, 34); g.textAlign = "left"; }
-    if (S.phase === "arrive" && S.t - S.end > 1.4) { g.font = "9px Silkscreen"; g.textAlign = "center"; g.fillStyle = "#1a1026"; g.fillText("…O'KEEFE'S SCHOONER, WITH TEN", W / 2, 34); g.textAlign = "left"; }
+    if (S.phase === "arrive" && S.t - S.end > 1.4) { g.font = "9px Silkscreen"; g.textAlign = "center"; g.fillStyle = "#1a1026"; g.fillText("…O'KEEFE'S SHIP, WITH TEN", W / 2, 34); g.textAlign = "left"; }
   }
 
   let last = performance.now();

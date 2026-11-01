@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wampum · Every Wren in History · WTH Is Money?</title>
+<meta name="description" content="Wampum: when iron drills made shell beads cheap to make, a beaver pelt went from about 640 beads to 3,200.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="wampum.css">
+</head>
+<body data-ch="wampum">
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <span class="pixel muted ep">EP 02 · EVERY WREN IN HISTORY</span>
+  <button class="mute pixel" id="mute" title="Sound on/off">♪ ON</button>
+</header>
+
+<nav class="chapters" id="chapters"></nav>
+
+<main class="page">
+  <section class="chapter" id="wampum">
+    <p class="kicker pixel">CHAPTER 3 · NORTH AMERICA, 1600s</p>
+    <h1>Wampum: when the tools changed</h1>
+
+    <div class="step">
+      <span class="num pixel">1</span><h2>Watch</h2>
+    </div>
+    <video class="movie" controls preload="metadata" poster="../../video/ep02/wampum/out/poster.jpg" src="../../video/ep02/wampum/out/ep02-wampum.mp4">
+      <track kind="captions" srclang="en" label="English" default src="../../video/ep02/wampum/out/captions.vtt">
+    </video>
+
+    <div class="step">
+      <span class="num pixel">2</span><h2>Play: Bead rush</h2>
+    </div>
+    <p class="lead"><span class="long">Drill beads for the winter, then buy a kettle and a coat. Watch the price board. </span><span class="short">Drill beads. Buy a kettle and a coat before winter. </span><span id="drill-hint"><b>Space</b> or click to drill · <b>1 2 3</b> to buy.</span></p>
+    <div class="wgame" id="game">
+      <div class="wstage">
+        <canvas id="bead" class="px" width="320" height="180"></canvas>
+        <div class="game-ui" id="game-ui"></div>
+      </div>
+      <div class="wbuy" id="wbuy" hidden></div>
+      <button class="wpad pixel" id="wpad" hidden>TAP HERE TO DRILL</button>
+    </div>
+
+    <div class="step" id="wren-step" hidden>
+      <span class="num pixel">3</span><h2>Wren moment</h2>
+    </div>
+    <div class="wren-card" id="wren-card" hidden>
+      <canvas id="wren-portrait" class="px" width="20" height="24"></canvas>
+      <div>
+        <p class="big">Wren found a cave. Here, the cave was an iron drill.</p>
+        <p>When money gets cheap to make, prices climb and <b>whoever holds it pays</b>. <span class="long">The makers did nothing wrong: they took up a better tool. The trouble is what happens to any money that suddenly gets easy to make. </span>Ulm Hollow learned that with pentaja.</p>
+        <p class="muted" id="wren-next">Next: cowries, the money that got too heavy to carry.</p>
+      </div>
+    </div>
+
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li>R. Williams, <i>A Key into the Language of America</i> (1643), ch. XXIV, “Of their Coyne”: <a href="https://www.gutenberg.org/ebooks/63701">Project Gutenberg</a>. Stone drilling before European awls; whelk and quahog beads.</li>
+        <li>L. Jordan, <i>Colonial Currency</i>, University of Notre Dame: “Wampum: Introduction”, “Wampum in New Netherland”, “The Beaver Pelt in New Netherland” and “Charts Illustrating Wampum Value Depreciation” (coins.nd.edu, read via the Internet Archive). The 1637 law (6 beads a penny, sums under 12 pence); the beaver pelt at about 640 beads (1641) and 3,200 (1662); in silver the pelt stayed at 6–8 guilders; the 1661 repeal, nine years after the Boston mint opened.</li>
+        <li>Petition of the burgomasters and schepens of New Amsterdam, 19 Sept 1658, New York State Archives A1809 vol. 8 (translation via <a href="https://encyclopedia.nahc-mapping.org/node/6235">Mapping Early New York</a>): wampum from New England, “so oversupplied that it is not considered valuable anymore”; the rate from 6 to 8 beads a stiver.</li>
+        <li>E. Peña, “Wampum Production in New Netherland and Colonial New York”, <i>BEADS</i> 2 (1990); and Peña (2006), via Jordan: metal tools let makers “work more efficiently”.</li>
+        <li>A. Woodward, <i>Wampum</i> (1878): <a href="https://www.gutenberg.org/ebooks/23635">Project Gutenberg</a>. Long Island as the biggest producer; floods of “rough” beads and counterfeits; the 1661 repeal.</li>
+        <li>E. James-Perry (Aquinnah Wampanoag), “About Wampum”; McCord Stewart Museum, <i>Wampum: Beads of Diplomacy</i>. Belts are still made and used today.</li>
+        <li><b>Made up for the game and the movie:</b> how long a bead took with stone and how much faster iron was (no source gives a number), the game's prices, drill speeds and the shape of the price curve, the 240-bead basket and the loaves. The 5× rise is the real New Amsterdam beaver-pelt figure.</li>
+        <li>Not yet checked with a Native wampum maker or museum educator; we'd welcome corrections.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script src="../../assets/js/chip.js"></script>
+<script src="../01-barter/art.js"></script>
+<script src="chapters.js"></script>
+<script src="wampum.js"></script>
+</body>
+</html>

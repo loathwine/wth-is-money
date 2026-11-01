@@ -5,7 +5,7 @@
 The narration is in `narration.json`: 9 segments, 227 words. At the Yap pace (about 2.57 words a second) that is roughly 88 s of speech, or about 93 s with pads.
 Scenes go in `scenes.js` as `SC.<scene>(lt, d, t, s)`. `W(n)` means `word(s, n)`, the time word *n* (counting from 0) of that segment is spoken. Word indices below were counted with `text.split()`, the same way `word()` and `build.py` count them.
 Palette and props are the shared ones (`scene.js`, `props.js`: `cowrie`, `coin`, `sack`, `hut`, `ground`, `chart`, `stamp`, `label`, `where`). **New props needed:** `goat`, `jar` (clay pot), `head-load basket`, `brig` (a 19th-century merchant sailing ship, or reuse `schooner`), `kenkey` (a pale dough ball wrapped in a leaf), `reef` (a strip of shallow turquoise water over coral), and an Africa outline for the map.
-Wren is drawn with `alien("wren", …)`. The sprite id is still "rod" until the rename lands.
+Wren is drawn with `alien("wren", …)`.
 
 ## Segments and visuals
 
@@ -127,37 +127,9 @@ Every number spoken or shown is listed here. "Via" means we read the claim in th
 
 **Debate to know about (no need to air it in a 90 s chapter):** Hogendorn & Johnson (1986) call this "the great inflation" that ruined the shell money. Pont Cháfer (2025) calls it "the great depreciation": huge on the coast and against silver, much milder inland, where cowries kept buying food into the 1930s. Our script stays on the coast (Dahomey, Lagos), where both agree the shells collapsed against silver, and it says "a tenth of a dollar", never "a tenth as much food".
 
-## Sound cues (for `cues.py`)
+## Sound cues
 
-```python
-# chapter 4 · cowries
-place(sfx, seg["c0"]["t0"], whoosh(), 0.25)
-for i in range(24): place(sfx, seg["c0"]["t0"] + 0.2 + i * 0.09, clink(2400 + (i * 211) % 700), 0.05)   # shells pattering down
-place(sfx, w("c0", 8), thud(), 0.45)                                                       # "heavy"
-place(sfx, w("c1", 9), pop_(900), 0.15)                                                    # the big cowrie
-place(sfx, w("c1", 18), chime(79, (0,)), 0.15)                                             # Maldives blink
-for k in np.linspace(w("c2", 9), w("c2", 9) + 0.6, 12): place(sfx, k, clink(2200), 0.04)  # string of 40
-place(sfx, w("c2", 13), thud(), 0.3)                                                       # a head bundles up
-# c3: market murmur under W(0)-W(9), then no hits. Low wind and surf only; the music drops to its drone.
-place(sfx, w("c3", 10), noise(2.5, 2, seed=7), 0.05)
-place(sfx, w("c4", 4), whoosh(), 0.15)
-place(sfx, w("c4", 10), thud(), 0.5)                                                       # REEF! stamp
-for k in np.arange(w("c4", 22), w("c4", 22) + 0.6, 0.05): place(sfx, k, clink(1800 + 400 * np.sin(k * 9)), 0.04)   # a small load goes in
-place(sfx, w("c4", 23), pop_(1100), 0.12)                                                  # Wren cameo
-for k in np.linspace(w("c5", 12), w("c5", 19), 60): place(sfx, k, clink(1500 + 1500 * (k - w("c5", 12)) / max(.1, w("c5", 19) - w("c5", 12))), 0.035)  # pouring, rising pitch
-place(sfx, w("c5", 16), thud(), 0.45)
-place(sfx, w("c6", 4), chime(76, (0, 7)), 0.15)                                            # scale level
-for k in np.linspace(w("c6", 14), w("c6", 19), 18): place(sfx, k, clink(1600), 0.05)      # ten heads pile up
-place(sfx, w("c6", 19), thud(), 0.5)                                                       # ×10
-place(sfx, w("c6", 31), tone(300, 0.6, "square", 180, decay=0.25), 0.10)                   # slices fade: falling tone
-place(sfx, w("c7", 4), thud(), 0.6)                                                        # "heavy"
-place(sfx, w("c7", 12), clink(3200), 0.15)                                                 # one bright coin
-for k in np.linspace(w("c7", 16), w("c7", 18) + 0.3, 30): place(sfx, k, clink(1300), 0.04)  # 4,000 shells into a sack
-for k in np.arange(w("c7", 26), w("c7", 29) + 1.0, 0.55): place(sfx, k, thud(), 0.12)     # slow footsteps under the load
-place(sfx, w("c8", 8), thud(), 0.4)                                                        # NOT MONEY
-place(sfx, w("c8", 20), thud(), 0.4); place(sfx, w("c8", 24), thud(), 0.4)               # CAVE / REEF stamps
-place(sfx, w("c8", 31), chime(62, (0, 3, 7, 10)), 0.25)                                    # emperor: minor sting
-```
+The cues as built are in `cues.py` (same word indices as the visuals in `scenes.js`). They follow the plan that was here: shells pattering in the title, a thud on "heavy", the 40-string and head clinks, no hits on the slave-trade line (c3 drops to a drone), REEF! thud, rising-pitch pour in c5, scale chime, ten thuds and ×10 in c6, a falling tone as the dollar's slices fade, the sack dropping on "heavy" and slow footsteps in c7, NOT MONEY / CAVE / REEF thuds and a minor sting on "emperor".
 
 ## Music idea
 
@@ -169,3 +141,9 @@ place(sfx, w("c8", 31), chime(62, (0, 3, 7, 10)), 0.25)                         
 - c3: is one muted line ("CENTURIES OF THE SLAVE TRADE") enough, or should it carry a number? Savary's figure is literally a shell price for a ship's cargo of captives, and turning people into a price on screen feels wrong for this format. The "12 tonnes" label shows only the shells. I'd leave it as is.
 - c5: if someone can open Hogendorn & Johnson (1986), pp. 62–78, check which import figure to use (16 billion in "a few decades", or about 1 billion a year for 1851–1880). The narration says "by one estimate" either way.
 - Place names: the narration uses "Dahomey", "Zanzibar" and "Lagos" only (TTS-safe). "Ouidah" and "Abomey" appear only on screen.
+
+## As built
+
+- **Length:** 103.4 s (pads added in `narration.json`: c5 0.5 s, c6 1.2 s, c7 1.4 s, so the big numbers, the food note and the 1904 stamp can be read).
+- **Changes from the plan above:** c2 adds "≈ 2 kg · a bag of flour" under HEAD = 2,000. c3 adds the label "THEIR MARKETS RAN ON SHELLS" at W(5). c4's shop / shell / price beats are a panel on the left of the map (the right side is the Indian Ocean); prices are bars marked HIGH / LOW, with no numbers. c6's hut is drawn 2× for the jar part (family of three, the jar, a pie of the dollar with nine slices fading; "SHELLS SPENT: 0" on W(36); the Abomey food note top left). c7's sack drops in on "heavy" (thud), then fills to 4,000 shells and "≈ 4–8 KG"; the 1904 stamp lands on W(28). c8: the sack→bogwool split is "ULM HOLLOW | LAGOS, 1900" with the label "FLOODED MONEY = BOGWOOL"; the teaser coin's emperor carries a small laurel and a cave stamp.
+- **Music (`cues.py`):** F major pentatonic island groove (c0–c2), a low F drone for c3, the groove back for c4–c5 with a second marimba line in c5, D minor at a slower beat for c6–c7, F again for c8, then a drone under the Rome teaser.

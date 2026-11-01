@@ -1,0 +1,72 @@
+/* EP 02 · Chapter 2 (glass beads): the bead-ship game. Canvas scene + big DOM tiles in the thumb zone. */
+.bead-game { display: grid; grid-template-columns: 3fr 2fr; grid-template-areas: "stage side" "out out"; gap: 10px; user-select: none; -webkit-user-select: none; }
+.bg-stage { grid-area: stage; position: relative; }
+.bg-stage canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border: 2px solid var(--line-2); background: #000; image-rendering: pixelated; }
+.bg-side { grid-area: side; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.bg-out { grid-area: out; }
+.bg-out:empty, .bg-card:empty, .bg-tiles:empty, .bg-hud:empty { display: none; }
+
+.bg-hud { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 10px; font-family: var(--font-pixel); font-size: 12px; color: var(--muted); }
+.bg-hud > span { display: flex; flex-direction: column; }
+.bg-hud b { color: var(--ink); font-weight: 400; font-size: 15px; }
+.bg-hud .gold { color: var(--gold); }
+.bg-hud .bar { grid-column: 1 / -1; height: 8px; background: var(--panel); border: 1px solid var(--line-2); }
+.bg-hud .bar span { display: block; height: 100%; background: var(--gold); transition: width .1s linear; }
+
+.bg-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; }
+.tile {
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 76px; padding: 8px 10px;
+  background: var(--bg-2); border: 2px solid var(--line-2); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  box-shadow: 4px 4px 0 #000; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tile:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.tile:focus-visible { border-color: var(--gold); outline: none; }
+.tile .n { font-family: var(--font-pixel); font-size: 13px; color: var(--gold); }
+.tile .p { font-size: 17px; font-weight: 700; }
+.tile .p s { color: var(--dim); font-weight: 500; margin-right: 6px; }
+.tile .d { font-size: 12px; color: var(--muted); }
+.tile .k { position: absolute; top: 4px; right: 6px; font-family: var(--font-pixel); font-size: 10px; color: var(--dim); }
+.tile.up { border-color: var(--bad); animation: bg-flash .5s; }
+.tile.shake { animation: bg-shake .3s; border-color: var(--bad); }
+.tile.star { border-color: #7fc8ee; }
+.tile.star .n { color: #7fc8ee; }
+.tile.gag { border-color: var(--pen); border-style: dashed; }
+.tile.gag .n { color: var(--pen); }
+.tile.done { opacity: .5; }
+.tile.info { cursor: default; background: transparent; border-style: dashed; box-shadow: none; }
+.tile.info:active { transform: none; }
+.tile:disabled { opacity: .45; cursor: default; }
+@keyframes bg-flash { 0%, 60% { background: #4a1a26; } 100% { background: var(--bg-2); } }
+@keyframes bg-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+.bg-card .panel { max-width: none; margin: 0; text-align: left; }
+.bg-card .panel h3, .bg-out .panel h3 { text-align: left; }
+.bg-out .panel { max-width: none; text-align: left; }
+.bead-game .panel p { font-size: 15px; }
+.bead-game .big { font-size: 20px; font-weight: 700; }
+.bead-game .tiny { font-size: 12px; color: var(--muted); }
+.bead-game .real { border-left: 3px solid var(--zir); padding-left: 10px; }
+.bg-res { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+.bg-res > div { background: var(--bg-2); border: 1px solid var(--line-2); padding: 10px 12px; }
+.bg-res b.h { display: block; font-family: var(--font-pixel); font-weight: 400; font-size: 12px; margin-bottom: 4px; }
+.bg-res .bnum { display: block;  font-size: 30px; font-weight: 700; line-height: 1.1; }
+.bg-res .bar { height: 10px; background: var(--panel); margin-top: 8px; }
+.bg-res .bar span { display: block; height: 10px; }
+.bg-chart { display: block; width: 100%; max-width: 560px; aspect-ratio: 8 / 3; image-rendering: pixelated; border: 1px solid var(--line-2); background: var(--bg); margin: 8px 0; }
+.twist { color: var(--pen); font-weight: 700; }
+
+@media (max-width: 700px) {
+  .bead-game { grid-template-columns: 1fr; grid-template-areas: "stage" "side" "out"; gap: 8px; }
+  .bg-tiles { gap: 7px; }
+  .tile { min-height: 70px; padding: 7px 9px; }
+  .tile .k { display: none; }
+  .bg-res { grid-template-columns: 1fr; }
+}
+/* phones held sideways: the scene fits the screen height, tiles beside it */
+@media (pointer: coarse) and (max-height: 500px) {
+  .bead-game { grid-template-columns: minmax(0, 1fr) 300px; }
+  .bg-stage canvas { width: min(100%, calc((100dvh - 24px) * 16 / 9)); }
+  .tile { min-height: 58px; padding: 5px 8px; }
+  .tile .k { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .tile.up, .tile.shake { animation: none; } }

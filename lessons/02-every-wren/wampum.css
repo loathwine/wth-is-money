@@ -1,0 +1,71 @@
+/* EP 02 · Chapter 3 (wampum): Bead rush. Canvas + buy buttons (a column beside it on wide screens and phones held
+   sideways, a row under it in portrait) + a big drill pad for the thumb in portrait play. */
+.wgame { display: flex; gap: 10px; align-items: stretch; user-select: none; -webkit-user-select: none; }
+.wstage { position: relative; flex: 1; min-width: 0; }
+.wstage canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border: 2px solid var(--line-2); background: #000; touch-action: manipulation; cursor: pointer; }
+.wbuy { display: flex; flex-direction: column; gap: 8px; width: 150px; flex: none; }
+.wbuy[hidden], .wpad[hidden] { display: none; }
+.buy {
+  position: relative; flex: 1; min-height: 56px; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 8px 10px;
+  background: var(--bg-2); border: 2px solid var(--line-2); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  box-shadow: 4px 4px 0 #000; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.buy:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.buy .n { font-family: var(--font-pixel); font-size: 14px; color: var(--ink); }
+.buy .p { font-size: 16px; font-weight: 700; color: var(--muted); }
+.buy .k { position: absolute; top: 4px; right: 6px; font-family: var(--font-pixel); font-size: 10px; color: var(--dim); }
+.buy.can { border-color: var(--gold); animation: w-pulse 0.9s infinite; }
+.buy.can .p { color: var(--gold); }
+.buy.got { opacity: .55; border-style: dashed; }
+.buy.got .p { color: var(--leaf); }
+.buy:disabled { cursor: default; }
+.buy.up .p { animation: w-up .7s; }
+.buy.shake { animation: w-shake .3s; border-color: var(--bad); }
+@keyframes w-pulse { 50% { box-shadow: 4px 4px 0 #000, 0 0 0 3px rgba(255, 210, 63, .35); } }
+@keyframes w-up { 0%, 50% { color: var(--bad); } }
+@keyframes w-shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.wpad {
+  display: flex; align-items: center; justify-content: center; min-height: 120px; background: var(--bg-2); color: var(--muted);
+  border: 3px dashed var(--line-2); font-size: 16px; touch-action: none; -webkit-tap-highlight-color: transparent; cursor: pointer;
+}
+.wpad { flex-direction: column; gap: 6px; text-align: center; }
+.wpad b { font-size: 44px; color: var(--gold); font-weight: 400; line-height: 1; }
+.wpad span { font-size: 12px; color: var(--muted); }
+.wpad i { font-style: normal; font-size: 16px; color: var(--ink); margin-top: 18px; line-height: 1.5; }
+.wpad:active { background: var(--panel-2); color: var(--gold); border-color: var(--gold); }
+.wpanel .big { font-size: 18px; }
+.wpanel .stars { color: var(--gold); margin-left: 6px; letter-spacing: 2px; }
+.wpanel .bad { color: var(--bad); }
+.wpanel .real { border-left: 3px solid var(--zir); padding-left: 10px; text-align: left; font-size: 14px; }
+.wpanel .tiny { font-size: 12px; color: var(--muted); }
+/* desktop: no pad (click the scene or press Space); the panel sits over the canvas, scrollable if tall */
+@media (min-width: 701px) {
+  .wgame .wpad { display: none; }
+  .wstage .game-ui.below { position: static; display: block; margin-top: 12px; }
+  .wstage .game-ui.below .panel { max-width: none; }
+  .wpanel p { font-size: 15px; }
+}
+@media (max-width: 700px) {
+  .wgame { flex-direction: column; gap: 8px; }
+  .wstage canvas { height: auto; }
+  .wbuy { flex-direction: row; width: auto; }
+  .buy { padding: 8px; }
+}
+
+/* phones, while playing: the game fills the screen. Portrait: canvas, buy row, drill pad. Sideways: canvas | buy column. */
+body.wplay { overflow: hidden; }
+body.wplay .wgame { position: fixed; inset: 0; z-index: 100; background: #000; padding: 8px; gap: 8px; flex-direction: column; }
+body.wplay .wstage { flex: none; }
+body.wplay .wstage canvas { border: 0; }
+body.wplay .game-ui { display: none; }
+body.wplay .wbuy { flex-direction: row; width: auto; }
+body.wplay .buy { min-height: 72px; }
+body.wplay .wpad { display: flex; flex: 1; }
+@media (orientation: landscape) {
+  body.wplay .wgame { flex-direction: row; }
+  body.wplay .wstage { height: 100%; aspect-ratio: 16 / 9; }
+  body.wplay .wstage canvas { width: 100%; height: 100%; }
+  body.wplay .wbuy { flex-direction: column; flex: 1; }
+  body.wplay .buy { min-height: 0; }
+  body.wplay .wpad { display: none; }
+}

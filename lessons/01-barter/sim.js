@@ -52,6 +52,11 @@ const JUNK = 0.5;        // below this a unit isn't worth carrying; it's left at
 const STOCK_LIMIT = 8;   // stop producing once you hold this many of your own good
 const MONEY_BAR = 2.5;  // exchange value at which a villager 'takes it as payment'
 
+/* ---------- pacing ----------
+   Wren strikes the cave on the night of day 7-9 (once pentaja has caught on), and the
+   lesson ends at the harvest festival: the morning of FESTIVAL, 6-8 days after the cave. */
+const FESTIVAL = 16;
+
 /* ---------- family sickness ----------
    Now and then someone at home falls ill (at night). While they're sick:
    - you make less bogwool (1 a day instead of 2; nothing at all once it gets worse),
@@ -59,15 +64,24 @@ const MONEY_BAR = 2.5;  // exchange value at which a villager 'takes it as payme
      your pack, up to what's still needed; with all doses taken they're cured that night.
    - two nights in a row with no medicine and it gets worse (no bogwool at all),
    - left alone it passes by itself after NATURAL nights.
-   When: once early (night of day 6-8), once a few days after the cave (when saved
-   pentaja has lost most of its worth), and once more late for those who keep playing.
-   Drawn from its own random stream, so it never shifts the rest of the village. */
+   When: once early (night of day 4-5, before the cave, when Gran's jar pays for it easily),
+   once a few days after the cave (when the jar has lost most of its worth), and once more
+   late for those who keep playing after the festival.
+   Drawn from its own random stream, so it never shifts the rest of the village.
+
+   Gran's jar: JAR pentaja kept at home, pretty crystals Gran collected long before anyone
+   used them as money. It isn't in your pack, so it can't pay for everyday swaps: it comes
+   out for emergencies (medicine while someone is sick) and, after the cave, to move savings
+   into zirnet. Not counted in the village's stock (nobody knows it's there). */
 const FAMILY = [
   { id: 'gran', name: 'Gran' },
   { id: 'tam',  name: 'Little Tam' },
   { id: 'ola',  name: 'Aunt Ola' },
 ];
-const SICK = { DOSES: 2, RATE: 1, WORSE_AFTER: 2, WORSE_RATE: 0, WORSE_DOSES: 0, NATURAL: 6, FIRST: [6, 8], AFTER_CAVE: [5, 6], LATE: [11, 13], GAP: 4 };
+const SICK = { DOSES: 2, RATE: 1, WORSE_AFTER: 2, WORSE_RATE: 0, WORSE_DOSES: 0, NATURAL: 5, FIRST: [4, 5], AFTER_CAVE: [4, 5], LATE: [9, 10], GAP: 3 };
+const JAR = 8;
+const HUNGRY_TIRED = 2;
+const JAR_COST = 3;     // route finder: what one crystal from the jar 'costs' you, vs. your bogwool   // hungry nights in a row before you work slower
 
 function rng(seed) {
   let s = (seed >>> 0) || 1;
@@ -79,7 +93,7 @@ function createWorld(opts = {}) {
   const w = {
     day: 1, seed, rand: rng(seed),
     playerAuto: opts.playerAuto ?? false,
-    caveDay: null, caveStrikeAt: opts.caveStrikeAt ?? { minDay: 14, maxDay: 28, moneyness: 0.5 },
+    caveDay: null, caveStrikeAt: opts.caveStrikeAt ?? { minDay: 7, maxDay: 9, moneyness: 0.5 },
     agents: [], byId: {},
     produced: Object.fromEntries(IDS.map(g => [g, []])), // per-day production, last 7 days
     s2f: Object.fromEntries(IDS.map(g => [g, 1])),
@@ -116,6 +130,7 @@ function createWorld(opts = {}) {
     first: roll(SICK.FIRST), afterCave: roll(SICK.AFTER_CAVE), late: roll(SICK.LATE),
     order, lastCured: -99, sickNights: 0,
     on: opts.sickness ?? true,
+    jar: { pen: opts.jar ?? JAR, zir: 0 },
   };
   recomputeS2F(w);
   w.history.push(stats(w));
@@ -303,6 +318,7 @@ function tradeRounds(w, rounds) {
 function endDay(w) {
   tradeRounds(w, 4);   // the afternoon, after the player heads home
   const ev = w.events;
+  nurse(w, ev);   // medicine first, in the evening, before anything in the pack wilts overnight
   for (const a of w.agents) {
     // eat and use
     for (const g in a.needs) {
@@ -323,7 +339,6 @@ function endDay(w) {
       if (lost && a.id === 'you') ev.push({ type: 'rot', g, n: lost });
     }
   }
-  nurse(w, ev);
   // leave junk at home: units not worth carrying to market tomorrow
   for (const a of w.agents) {
     for (const g of IDS) {
@@ -370,11 +385,13 @@ function endDay(w) {
 }
 
 /* ---------- family sickness ---------- */
-// Bogwool you'll make tonight: 2 normally, half without tools, 1 while someone's sick, 0 once it's worse.
+// Bogwool you'll make tonight: 2 normally, half without tools or after two hungry nights in a row,
+// 1 while someone's sick, 0 once it's worse.
 function outputRate(w) {
   const a = w.byId.you, s = w.family && w.family.sick;
   let rate = a.rate;
   if (a.hunger.ket > 0) rate = Math.max(1, Math.floor(rate / 2));   // no tools
+  if (a.hunger.lum >= HUNGRY_TIRED) rate = Math.max(1, Math.floor(rate / 2));   // too hungry to work hard
   if (s) rate = Math.min(rate, s.worse ? SICK.WORSE_RATE : SICK.RATE);
   return rate;
 }
@@ -451,13 +468,73 @@ function medPriceBefore(w, y = 'pen') {
 
 // Everything the UI needs about home in one place.
 function family(w) {
-  const s = w.family.sick, a = w.byId.you;
+  const s = w.family.sick, a = w.byId.you, J = w.family.jar;
+  const med = medPriceNow(w), trend = medTrend(w);
   return {
     sick: !!s, who: s ? s.who : null, name: s ? s.name : null,
     dosesNeeded: s ? s.left : 0, dosesHave: count(a, 'dri'), nights: s ? s.nights : 0,
     worse: s ? s.worse : false, natural: SICK.NATURAL, outputRate: outputRate(w),
-    episodes: w.family.episodes.length,
+    episodes: w.family.episodes.length, hungry: a.hunger.lum, tired: a.hunger.lum >= HUNGRY_TIRED,
+    jar: { ...J }, med, trend,                  // med: { pen, zir } crystals Dov wants for one medicine today; trend: the same, smoothed
+    jarMeds: jarWorth(J, trend),                // about how many medicines the jar buys these days
   };
+}
+
+// Medicines (DOSES driftcap each) the jar's crystals would buy at these prices.
+function jarWorth(J, med) {
+  let n = 0;
+  for (const y of ['pen', 'zir']) if (J[y] && med[y]) n += J[y] / med[y];
+  return Math.floor(n + 1e-9);
+}
+
+// The jar's worth, smoothed: median of Dov's medicine price over the last 5 market days (so it trends rather than flickers).
+function medTrend(w) {
+  const out = {}, now = medPriceNow(w);
+  for (const y of ['pen', 'zir']) {
+    const v = [...w.history.slice(1).slice(-4).map(h => h.med && h.med[y]), now[y]].filter(x => x != null).sort((a, b) => a - b);
+    out[y] = v.length ? v[(v.length - 1) >> 1] : null;
+  }
+  return out;
+}
+
+// Today's price of one medicine in pentaja / zirnet: Dov's quote right now, or, when he has none
+// to sell or isn't here, the last price he gave.
+function medPriceNow(w) {
+  const now = medPrice(w), out = {};
+  for (const y of ['pen', 'zir']) {
+    out[y] = now[y];
+    for (let i = w.history.length - 1; out[y] == null && i >= 0; i--) out[y] = w.history[i].med && w.history[i].med[y];
+  }
+  return out;
+}
+
+/* ---------- Gran's jar ---------- */
+// What the jar may pay for today: medicine while someone is sick; after the cave, zirnet (moving your savings).
+function jarFor(w, x) { return x === 'dri' ? !!w.family.sick : x === 'zir' ? w.caveDay != null && w.day >= w.caveDay : false; }
+// Pay k crystals (y: pen or zir) from the jar for n of x at a stall. Zirnet you buy goes into the jar.
+function jarTrade(w, sellerId, x, n, k, y = 'pen') {
+  const J = w.family.jar, you = w.byId.you;
+  if (!jarFor(w, x) || y === x || !(J[y] >= k)) return null;
+  give(you, y, k); J[y] -= k;
+  const t = playerTrade(w, sellerId, x, n, y, k);
+  if (!t) { take(you, y, k); J[y] += k; return null; }
+  if (x === 'zir') { take(you, 'zir', n); J.zir += n; }
+  t.jar = true;
+  return t;
+}
+// The cheapest jar deal at a stall for x: { y, k, n, ok } or null.
+function jarQuote(w, sellerId, x, n) {
+  const J = w.family.jar, B = w.byId[sellerId];
+  if (!jarFor(w, x) || !B.present) return null;
+  n = Math.min(n ?? (x === 'dri' ? w.family.sick.left - count(w.byId.you, 'dri') : 1), count(B, x));
+  if (n < 1) return null;   // nothing (more) needed, or nothing on the stall
+  let best = null;
+  for (const y of ['pen', 'zir']) {
+    if (y === x || !J[y]) continue;
+    const p = askPrice(w, w.byId.you, B, x, n, y);
+    if (p && p.k <= J[y] && (!best || p.k < best.k)) best = { y, k: p.k, n, ok: true };
+  }
+  return best;
 }
 
 function recomputeS2F(w) {
@@ -615,20 +692,29 @@ function findRoutes(w, target, need = 1, maxHops = 3) {
     for (const g in spent) cost += lossOf(w, you, g, Math.min(spent[g], count(you, g)));
     return { target, need, steps, spent, cost };
   });
+  // while someone is sick, Gran's jar can pay Dov for the medicine straight away (the others only
+  // sell their own driftcap dear: the trade table still lets you, the helper doesn't suggest it)
+  if (jarFor(w, target) && target !== 'zir') for (const B of sellers.filter(b => b.id === MAKER[target])) {
+    const q = jarQuote(w, B.id, target, need);
+    if (q && q.n >= need) routes.push({ target, need, steps: [{ npc: B.id, x: target, n: q.n, y: q.y, k: q.k, jar: true }], spent: {}, jar: { [q.y]: q.k }, cost: 2 + q.k * JAR_COST });
+  }
   routes.sort((a, b) => a.cost - b.cost);
   const seen = new Set();
   return routes.filter(r => {
-    const sig = r.steps.map(s => s.npc + s.y).join('>');
+    const sig = r.steps.map(s => s.npc + s.y + (s.jar ? 'J' : '')).join('>');
     if (seen.has(sig)) return false;
     seen.add(sig); return true;
   });
 }
 
+// Do one route step (from the jar if the step says so).
+function routeStep(w, st) { return st.jar ? jarTrade(w, st.npc, st.x, st.n, st.k, st.y) : playerTrade(w, st.npc, st.x, st.n, st.y, st.k); }
+
 const Sim = {
-  GOODS, IDS, VILLAGERS, CAP, HAUL, FAMILY, SICK, createWorld, startDay, endDay, stats,
-  family, outputRate, medPrice, medPriceBefore,
+  GOODS, IDS, VILLAGERS, CAP, HAUL, FAMILY, SICK, JAR, FESTIVAL, createWorld, startDay, endDay, stats,
+  family, outputRate, medPrice, medPriceBefore, medPriceNow, medTrend, jarWorth, jarFor, jarTrade, jarQuote,
   count, load, val, planVal, useVal, exchVal, saleability, playerTrade, playerAsk, askPrice, wantUnits,
-  quote, takes, findRoutes,
+  quote, takes, findRoutes, routeStep,
 };
 root.Sim = Sim;
 if (typeof module !== 'undefined') module.exports = Sim;

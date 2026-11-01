@@ -21,7 +21,9 @@
     nav.innerHTML = CHAPTERS.map((c) => c.href
       ? `<a class="ch${c.ch === here ? " on" : ""}${isDone(c.ch) ? " done" : ""}" href="${c.href}"${c.ch === here ? ' aria-current="page"' : ""}><b>${c.n}</b> ${c.name}</a>`
       : `<span class="ch soon"><b>${c.n}</b> ${c.name}</span>`).join("");
-    nav.querySelector(".on")?.scrollIntoView({ block: "nearest", inline: "center" });
+    // centre the current chapter by scrolling the bar sideways only (scrollIntoView would also scroll the page)
+    const on = nav.querySelector(".on");
+    if (on) nav.scrollLeft = on.offsetLeft - nav.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2;
   }
   // the "next chapter" link for a page's final card
   function next() {

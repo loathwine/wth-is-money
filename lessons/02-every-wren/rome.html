@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rome: when Wren is the emperor · WTH Is Money?</title>
+<meta name="description" content="Rome's emperors owned the mint. Thinner coins paid the army, prices rose, and savers lost almost everything.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="rome.css">
+</head>
+<body data-ch="rome">
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <span class="pixel muted ep">EP 02 · EVERY WREN IN HISTORY</span>
+  <button class="mute pixel" id="mute" title="Sound on/off">♪ ON</button>
+</header>
+
+<nav class="chapters" id="chapters"></nav>
+
+<main class="page">
+  <section class="chapter" id="rome">
+    <p class="kicker pixel">CHAPTER 5 · ROMAN EMPIRE</p>
+    <h1>Rome: when Wren is the emperor</h1>
+
+    <div class="step">
+      <span class="num pixel">1</span><h2>Watch</h2>
+    </div>
+    <video class="movie" controls preload="metadata" poster="../../video/ep02/rome/out/poster.jpg" src="../../video/ep02/rome/out/ep02-rome.mp4">
+      <track kind="captions" srclang="en" label="English" default src="../../video/ep02/rome/out/captions.vtt">
+    </video>
+
+    <div class="step">
+      <span class="num pixel">2</span><h2>Play: The Emperor's Mint</h2>
+    </div>
+    <p class="lead"><span class="long">You run the mint. The army wants more coins every year, but your silver doesn't grow. </span><span class="short">The army wants more coins every year. Your silver doesn't grow. </span><span id="mint-hint">Hold <b>Space</b> (or the MINT button) to mint, press <b>C</b> to add copper.</span></p>
+    <div class="game mint-game" id="game">
+      <canvas id="mint-cv" width="1080" height="600"></canvas>
+      <div class="controls" id="controls" hidden></div>
+      <div class="game-ui" id="game-ui"></div>
+    </div>
+
+    <div class="step" id="wren-step" hidden>
+      <span class="num pixel">3</span><h2>Wren moment</h2>
+    </div>
+    <div class="wren-card" id="wren-card" hidden>
+      <canvas id="wren-portrait" class="px" width="20" height="24"></canvas>
+      <div>
+        <p class="big">Wren had to find a cave. An emperor owns the mint.</p>
+        <p>Each thinner coin quietly took a little from everyone holding coins, Marcus included. <b>When prices rose, Rome blamed the sellers.</b></p>
+        <p class="muted" id="wren-next">Next: is there money with no cave? <span class="pixel">(coming soon)</span></p>
+      </div>
+    </div>
+
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li>Silver in the denarius: K. Butcher &amp; M. Ponting, <a href="https://warwick.ac.uk/fac/arts/classics/intranets/staff/butcher/butcher_ponting_complete.pdf">“The Denarius in the First Century”</a> (Augustus ~98%; Nero's AD 64 cut to ~80%); H. Gitler &amp; M. Ponting, <i>Topoi</i> Suppl. 8 (2007) (Severan coins ~47%); NGC, <a href="https://www.ngccoin.com/news/article/6893/NGC-Ancients/">“The Decline of Roman Silver Coinage” II</a>; RIC/MOM, <a href="https://ric.mom.fr/en/info/sysmon">Monetary system</a> (under 5% by the 270s, a thin silver wash).</li>
+        <li>Army pay and debasement: M. A. Speidel, “Roman Army Pay Scales”, <i>JRS</i> 82 (1992); K. Harl, <i>Coinage in the Roman Economy</i> (1996). Severus' advice: Cassius Dio 77.15.2 (“is reported to have” said it).</li>
+        <li>Wheat in Roman Egypt: W. Scheidel, <a href="https://www.ancientportsantiques.com/wp-content/uploads/Documents/AUTHORS/Scheidel2008-Wages.pdf">“Real wages in Roman Egypt”</a> (2008); S. Robertson, <a href="https://etheses.durham.ac.uk/id/eprint/11323/"><i>The Crisis of the 3rd Century A.D.</i></a> (2015), citing Rathbone and Duncan-Jones; P. Kelly, “Third-Century Inflation Reassessed”, <i>TRAJ</i> 4 (2021). Why prices jumped in the 270s is debated.</li>
+        <li>Edict on Maximum Prices (AD 301), trans. A. Kropff (2016). Lactantius, <a href="https://www.newadvent.org/fathers/0705.htm"><i>On the Deaths of the Persecutors</i></a> 7, a hostile witness.</li>
+        <li>“About ten days of bread” is our arithmetic: 300 ÷ 8 ≈ 37 times the price, 365 ÷ 37 ≈ 10. In the game, the year events are real; the silver per year, army costs, a loaf at 1 coin and the one-year price lag are game numbers. Marcus (and his 287-year jar: read it as a family's savings) is made up.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script src="../../assets/js/chip.js"></script>
+<script src="../01-barter/art.js"></script>
+<script src="chapters.js"></script>
+<script src="rome.js"></script>
+</body>
+</html>

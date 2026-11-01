@@ -169,6 +169,49 @@ function drawPortrait(canvas, id, t = 0) {
   drawAlien(ctx, canvas.width / 2, canvas.height - 3, id, t);
 }
 
+/* ---------- your family: close-up faces whose mood shows how home is doing ---------- */
+// mood: ok (smile) | hungry (frown, droopy eyes) | sick (green, eyes shut, sweat) | worse (greener, flushed)
+const KIN = {
+  gran: { hair: '#f4ecff', top: 'gran' },
+  tam:  { hair: '#5fbf4a', top: 'sprout', small: true },
+  ola:  { hair: '#7a3f8a', top: 'bun' },
+};
+const FACE = { ok: ['#f2a65a', '#b8692b', '#ffd9a8'], hungry: ['#d99a5e', '#9a5f2e', '#f0caa0'],
+  sick: ['#b7c86a', '#6f8a3a', '#dfeaa8'], worse: ['#93b85a', '#55752c', '#cfe39a'] };
+function drawFace(ctx, id, mood = 'ok') {
+  const K = KIN[id], [body, dark, cheek] = FACE[mood] || FACE.ok, sm = K.small ? 1 : 0;
+  const px = (x, y, w = 1, h = 1, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
+  ctx.clearRect(0, 0, 16, 16);
+  const rows = sm ? [6, 8, 10, 10, 10, 10, 10, 8, 6] : [6, 10, 12, 12, 12, 12, 12, 12, 10, 6];
+  const top = 16 - rows.length - 1;
+  rows.forEach((w, i) => { px(8 - w / 2, top + i, w, 1, body); px(8 + w / 2 - 1, top + i, 1, 1, dark); });
+  // hair / tops
+  if (K.top === 'gran') { px(4, top - 1, 8, 2, K.hair); px(3, top + 1, 2, 3, K.hair); px(11, top + 1, 2, 3, K.hair); }
+  if (K.top === 'sprout') { px(8, top - 3, 1, 3, '#3f8a34'); px(9, top - 3, 2, 1, K.hair); px(6, top - 2, 2, 1, K.hair); }
+  if (K.top === 'bun') { px(6, top - 3, 4, 3, K.hair); px(4, top, 8, 1, K.hair); }
+  // eyes
+  const ey = top + (sm ? 3 : 4), ex = sm ? [6, 9] : [5, 9];
+  for (const x of ex) {
+    if (mood === 'sick' || mood === 'worse') px(x, ey + 1, 2, 1, '#1a1026');                 // shut
+    else if (mood === 'hungry') { px(x, ey + 1, 2, 1, '#fff'); px(x + (x < 8 ? 1 : 0), ey + 1, 1, 1, '#1a1026'); px(x, ey, 2, 1, dark); }
+    else { px(x, ey, 2, 2, '#fff'); px(x + (x < 8 ? 1 : 0), ey + 1, 1, 1, '#1a1026'); }
+  }
+  if (id === 'gran' && mood !== 'sick' && mood !== 'worse') { px(4, ey - 1, 4, 1, '#c9a77c'); px(9, ey - 1, 4, 1, '#c9a77c'); }   // spectacles
+  // mouth
+  const my = ey + (sm ? 3 : 4), mx = sm ? 6 : 6;
+  if (mood === 'ok') { px(mx, my, 1, 1, '#1a1026'); px(mx + 1, my + 1, 2, 1, '#1a1026'); px(mx + 3, my, 1, 1, '#1a1026'); px(mx - 2, my - 1, 1, 1, cheek); px(mx + 5, my - 1, 1, 1, cheek); }
+  else if (mood === 'hungry') { px(mx, my + 1, 1, 1, '#1a1026'); px(mx + 1, my, 2, 1, '#1a1026'); px(mx + 3, my + 1, 1, 1, '#1a1026'); }
+  else { px(mx, my, 4, 1, '#1a1026'); px(mx + 1, my, 1, 1, '#ff8ac2'); }
+  if (mood === 'sick' || mood === 'worse') px(13, ey - 1, 1, 2, '#4de1e8');                    // sweat
+  if (mood === 'worse') { px(3, my - 1, 2, 1, '#ff6f6f'); px(11, my - 1, 2, 1, '#ff6f6f'); }  // fever
+}
+const faceCache = {};
+function faceURL(id, mood = 'ok') {
+  const k = id + mood;
+  if (!faceCache[k]) { const c = document.createElement('canvas'); c.width = c.height = 16; drawFace(c.getContext('2d'), id, mood); faceCache[k] = c.toDataURL(); }
+  return faceCache[k];
+}
+
 /* ---------- map ---------- */
 // Phones get a portrait village (two columns of stalls, home at the bottom) that fills the screen.
 // ?phone=1 / ?phone=0 force either layout.
@@ -177,7 +220,7 @@ const PHONE = q != null ? q === '1' : matchMedia('(max-width: 700px)').matches;
 // On a phone the map is 14 tiles wide and as tall as the screen allows (22–28 tiles, leaving room for the trade log); the plaza
 // stays put and the grass around your hut grows or shrinks.
 const TILE = 16, MW = PHONE ? 14 : 24;
-const MH = PHONE ? Math.max(22, Math.min(28, Math.floor(MW * (innerHeight - 170) / innerWidth))) : 14;
+const MH = PHONE ? Math.max(22, Math.min(28, Math.floor(MW * (innerHeight - 198) / innerWidth))) : 14;
 const B = (MH - 24) * TILE; // phone: how far the hut and its garden move down from the 24-row layout
 
 // Stalls: counter tile row + leftmost tile column. NPC stands just behind (north of) the counter.
@@ -277,6 +320,6 @@ function drawStall(ctx, id, goods, open) {
   goods.slice(0, 3).forEach((g, i) => ctx.drawImage(iconCanvas[g], x + 4 + i * 14, y - 7));
 }
 
-window.Art = { ICONS, iconCanvas, iconURL, LOOKS, drawAlien, drawPortrait, buildBackground, drawStall, drawTree,
+window.Art = { ICONS, iconCanvas, iconURL, LOOKS, drawAlien, drawPortrait, drawFace, faceURL, buildBackground, drawStall, drawTree,
   STALLS, HUT, DOOR, TREES, STONE, TILE, MW, MH, PHONE };
 })();

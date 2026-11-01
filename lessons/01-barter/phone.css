@@ -12,8 +12,10 @@ body.phone .brand::before { content: "←"; font-family: var(--font-body); font-
 body.phone .daybox { order: 0; margin: 0; font-size: 12px; flex-direction: column; gap: 0; line-height: 1.2; }
 body.phone .family { order: 1; width: auto; margin-left: auto; flex-wrap: nowrap; gap: 12px; font-size: 15px; }
 body.phone .family > span:first-child { display: none; }
-body.phone .family .need { padding: 4px 8px; border: 2px solid var(--line-2); background: var(--panel); }
-body.phone .family .need.bad { border-color: var(--bad); animation: blink 1s steps(2) infinite; }
+body.phone .family { gap: 8px; }
+body.phone .face { width: 30px; height: 30px; }
+body.phone .family .jar { padding: 3px 6px; font-size: 14px; }
+body.phone .status { padding: 4px 10px; font-size: 13px; min-height: 28px; }
 
 body.phone .game { flex: 1; min-height: 0; display: block; position: relative; }
 body.phone .world { height: 100%; padding: 0; gap: 0; position: relative; }
@@ -72,6 +74,9 @@ body.phone .card.story { width: 100%; max-height: 88dvh; border: 0; border-top: 
 body.phone .story h2 { font-size: 20px; }
 body.phone .story p { margin-bottom: 9px; font-size: 16px; }
 body.phone .story .big { font-size: 18px; }
+body.phone .story .muted { font-size: 14px; }
+body.phone .face.big { width: 36px; height: 36px; }
+body.phone .story .goal { font-size: 15px; }
 body.phone .long { display: none; }
 body:not(.phone) .short { display: none; }
 body.phone .story-actions .btn { flex: 1; justify-content: center; padding: 15px; }

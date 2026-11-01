@@ -1,0 +1,84 @@
+[
+ {
+  "id": "w1",
+  "scene": "wtitle",
+  "t0": 0.0,
+  "t1": 5.847,
+  "voice": 0.6,
+  "speech": 4.497,
+  "text": "Chapter three. Wampum: when the tools changed.",
+  "dip": true
+ },
+ {
+  "id": "w2",
+  "scene": "wshore",
+  "t0": 5.847,
+  "t1": 14.983,
+  "voice": 5.847,
+  "speech": 8.786,
+  "text": "On America's northeast coast, people made beads from shells: white from the whelk, purple from the quahog clam. Wampum."
+ },
+ {
+  "id": "w3",
+  "scene": "wstone",
+  "t0": 14.983,
+  "t1": 26.684,
+  "voice": 14.983,
+  "speech": 11.35,
+  "text": "Each bead was cut, drilled and polished by hand, with stone. Slow work. Strung into belts, wampum sealed treaties between nations."
+ },
+ {
+  "id": "w4",
+  "scene": "wlaw",
+  "t0": 26.684,
+  "t1": 41.5,
+  "voice": 26.684,
+  "speech": 14.466,
+  "text": "European colonists arrived with almost no coins. Inland nations took wampum for furs, so colonists used it as money. In sixteen thirty-seven, Massachusetts made it legal small change: six beads to a penny."
+ },
+ {
+  "id": "w5",
+  "scene": "wiron",
+  "t0": 41.5,
+  "t1": 53.077,
+  "voice": 41.5,
+  "speech": 11.227,
+  "text": "The newcomers also brought iron. Coastal makers switched to iron drill points: far faster than stone. Beads multiplied. Rough ones and fakes poured in too."
+ },
+ {
+  "id": "w6",
+  "scene": "wbeaver",
+  "t0": 53.077,
+  "t1": 70.203,
+  "voice": 53.077,
+  "speech": 16.777,
+  "text": "In Dutch New Amsterdam, a beaver pelt cost about six hundred and forty beads in sixteen forty-one. By sixteen sixty-two: three thousand two hundred. Same pelt. Five times the beads. That's inflation: the pelt didn't change. The beads got cheap."
+ },
+ {
+  "id": "w7",
+  "scene": "wbakers",
+  "t0": 70.203,
+  "t1": 83.048,
+  "voice": 70.203,
+  "speech": 12.495,
+  "text": "If you saved wampum, or earned it, it bought less and less. You did nothing wrong. In sixteen fifty-eight, the town's leaders complained that bakers and brewers would hardly take the beads."
+ },
+ {
+  "id": "w8",
+  "scene": "wfade",
+  "t0": 83.048,
+  "t1": 95.187,
+  "voice": 83.048,
+  "speech": 11.788,
+  "text": "In sixteen sixty-one, with Boston now minting silver coins, Massachusetts dropped wampum as legal money. Wampum belts still matter today. But as money, it faded away."
+ },
+ {
+  "id": "w9",
+  "scene": "wcallback",
+  "t0": 95.187,
+  "t1": 108.323,
+  "voice": 95.187,
+  "speech": 11.286,
+  "text": "In Ulm Hollow, Wren found a cave. Here, the cave was an iron drill. Same story. Next: cowries, the money that got too heavy to carry."
+ }
+]

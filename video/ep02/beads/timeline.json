@@ -1,0 +1,84 @@
+[
+ {
+  "id": "b1",
+  "scene": "beadtitle",
+  "t0": 0.0,
+  "t1": 8.15,
+  "voice": 0.6,
+  "speech": 6.6,
+  "text": "Chapter two: glass beads. And this time... you are Wren.",
+  "dip": true
+ },
+ {
+  "id": "b2",
+  "scene": "accori",
+  "t0": 8.15,
+  "t1": 20.137,
+  "voice": 8.15,
+  "speech": 11.636,
+  "text": "West Africa, five hundred years ago. On the Gold Coast, a rare blue bead, the accori, could be worth its weight in gold. All were old. Nobody made new ones."
+ },
+ {
+  "id": "b3",
+  "scene": "copies",
+  "t0": 20.137,
+  "t1": 31.122,
+  "voice": 20.137,
+  "speech": 10.635,
+  "text": "Now you're a European trader. It's only glass, you think. I can make that! Europe's glassmakers tried. But people on the coast could tell the copies apart."
+ },
+ {
+  "id": "b4",
+  "scene": "beadflood",
+  "t0": 31.122,
+  "t1": 47.435,
+  "voice": 31.122,
+  "speech": 15.963,
+  "text": "New plan: ordinary beads, by the ton. By the late seventeen hundreds, Venice made tens of millions a year. In Liverpool, the price of one ounce of gold bought nearly fifty kilos. Coastal merchants still bargained hard."
+ },
+ {
+  "id": "b5",
+  "scene": "cargo",
+  "t0": 47.435,
+  "t1": 64.92,
+  "voice": 47.435,
+  "speech": 16.135,
+  "text": "Ships carried them south, with cloth, iron and guns. They bought gold and ivory. Above all, Liverpool's traders bought people. Glass beads helped pay for the Atlantic slave trade."
+ },
+ {
+  "id": "b6",
+  "scene": "savings",
+  "t0": 64.92,
+  "t1": 78.93,
+  "voice": 64.92,
+  "speech": 13.661,
+  "text": "Step off the ship. Imagine your family saved in ordinary beads: years of work, on a string. If every ship brings more beads, each one buys a little less. Same string. Less food."
+ },
+ {
+  "id": "b7",
+  "scene": "accorihold",
+  "t0": 78.93,
+  "t1": 89.67,
+  "voice": 78.93,
+  "speech": 10.389,
+  "text": "Unless the string held an accori. Nobody could copy those. Two hundred years on, a Dutch trader wrote it still traded for its weight in gold."
+ },
+ {
+  "id": "b8",
+  "scene": "beadcallback",
+  "t0": 89.67,
+  "t1": 102.616,
+  "voice": 89.67,
+  "speech": 12.596,
+  "text": "Remember Ulm Hollow? Wren didn't steal. Wren just spent first, and pentaja savers paid the difference. When you're Wren, it feels like winning. Somebody always pays."
+ },
+ {
+  "id": "b9",
+  "scene": "nextwampum",
+  "t0": 102.616,
+  "t1": 111.446,
+  "voice": 102.616,
+  "speech": 6.98,
+  "text": "Next: North America, where shell beads became money... until metal drills arrived."
+ }
+]

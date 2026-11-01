@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cowries · Every Wren in History · WTH Is Money?</title>
+<meta name="description" content="Cowrie shells were money across West Africa. Then cheap shells flooded in, and a goat's price grew from a pouch to two head-loads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="cowries.css">
+</head>
+<body data-ch="cowries">
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <span class="pixel muted ep">EP 02 · EVERY WREN IN HISTORY</span>
+  <button class="mute pixel" id="mute" title="Sound on/off">♪ ON</button>
+</header>
+
+<nav class="chapters" id="chapters"></nav>
+
+<main class="page">
+  <section class="chapter" id="cowries">
+    <p class="kicker pixel">CHAPTER 4 · WEST AFRICA</p>
+    <h1>Cowries: the money that got too heavy to carry</h1>
+
+    <div class="step">
+      <span class="num pixel">1</span><h2>Watch</h2>
+    </div>
+    <video class="movie" controls playsinline preload="metadata" poster="../../video/ep02/cowries/out/poster.jpg" src="../../video/ep02/cowries/out/ep02-cowries.mp4">
+      <track kind="captions" src="../../video/ep02/cowries/out/captions.vtt" srclang="en" label="English" default>
+    </video>
+
+    <div class="step">
+      <span class="num pixel">2</span><h2>Play: Goat money</h2>
+    </div>
+    <p class="lead"><span class="long">A goat always costs one silver dollar. You pay in shells, and every round the dollar costs more of them. </span><span class="short">Same goat, more shells each time. </span><span id="cw-hint">Space, → or click to step, or hold.</span></p>
+    <div class="cw" id="game">
+      <div class="cw-stage"><canvas id="cw" class="px" width="240" height="160"></canvas></div>
+      <div class="cw-side">
+        <div class="cw-hud" id="cw-hud" hidden></div>
+        <button class="cw-tap pixel" id="cw-tap" hidden>STEP <small>tap · or hold</small></button>
+      </div>
+      <div class="cw-card" id="cw-card" hidden></div>
+      <div class="game-ui" id="game-ui"></div>
+    </div>
+
+    <div class="step" id="wren-step" hidden>
+      <span class="num pixel">3</span><h2>Wren moment</h2>
+    </div>
+    <div class="wren-card" id="wren-card" hidden>
+      <canvas id="wren-portrait" class="px" width="20" height="24"></canvas>
+      <div>
+        <p class="big">Flood a money, and it turns into bogwool.</p>
+        <p>In Ulm Hollow, bogwool was too bulky to be money. Cowries got there the other way: by 1890, <b>one silver dollar's worth of shells weighed about as much as a child</b> (20,000 shells at 1–2 g each: 20–40 kg).</p>
+        <p>Wren found a cave. Hamburg found a reef. Nobody broke a rule: everyone in the chain just bought cheap shells. <b>The people who lost were the ones holding shells as savings.</b></p>
+        <p class="real"><b>In real life:</b> when lots of new money is made, prices don't jump for everyone on the same day. The saver with a jar (or a bank account) finds out last.</p>
+        <p class="muted">Next: Rome, when Wren is the emperor.</p>
+        <p id="wren-next"></p>
+      </div>
+    </div>
+
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li>M. J. Pont Cháfer, “Thresholds, Borders and Cowries: the Problem of Small Change in West Africa”, in E. Morelli (ed.), <i>African Thresholds</i> (Brill, 2025), pp. 214–221: <a href="https://library.oapen.org/bitstream/20.500.12657/105276/1/9789004726970_webready_content_text.pdf">open access</a>. Dahomey's dollar going from 2,000 shells (late 1840s) to 20,000 (1880s), citing R. Law (1995); 10,000 in 1871 (Skertchly); Lagos, 4,000 shells to the shilling around 1900; Hopkins (1966) on 2,000 shells falling from about 50 pence to 6 pence; shell weights; the 1904 ban; 15 million users.</li>
+        <li>A. Haour &amp; A. Moffett, “Cowrie in East Africa” (UEA): <a href="https://ueaeprints.uea.ac.uk/87131/">preprint</a>. Maldive shells shipped to meet West African demand; East African cowries “fished alive from the reef”, traded by local Muslim merchants.</li>
+        <li>K. Pallaver, Cambridge seminar abstract (2023): <a href="https://www.histecon.magd.cam.ac.uk/seminar_pallaver.htm">A. J. Hertz, Hamburg, 1845</a>; “16 billion shells” in a few decades, citing J. Hogendorn &amp; M. Johnson, <i>The Shell Money of the Slave Trade</i> (CUP, 1986). Other readings of the same book give about twice as much; we use the lower figure.</li>
+        <li>J. S. Hogendorn, “A ‘supply-side’ aspect of the African slave trade”, <i>Slavery &amp; Abolition</i> 2:1 (1981). Central Bank of Nigeria, “<a href="https://www.cbn.gov.ng/currency/Oldnotes/before.html">Before 1959</a>”: 40 shells to a string, 2,000 to a head.</li>
+        <li>R. F. Burton, <i>A Mission to Gelele</i> (1864): 5,000 shells to the dollar at Whydah; T. J. Hutchinson, <i>Impressions of Western Africa</i> (1858): 2,000 to the dollar at Lagos; both via M. Johnson, “The Cowrie Currencies of West Africa, Part II”, <i>J. African History</i> 11 (1970).</li>
+        <li>Savary des Bruslons (1726), a ship's cargo of “more than 25,000 pounds” of shells, via G. Salaün, <a href="https://www.anneauxdelamemoire.org/post/cowries-the-currency-of-trading-en-fr">Musée Dobrée (2023)</a>. A. Olukoju, <i>African Economic History</i> 53:1 (2025), on the ban.</li>
+        <li>Food prices (a ball of maize dough, 3 shells in 1858, 12 in 1864, Abomey): R. Law, <i>J. African History</i> 33 (1992), via Pont Cháfer. Historians debate how much food prices inland rose; the collapse against silver on the coast is not in doubt.</li>
+        <li>Game values: the goat's price (one silver dollar), the 20 kg head-load, the sway and the timers are made up. The shells per dollar (2,000 / 10,000 / 20,000) and the weights (about 1 g a Maldive shell, 2 g a Zanzibar one) are real.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script src="../../assets/js/chip.js"></script>
+<script src="../01-barter/art.js"></script>
+<script src="chapters.js"></script>
+<script src="cowries.js"></script>
+</body>
+</html>

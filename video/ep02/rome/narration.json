@@ -24,27 +24,32 @@
  {
   "id": "r5",
   "scene": "fourcoins",
-  "text": "By the year two hundred, coins were about half silver. By two seventy, under five percent: copper, with a thin silver skin."
+  "text": "By the year two hundred, coins were about half silver. By two seventy, under five percent: copper, with a thin silver skin.",
+  "pad": 0.6
  },
  {
   "id": "r6",
   "scene": "wheat",
-  "text": "In Roman Egypt, a sack of wheat cost about eight drachmas in the year one hundred. Prices crept up for a long time, then leapt: by three hundred, about three hundred."
+  "text": "In Roman Egypt, a sack of wheat cost about eight drachmas in the year one hundred. Prices crept up for a long time, then leapt: by three hundred, about three hundred.",
+  "pad": 1.4
  },
  {
   "id": "r7",
   "scene": "jar",
-  "text": "Picture savings worth a year of bread, back then. By three hundred, the same sum bought about ten days. Nobody stole a coin. The emperor just made more."
+  "text": "Picture savings worth a year of bread, back then. By three hundred, the same sum bought about ten days. Nobody stole a coin. The emperor just made more.",
+  "pad": 0.6
  },
  {
   "id": "r8",
   "scene": "edict",
-  "text": "In three hundred and one, Emperor Diocletian blamed greedy sellers and capped over a thousand prices and wages. Charge more, and you could die."
+  "text": "In three hundred and one, Emperor Diocletian blamed greedy sellers and capped over a thousand prices and wages. Charge more, and you could die.",
+  "pad": 0.6
  },
  {
   "id": "r9",
   "scene": "emptystalls",
-  "text": "A writer of the time says blood was spilled over small things, and people were too scared to sell. The law was finally dropped."
+  "text": "A writer of the time says blood was spilled over small things, and people were too scared to sell. The law was finally dropped.",
+  "pad": 0.6
  },
  {
   "id": "r10",

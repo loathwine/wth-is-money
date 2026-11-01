@@ -201,8 +201,33 @@ button.chip:hover { border-color: var(--gold); }
 .planner { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px dashed var(--line); }
 .planner .lbl { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
 .planner .chips button.on { border-color: var(--gold); color: var(--gold); }
-.family .need { cursor: pointer; }
-.family .need:hover { text-decoration: underline; }
+/* your family and Gran's jar, in the top bar */
+.family .faces, .family .jar { display: inline-flex; align-items: center; gap: 2px; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); font: inherit; }
+.face { width: 30px; height: 30px; image-rendering: pixelated; vertical-align: middle; }
+.face.big { width: 44px; height: 44px; }
+.face.sick, .face.worse { animation: wobble 1.2s ease-in-out infinite; }
+@keyframes wobble { 50% { transform: translateY(2px) rotate(-4deg); } }
+.family .jar { gap: 3px; font-size: 15px; border: 2px solid var(--line-2); background: var(--panel); padding: 3px 8px; }
+.family .jar b { font-family: var(--font-pixel); font-weight: 400; color: var(--pen); }
+.family .jar .eq { color: var(--muted); margin-left: 3px; }
+.family .jar.drop { border-color: var(--bad); animation: shake .4s 3; }
+.family .jar.drop .eq { color: var(--bad); }
+@keyframes shake { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+.daybox .of { color: var(--muted); font-size: .8em; }
+.status { padding: 5px 18px; background: var(--bg); border-bottom: 2px solid var(--line); font-size: 14px; color: var(--leaf); cursor: pointer; display: flex; align-items: center; gap: 4px; min-height: 30px; }
+.status .gi { width: 18px; height: 18px; }
+.status.bad { color: #ffb3b3; background: #2a1020; }
+.status.warn { color: var(--gold); }
+.status .go { margin-left: auto; border: 1px solid currentColor; padding: 0 6px; }
+.fam-row { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+.fam-row span { margin-left: 6px; }
+.story .goal { border: 2px solid var(--gold); padding: 8px 10px; }
+.story h2 .face { margin: -8px 4px -6px 0; }
+.deal-row.jar { background: rgba(255, 111, 181, .14); padding: 6px; }
+.deal-row .from { color: var(--pen); font-size: 13px; }
+.jar-row { display: flex; gap: 10px; align-items: flex-start; font-size: 22px; margin-bottom: 12px; padding: 10px; border: 2px solid var(--pen); }
+.jar-row > div { font-size: 14px; }
+.jar-row .meta { color: var(--muted); font-size: 13px; }
 
 .story h2 { color: var(--gold); }
 .story p { margin: 0 0 12px; }

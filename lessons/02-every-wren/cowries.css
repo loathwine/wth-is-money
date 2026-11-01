@@ -1,0 +1,62 @@
+/* EP 02 · Chapter 4 (cowries): Goat money. Canvas + HUD + one big STEP button. During a run on a phone the
+   game takes the whole screen: canvas on top and the button under it in portrait, side by side when held sideways. */
+.cw { position: relative; user-select: none; -webkit-user-select: none; }
+.cw-stage { max-width: 760px; margin: 0 auto; }
+.cw-stage canvas { display: block; width: 100%; aspect-ratio: 3 / 2; border: 2px solid var(--line-2); background: #000; touch-action: manipulation; cursor: pointer; }
+.cw-side { max-width: 760px; margin: 8px auto 0; display: flex; flex-direction: column; gap: 8px; }
+.cw-hud { display: flex; gap: 6px; align-items: stretch; }
+.cw-hud > span { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-2); border: 2px solid var(--line); padding: 4px 2px; line-height: 1.1; min-width: 0; }
+.cw-hud small { font-family: var(--font-pixel); font-size: 9px; color: var(--muted); }
+.cw-hud b { font-size: 18px; white-space: nowrap; }
+.cw-hud .cw-y { flex: .8; font-size: 13px; color: var(--gold); }
+.cw-hud .bad b { color: var(--bad); }
+.cw-tap {
+  min-height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: var(--gold); color: #1a1026; border: 0; box-shadow: 4px 4px 0 #000; font-size: 22px; cursor: pointer;
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+.cw-tap small { font-family: var(--font-body); font-size: 13px; font-weight: 700; opacity: .7; }
+.cw-tap:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.cw-tap[hidden], .cw-hud[hidden] { display: none; }
+
+/* the card between rounds: covers the whole game box */
+.cw-card { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(18, 13, 29, .9); cursor: pointer; padding: 12px; }
+.cw-in { max-width: 440px; text-align: center; }
+.cw-in p { margin: 6px 0; font-size: 17px; }
+.cw-year { font-size: 30px; color: var(--gold); margin: 0 0 8px; }
+.cw-sun { font-size: 11px; color: var(--muted); margin: 10px 0 !important; }
+.cw-jar { display: flex; gap: 10px; align-items: center; text-align: left; background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; margin: 10px 0; }
+.cw-jar canvas { width: 128px; height: 48px; flex: none; }
+.cw-jar span { font-size: 15px; line-height: 1.35; }
+
+/* result panel */
+.cw-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; text-align: left; }
+.cw-cmp div { background: var(--bg-2); border: 1px solid var(--line-2); padding: 8px 10px; font-size: 14px; line-height: 1.35; }
+.cw-cmp b { display: block; font-family: var(--font-pixel); font-weight: 400; font-size: 13px; margin-bottom: 2px; }
+.cw-cmp .bad { color: var(--bad); }
+.cw-cmp i { display: block; height: 10px; background: var(--gold); margin-top: 6px; }
+.cw-real { border-left: 3px solid var(--zir); padding-left: 10px; text-align: left; }
+.cw-note { font-size: 12px !important; }
+#wren-next .btn { margin-top: 4px; }
+
+/* phones during a run: full screen */
+html:has(body.cw-play), body.cw-play { overflow: hidden; }
+body.cw-play .cw-card { background: rgba(18, 13, 29, .97); }
+body.cw-play .cw { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; touch-action: none; }
+body.cw-play .cw-stage { max-width: none; margin: 0; flex: none; }
+body.cw-play .cw-stage canvas { width: 100%; border: 0; border-bottom: 2px solid var(--line-2); }
+body.cw-play .cw-side { max-width: none; margin: 0; flex: 1; padding: 10px; gap: 10px; }
+body.cw-play .cw-tap { flex: 1; font-size: 28px; }
+body.cw-play .game-ui { display: none; }
+@media (orientation: landscape) {
+  body.cw-play .cw { flex-direction: row; }
+  body.cw-play .cw-stage canvas { width: auto; height: 100dvh; border: 0; border-right: 2px solid var(--line-2); }
+  body.cw-play .cw-hud { flex-wrap: wrap; }
+  body.cw-play .cw-hud > span { flex: 1 1 40%; }
+}
+@media (max-width: 700px) {
+  .cw-hud b { font-size: 16px; }
+  .cw-cmp { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .cw-cmp div { padding: 6px 8px; font-size: 13px; }
+  .cw-in p { font-size: 16px; }
+}

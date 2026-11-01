@@ -141,12 +141,12 @@
     ctx.fillStyle = c; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(str, 0, size * 0.07);
     ctx.restore();
   }
-  // corner caption: place / year
-  function where(str, sub, lt, d) {
+  // corner caption: place / year (o.dark: dark subline, for pale skies)
+  function where(str, sub, lt, d, o = {}) {
     const a = seg(lt, 0.2, 0.7) * (1 - seg(lt, d - 0.6, d));
     if (a <= 0) return;
     text(str, 70, 70, 40, C.gold, { align: "left", alpha: a });
-    if (sub) body(sub, 72, 122, 30, C.ink, { align: "left", alpha: a });
+    if (sub) body(sub, 72, 122, 30, o.dark ? "#1a1026" : C.ink, { align: "left", alpha: a, ...(o.dark ? { shadow: false } : {}) });
   }
   function blitLo() { ctx.imageSmoothingEnabled = false; ctx.drawImage(lo, 0, 0, W, H); }
   const fadeOut = (lt, d, len = 0.6) => { const k = seg(lt, d - len, d); if (k > 0) { ctx.fillStyle = `rgba(0,0,0,${k})`; ctx.fillRect(0, 0, W, H); } };

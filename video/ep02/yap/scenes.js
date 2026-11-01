@@ -8,9 +8,10 @@
     canoe, schooner, pig, basket, icon, alien, text, body, label, stamp, where, blitLo, fadeOut, SC,
     ground, hut, cave, bead, cowrie, coin, axe, sack, chart } = T;
   const X = (x) => x * K;  // lo-res → hi-res coordinates for labels
+  const INK = "#1a1026", dark = (o = {}) => ({ shadow: false, ...o });   // dark text for pale skies and sand
 
   /* ================================================================ HOOK */
-  // h1 · "Remember Wren? He found a cave full of pentaja... and the money of a whole village stopped working."
+  // h1 · "Remember Wren? Wren found a cave full of pentaja... and the money of a whole village stopped working."
   SC.wrencave = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     sky(0, 96, "#2a1f45", "#3a2a5c");
@@ -30,12 +31,12 @@
     const k = seg(lt, w(9), w(9) + 2.5);
     if (k > 0) {
       chart(110, 170, 640, 380, [{ color: C.pen, pts: [0.06, 0.07, 0.06, 0.08, 0.07, 0.1, 0.18, 0.35, 0.55, 0.7, 0.85, 0.95] }], easeOut(k), { title: "PRICE OF A LUMFRUIT, IN PENTAJA" });
-      stamp("BROKEN", 430, 420, seg(lt, w(15), w(15) + 0.25), { size: 70 });
+      stamp("BROKEN", 430, 420, seg(lt, w(16), w(16) + 0.25), { size: 70 });
     }
     fadeOut(lt, d, 0.3);
   };
 
-  // h2 · "Wren is made up. But every money in history has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, ..."
+  // h2 · "Wren is made up. But again and again in history, money has had a Wren. A stone wheel. A glass bead. A seashell. A silver coin. Each time, ..."
   SC.montage = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     lx.fillStyle = C.bg; lx.fillRect(0, 0, LO_W, LO_H);
@@ -45,10 +46,10 @@
     const slots = seg(lt, w(5), w(5) + 0.5);
     if (slots > 0) for (let i = 0; i < 4; i++) { const x = 36 + i * 56; lx.save(); lx.globalAlpha = slots * 0.8; px(x - 16, 46, 32, 32, C.panel); px(x - 15, 47, 30, 30, C.bg2); lx.restore(); }
     const items = [
-      { at: w(13), draw: (x, y) => rai(x, y, 14), name: "STONE" },
-      { at: w(16), draw: (x, y) => bead(x, y, 1.6), name: "GLASS BEAD" },
-      { at: w(19), draw: (x, y) => cowrie(x, y, 1.8), name: "SHELL" },
-      { at: w(21), draw: (x, y) => coin(x, y, 9, 1.4), name: "SILVER" },
+      { at: w(15), draw: (x, y) => rai(x, y, 14), name: "STONE" },
+      { at: w(18), draw: (x, y) => bead(x, y, 1.6), name: "GLASS BEAD" },
+      { at: w(21), draw: (x, y) => cowrie(x, y, 1.8), name: "SHELL" },
+      { at: w(23), draw: (x, y) => coin(x, y, 9, 1.4), name: "SILVER" },
     ];
     items.forEach((it, i) => {
       const k = seg(lt, it.at, it.at + 0.35); if (k <= 0) return;
@@ -58,11 +59,11 @@
     blitLo();
     if (solo > 0) stamp("MADE UP", WIDTH / 2, 520, seg(lt, w(2), w(2) + 0.25) * (solo > 0.5 ? 1 : 0), { size: 80, color: C.gold });
     if (slots > 0) for (let i = 0; i < 4; i++) if (lt < items[i].at) text("?", X(36 + i * 56), X(62), 90, C.dim, { alpha: slots });
-    text("EVERY MONEY IN HISTORY", WIDTH / 2, 230, 56, C.gold, { alpha: seg(lt, w(5), w(5) + 0.5) });
+    text("AGAIN AND AGAIN", WIDTH / 2, 230, 64, C.gold, { alpha: seg(lt, w(5), w(5) + 0.5) });
     items.forEach((it, i) => {
       const k = seg(lt, it.at, it.at + 0.35); if (k <= 0) return;
       text(it.name, X(36 + i * 56), X(92), 34, C.ink, { alpha: k });
-      stamp("CAVE!", X(36 + i * 56), X(62), seg(lt, w(24) + i * 0.3, w(24) + i * 0.3 + 0.22), { size: 46 });
+      stamp("CAVE!", X(36 + i * 56), X(62), seg(lt, w(26) + i * 0.3, w(26) + i * 0.3 + 0.22), { size: 46 });
     });
     fadeOut(lt, d, 0.3);
   };
@@ -134,7 +135,7 @@
       person(146, 108, { t, arm: "up", cloth: "#c0392b", face: 1 });
       person(196, 108, { t: t + 0.4, arm: "up", cloth: "#d68910", face: -1 });
       blitLo();
-      where("PALAU", "quarrying with shell tools", lt, split);
+      where("PALAU", "quarrying with shell tools", lt, split, { dark: true });
       label("RAI", X(172), X(46), { k: seg(lt, w(19), w(19) + 0.35), size: 54, bg: C.gold });
     } else {
       const lt2 = lt - split, storm = seg(lt, w(29), w(29) + 1.2);
@@ -149,29 +150,30 @@
     }
   };
 
-  // y3 · what a stone was worth
+  // y3 · "Every rai cost a dangerous voyage, so there were never many. That's what made them precious: ..."
   SC.prices = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     sky(0, 96, "#8fd0f0", "#cdebf8");
     ground(96, C.sand, C.sand2);
     palm(14, 98, t, 26); palm(226, 98, t, 22); hut(52, 97);
-    const hi = seg(lt, w(24), w(24) + 0.4);
+    const hi = seg(lt, w(30), w(30) + 0.4);
     rai(96, 86, 7, { dull: hi > 0 }); rai(128, 80, 13); rai(168, 72, 22, { dull: hi > 0 });
     if (hi > 0) { const glow = 0.5 + 0.5 * Math.sin(t * 6); px(113, 63, 30, 1, `rgba(255,210,63,${glow})`); }
     // what it buys: a pig, or fifty baskets
-    const kp = seg(lt, w(33), w(33) + 0.4), kb = seg(lt, w(36), w(40));
+    const kp = seg(lt, w(39), w(39) + 0.4), kb = seg(lt, w(42), w(46));
     if (kp > 0) pig(Math.round(lerp(250, 186, easeOut(kp))), 108);
     for (let i = 0; i < Math.floor(kb * 50); i++) basket(8 + (i % 17) * 7, 128 - Math.floor(i / 17) * 5);
     blitLo();
-    where("YAP · VALUE", "", lt, d);
-    const rows = [["SIZE", w(8)], ["WHITENESS", w(11)], ["HOW HARD IT WAS TO GET HOME", w(17)]];
+    where("YAP", "what made a rai precious", lt, d, { dark: true });
+    label("NEVER MANY", 1460, 330, { k: seg(lt, w(9), w(9) + 0.4) * (1 - seg(lt, w(15), w(15) + 0.4)), size: 44, bg: C.gold });
+    const rows = [["SIZE", w(16)], ["WHITENESS", w(18)], ["HOW FEW THERE WERE", w(24)]];
     rows.forEach(([str, at], i) => {
       const k = seg(lt, at, at + 0.3);
-      if (k > 0) body("✓ " + str, 1150, 210 + i * 64, 44, C.ink, { align: "left", alpha: k * (1 - 0.6 * hi) });
+      if (k > 0) body("✓ " + str, 1150, 210 + i * 64, 44, INK, dark({ align: "left", alpha: k * (1 - 0.4 * hi) }));
     });
     label("~2 FEET ACROSS", X(128), X(52), { k: hi, size: 34 });
     if (kp > 0) label("= 1 BIG PIG", X(196), X(100) - 30, { k: kp, size: 32, bg: "#f2a7b8" });
-    if (kb > 0) label("OR 50 BASKETS OF FOOD", 520, 900, { k: seg(lt, w(36), w(36) + 0.3), size: 34, bg: C.gold });
+    if (kb > 0) label("OR 50 BASKETS OF FOOD", 520, 900, { k: seg(lt, w(42), w(42) + 0.3), size: 34, bg: C.gold });
   };
 
   // y4 · a ledger in everyone's heads; the fortune at the bottom of the sea
@@ -235,7 +237,7 @@
     stamp("FINE PAID", WIDTH / 2, 260, seg(lt, w(27), w(27) + 0.25), { size: 70, color: C.leaf });
   };
 
-  // y6 · O'Keefe's schooner and his offer
+  // y6 · O'Keefe's schooner and the offer
   SC.schooner = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     sky(0, 56, "#8fd0f0", "#cdebf8"); sea(t, 56);
@@ -253,7 +255,7 @@
     const coco = seg(lt, w(40), w(44));
     for (let i = 0; i < 3; i++) { const u = (coco * 3 - i * 0.4); if (u > 0 && u < 1) sack(lerp(196, 120, u), 58 - Math.sin(u * Math.PI) * 14); }
     blitLo();
-    where("1871 · DAVID O'KEEFE", "Irish-American sea captain", lt, d);
+    where("1871 · DAVID O'KEEFE", "Irish-American sea captain", lt, d, { dark: true });
     const kt = seg(lt, w(21), w(21) + 0.35);
     if (kt > 0) { label("SHIP + IRON TOOLS", 700, 230, { k: kt, size: 34, bg: C.gold }); }
     if (deal > 0) label("STONES →", 1300, 330, { k: seg(lt, w(32), w(32) + 0.3), size: 30 });
@@ -295,46 +297,55 @@
       label("SOUND FAMILIAR?", WIDTH / 2, 200, { k: seg(lt, 0.2, 0.6), size: 50 });
       return;
     }
-    sky(0, 96, "#8fd0f0", "#cdebf8"); ground(96, C.sand, C.sand2);
+    sky(0, 41, "#8fd0f0", "#cdebf8"); sea(t, 41, { speed: 0.4 }); ground(62, C.sand, C.sand2);   // boats on the sea, stones on the beach
     rai(70, 76, 18); rai(170, 76, 18);
     canoe(70, 40, { w: 18, crew: 1, t }); schooner(170, 42, t);
     // price bars made of food baskets
-    const kb = seg(lt, w(23), w(26));
+    const kb = seg(lt, w(24), w(27));
     const old = Math.floor(18 * easeOut(kb)), neu = Math.floor(6 * easeOut(kb));
     for (let i = 0; i < old; i++) basket(48 + (i % 6) * 8, 128 - Math.floor(i / 6) * 5);
     for (let i = 0; i < neu; i++) basket(148 + (i % 6) * 8, 128 - Math.floor(i / 6) * 5);
     blitLo();
-    text("OLD STONE", X(70), 812, 40, C.ink, { alpha: seg(lt, split, split + 0.4) });
-    body("by canoe · cost lives", X(70), 856, 30, C.ink, { alpha: seg(lt, split, split + 0.4) });
-    text("O'KEEFE STONE", X(170), 812, 40, C.ink, { alpha: seg(lt, split + 0.3, split + 0.7) });
-    body("by ship · easy", X(170), 856, 30, C.ink, { alpha: seg(lt, split + 0.3, split + 0.7) });
-    if (kb > 0) stamp("LESS", X(214), X(76), seg(lt, w(25), w(25) + 0.25), { size: 64 });
-    stamp("SPOTTED", WIDTH / 2, 520, seg(lt, w(38), w(38) + 0.25), { size: 80, color: C.leaf });
-    body("Source: Bryan, “Island Money”, Cleveland Fed (2004), citing Gillilland (1975)", WIDTH / 2, 36, 24, C.ink, { alpha: 0.7 * seg(lt, w(14), w(14) + 0.5) });
+    text("OLD STONE", X(70), 812, 40, INK, dark({ alpha: seg(lt, split, split + 0.4) }));
+    body("by canoe · cost lives", X(70), 856, 32, INK, dark({ alpha: seg(lt, split, split + 0.4) }));
+    text("O'KEEFE STONE", X(170), 812, 40, INK, dark({ alpha: seg(lt, split + 0.3, split + 0.7) }));
+    body("by ship · easy", X(170), 856, 32, INK, dark({ alpha: seg(lt, split + 0.3, split + 0.7) }));
+    if (kb > 0) stamp("LESS", X(214), X(76), seg(lt, w(27), w(27) + 0.25), { size: 64 });
+    stamp("SPOTTED", WIDTH / 2, 520, seg(lt, w(34), w(34) + 0.25), { size: 80, color: C.leaf });
+    body("Source: Bryan, “Island Money”, Cleveland Fed (2004), citing Gillilland (1975)", WIDTH / 2, 36, 24, INK, dark({ alpha: 0.7 * seg(lt, w(14), w(14) + 0.5) }));
   };
 
-  // y9 · back to Ulm Hollow; teaser
+  // y9 · "On Yap, everyone knew each stone's story, so new stones could be priced lower, and old savings stayed safe.
+  //       In Ulm Hollow, a pentaja is a pentaja: Wren's cave made everyone's pentaja worth less. Yap's money had a memory. Most money doesn't."
   SC.callback = (lt, d, t, s) => {
     const w = (n) => word(s, n);
-    lx.fillStyle = C.bg; lx.fillRect(0, 0, LO_W, LO_H);
-    ground(110, "#2a2140", "#33284d");
-    const tease = seg(lt, w(24), w(24) + 0.5), tease2 = seg(lt, w(24) + 0.5, w(24) + 1.1);
-    lx.save(); lx.globalAlpha = 1 - tease;
-    alien("wren", 150, 112, t); icon("pen", 156, 92);
-    alien("hesk", 190, 112, t); icon("zir", 196, 92);
-    lx.restore();
-    if (tease2 > 0) { lx.save(); lx.globalAlpha = tease2; bead(120, 66, 3); lx.restore(); }
+    const tease = seg(lt, w(39), w(39) + 0.5), tease2 = seg(lt, w(39) + 0.5, w(39) + 1.1);
+    // left half: Yap by day, two stones with known stories; right half: Ulm Hollow by night, a heap of identical pentaja
+    sky(0, 92, "#8fd0f0", "#cdebf8"); ground(92, C.sand, C.sand2);
+    px(120, 0, 120, LO_H, C.bg2); px(120, 96, 120, LO_H - 96, "#2a2140");
+    for (let i = 0; i < 30; i++) px(124 + hash(i) * 112, hash(i + 30) * 90, 1, 1, C.line);
+    px(119, 0, 2, LO_H, C.line);
+    const lower = seg(lt, w(12), w(13) + 0.4);
+    rai(36, 76, 14); rai(88, 76, 14, { dull: lower > 0.5 });
+    const kr = seg(lt, w(19), w(22));
+    for (let i = 0; i < Math.floor(kr * 24); i++) icon("pen", 126 + (i % 8) * 11, 104 - Math.floor(i / 8) * 9);
+    const cave2 = seg(lt, w(27), w(29));
+    for (let i = 0; i < Math.floor(cave2 * 24); i++) icon("pen", 126 + (i % 8) * 11, 77 - Math.floor(i / 8) * 9);
+    lx.save(); lx.globalAlpha = 1 - tease; alien("wren", 229, 128, t); lx.restore();
+    if (tease2 > 0) { lx.fillStyle = `rgba(18,13,29,${tease2})`; lx.fillRect(0, 0, LO_W, LO_H); lx.save(); lx.globalAlpha = tease2; bead(120, 66, 3); lx.restore(); }
     blitLo();
-    const kc = seg(lt, 0.2, w(9));
     if (tease < 1) {
       ctx.save(); ctx.globalAlpha = 1 - tease;
-      chart(100, 140, 760, 460, [
-        { color: C.pen, pts: [0.05, 0.2, 0.45, 0.75, 0.9, 0.95, 0.6, 0.3, 0.12, 0.05, 0.03] },
-        { color: C.zir, pts: [0.05, 0.08, 0.1, 0.15, 0.2, 0.22, 0.4, 0.6, 0.72, 0.78, 0.8] },
-      ], easeOut(kc), { title: "WHO TAKES IT AS MONEY · ULM HOLLOW" });
+      text("YAP", X(60), 70, 50, C.gold); text("ULM HOLLOW", X(180), 70, 50, C.pen);
+      label("CANOE · 1850", X(36), X(50), { k: seg(lt, w(4), w(4) + 0.35), size: 32 });
+      label("SHIP · 1885", X(88), X(50), { k: seg(lt, w(6), w(6) + 0.35), size: 32 });
+      body("50 baskets", X(36), X(100), 40, INK, dark({ alpha: seg(lt, w(10), w(10) + 0.4) }));
+      body(`${Math.round(lerp(50, 15, lower))} baskets`, X(88), X(100), 40, lower > 0.5 ? "#c0263f" : INK, dark({ alpha: seg(lt, w(10), w(10) + 0.4) }));
+      label("OLD SAVINGS: SAFE ✓", X(60), X(111), { k: seg(lt, w(15), w(15) + 0.4), size: 30, bg: C.leaf });
+      label("ALL ALIKE", X(172), 230, { k: seg(lt, w(23), w(23) + 0.4) * (1 - seg(lt, w(31), w(31) + 0.3)), size: 30 });
+      stamp("ALL WORTH LESS", X(172), 230, seg(lt, w(32), w(32) + 0.25), { size: 44 });
+      label("YAP'S MONEY HAD A MEMORY", WIDTH / 2, 1010, { k: seg(lt, w(34), w(34) + 0.4), size: 40, bg: C.gold });
       ctx.restore();
-      label("EASY TO MAKE → STOPS BEING MONEY", WIDTH / 2, 700, { k: seg(lt, w(10), w(10) + 0.4) * (1 - tease), size: 40, bg: C.gold });
-      label("YAP: ✓ SPOTTED IT", 1460, 300, { k: seg(lt, w(21), w(21) + 0.4) * (1 - tease), size: 36, bg: C.leaf });
     }
     if (tease2 > 0) { text("NEXT", WIDTH / 2, 200, 50, C.muted, { alpha: tease2 }); text("GLASS BEADS", WIDTH / 2, 880, 90, C.gold, { alpha: tease2 }); }
     fadeOut(lt, d, 1.0);
