@@ -1439,7 +1439,7 @@ function endScreen() {
   const score = sc.fed * 10 + cured * 25 + meds * 5 + alive * 40;
   const max = sc.nights * 10 + eps.filter(e => e.cured || e.died).length * 25 + Math.max(meds, ifZir || 0, medsBefore || 0) * 5 + Sim.FAMILY.length * 40;
   const stars = Math.max(0, (score >= max * 0.8 ? 3 : score >= max * 0.55 ? 2 : score >= max * 0.3 ? 1 : 0) - dead.length);
-  let best = 0; try { best = +localStorage.getItem('wth-ep01-best') || 0; if (score > best) localStorage.setItem('wth-ep01-best', score); } catch {}
+  let best = 0; try { best = +localStorage.getItem('wth-ep01-best') || 0; if (score > best) localStorage.setItem('wth-ep01-best', score); localStorage.setItem('wth-ep01-done', '1'); } catch {}
   const isBest = score > best;
   if (isBest && best) setTimeout(() => sfx('tada'), 900);
   const mush = n => `${n} ${icon('dri', 'sm')}`;

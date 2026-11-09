@@ -1,0 +1,61 @@
+[
+ {
+  "id": "g1",
+  "scene": "gtitle",
+  "text": "Chapter six. Gold: is there money without a cave?",
+  "dip": true,
+  "pad": 0.8
+ },
+ {
+  "id": "g2",
+  "scene": "allwrens",
+  "text": "Every money in this episode had a Wren. A ship on Yap. Glass from Venice. Iron drills. Shells from Zanzibar. A mint in Rome. Each time, money got easier to make. Usually, the savers paid.",
+  "pad": 0.6
+ },
+ {
+  "id": "g3",
+  "scene": "cube",
+  "text": "Now gold. All the gold ever mined would fit in one cube, about twenty-three metres on each side. As tall as a seven-storey building. Almost all of it still exists.",
+  "cap": "Now gold. All the gold ever mined would fit in one cube, about 23 metres on each side. As tall as a seven-storey building. Almost all of it still exists."
+ },
+ {
+  "id": "g4",
+  "scene": "slice",
+  "text": "Each year, the world's mines add a slice on top, less than half a metre thick. Under two percent.",
+  "cap": "Each year, the world's mines add a slice on top, less than half a metre thick. Under 2%.",
+  "pad": 2.2
+ },
+ {
+  "id": "g5",
+  "scene": "rush",
+  "text": "Gold had its rushes. California in eighteen forty-nine, then Australia. In the eighteen-fifties, the world dug over three times as much gold a year as in the forties. Three times a thin slice is still a thin slice.",
+  "cap": "Gold had its rushes. California in 1849, then Australia. In the 1850s, the world dug over three times as much gold a year as in the 1840s. Three times a thin slice is still a thin slice."
+ },
+ {
+  "id": "g6",
+  "scene": "rushprices",
+  "text": "Prices rose. In Britain, where money was gold, by up to a third. They stayed high for about twenty years. Then they fell. By the eighteen-nineties, they were lower than in the forties.",
+  "cap": "Prices rose. In Britain, where money was gold, by up to a third. They stayed high for about twenty years. Then they fell. By the 1890s, they were lower than in the 1840s.",
+  "pad": 0.6
+ },
+ {
+  "id": "g7",
+  "scene": "meters",
+  "text": "Compare. Cowries: a silver dollar cost ten times more shells. Rome: wheat cost thirty-seven times more. Gold, in the great rushes: prices up to a third higher, for a while. Gold came closest to money without a cave.",
+  "cap": "Compare. Cowries: a silver dollar cost 10 times more shells. Rome: wheat cost 37 times more. Gold, in the great rushes: prices up to a third higher, for a while. Gold came closest to money without a cave.",
+  "pad": 1.0
+ },
+ {
+  "id": "g8",
+  "scene": "nocave",
+  "text": "And today? In ten years, gold's price roughly tripled, with big swings. So digging it pays far more. Still, mine output grew under one percent a year. Nobody has found gold's cave.",
+  "cap": "And today? In ten years, gold's price roughly tripled, with big swings. So digging it pays far more. Still, mine output grew under 1% a year. Nobody has found gold's cave.",
+  "pad": 1.4
+ },
+ {
+  "id": "g10",
+  "scene": "question",
+  "text": "Our money today isn't gold. So who is its Wren? First: why is gold so hard to flood? Next episode: why gold.",
+  "pad": 1.6
+ }
+]

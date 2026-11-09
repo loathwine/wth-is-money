@@ -3,7 +3,7 @@
 Interactive lessons on where money comes from, why it breaks, and what makes it hard.
 Play it (EP 01), watch it (EP 02, history), then read the theory (Menger → Mises).
 
-**Beta:** play it at https://loathwine.github.io/wth-is-money/ (made for phones first). EP 01 and EP 02 (five chapters) are up.
+**Beta:** play it at https://loathwine.github.io/wth-is-money/ (made for phones first). EP 01 and EP 02 (six chapters) are up.
 
 ## Run locally
 
@@ -72,8 +72,9 @@ Again and again in history, money has had a Wren: someone who found a cheaper wa
 | 3 | `wampum.html` · wampum | Steel drills turn hours of work into minutes. |
 | 4 | `cowries.html` · cowries | Ships full of cheaper shells from Zanzibar. |
 | 5 | `rome.html` · Rome | The emperor makes the coins himself. |
+| 6 | `gold.html` · Gold? (finale) | Is there money without a cave? Double five monies from their caves, then try gold: all twelve years of the 1849 rush reach only ×1.36. |
 
-`chapters.js` is shared by every chapter page: the chapter bar (✓ for finished chapters, saved in localStorage), the ♪ mute button, `Ep02.done(ch)`, `Ep02.next()` (the next chapter, for the final card's link) and `Ep02.playMode(on)`, which makes the game fill a phone's screen during a run. It also makes every `video.movie` play inline on iPhones, and swaps a movie that isn't rendered yet (404) for a short "still being made" note. Music and sound effects come from `assets/js/chip.js`.
+`chapters.js` is shared by every chapter page: the chapter bar (✓ for finished chapters, saved in localStorage), the ♪ mute button, `Ep02.done(ch)`, `Ep02.next()` (the next chapter, for the final card's link) and `Ep02.playMode(on)`, which makes the game fill a phone's screen during a run (and turns it sideways where the phone allows; `Ep02.playMode(on, { lock: false })` keeps it portrait, as gold's game does). It also makes every `video.movie` play inline on iPhones, and swaps a movie that isn't rendered yet (404) for a short "still being made" note. Music and sound effects come from `assets/js/chip.js`.
 
 The movies are built per chapter in `video/ep02/<ch>/` (`narration.json`, `scenes.js`, `cues.py`, `SCRIPT.md` with the fact check) by a shared engine in `video/ep02/`; each script takes the chapter dir:
 
@@ -113,7 +114,7 @@ lessons/01-barter/
   evening.js                what the family says at home each night (all the copy, and the trigger picker)
 lessons/02-every-wren/
   index.html, yap.js        chapter 1 (Yap) and its canoe-run game
-  beads/wampum/cowries/rome.html (+ .js)   chapters 2-5
+  beads/wampum/cowries/rome/gold.html (+ .js)   chapters 2-6
   chapters.js               shared chapter bar, progress, mute, phone play mode
   lesson.css                shared chapter styles
   OUTLINE.md                the episode plan; *.DESIGN.md: minigame designs
@@ -125,6 +126,6 @@ tools/                      headless sim runners, drive.js (phone-emulated scree
 
 ## Roadmap
 
-- **EP 02 · Every Wren in History** (beta): Yap's rai stones (O'Keefe), glass beads, wampum, cowries, Roman debasement. Next: a gold finale chapter ("is there money without a cave?"), and tightening each movie towards 2 minutes.
+- **EP 02 · Every Wren in History** (beta): Yap's rai stones (O'Keefe), glass beads, wampum, cowries, Roman debasement, and a gold finale ("is there money without a cave?"). Next: tighten each movie towards 2 minutes.
 - **EP 03 · Why Gold?**: stock-to-flow: why gold was the money that was hardest to flood (and why even it got flooded a little, in the gold rushes).
 - **EP 04 · The Theory of Money and Credit**: Mises (1912). The regression theorem (which the EP 01 notebooks already act out), fiduciary media, the business cycle.

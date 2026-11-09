@@ -1,7 +1,8 @@
 /* EP 02 · shared bits for every chapter page: the chapter bar, progress, the mute button,
    and the phone "play mode" (game fills the screen, sideways if the phone allows).
    A chapter page sets <body data-ch="beads"> and loads this before its game script.
-   Ep02.done("beads") marks the chapter finished (✓ in the bar); Ep02.playMode(true|false) wraps #game. */
+   Ep02.done("beads") marks the chapter finished (✓ in the bar); Ep02.playMode(true|false) wraps #game
+   (Ep02.playMode(true, { lock: false }) keeps the phone's orientation as it is: gold's game is portrait). */
 (function () {
   "use strict";
   const CHAPTERS = [
@@ -10,7 +11,7 @@
     { ch: "wampum", n: 3, name: "Wampum", href: "wampum.html" },
     { ch: "cowries", n: 4, name: "Cowries", href: "cowries.html" },
     { ch: "rome", n: 5, name: "Rome", href: "rome.html" },
-    { ch: "gold", n: 6, name: "Gold?", href: null },
+    { ch: "gold", n: 6, name: "Gold", href: "gold.html" },
   ];
   const here = document.body.dataset.ch || "yap";
   const isDone = (ch) => { try { return localStorage.getItem(`wth-ep02-${ch}-done`) === "1"; } catch { return false; } };
@@ -36,12 +37,12 @@
   }
 
   const PHONE = matchMedia("(max-width: 700px), (pointer: coarse) and (max-height: 500px)").matches;
-  function playMode(on) {
+  function playMode(on, opts = {}) {
     if (!PHONE) return;
     document.body.classList.toggle("playing", on);
     const el = document.getElementById("game");
     try {
-      if (on && el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().then(() => screen.orientation?.lock?.("landscape")).catch(() => {});
+      if (on && el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().then(() => { if (opts.lock !== false) return screen.orientation?.lock?.("landscape"); }).catch(() => {});
       if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
     } catch {}
   }

@@ -2,7 +2,7 @@
 
 It picks up from EP 01: the player has watched pentaja become money, and then watched it break once Wren found the cave. (Rod was renamed **Wren**, after the fable where the wren becomes king of the birds by riding on the eagle's back: the prize, without the work. Wren has no pronouns: just say "Wren".)
 
-**Status (beta):** all five chapters are built: 1 Yap (`index.html`, movie + Canoe run), 2 glass beads (`beads.html`), 3 wampum (`wampum.html`), 4 cowries (`cowries.html`), 5 Rome (`rome.html`). The movies live in `video/ep02/<ch>/`, each with a `SCRIPT.md` fact check, and each game has a `<ch>.DESIGN.md` here. The gold finale (6) is not started.
+**Status (beta):** all six chapters are built: 1 Yap (`index.html`, movie + Canoe run), 2 glass beads (`beads.html`), 3 wampum (`wampum.html`), 4 cowries (`cowries.html`), 5 Rome (`rome.html`), 6 the gold finale (`gold.html`, game "Wren's last cave"). The movies live in `video/ep02/<ch>/`, each with a `SCRIPT.md` fact check, and each game has a `<ch>.DESIGN.md` here.
 
 **The one idea:** when someone can make money cheaply, the people holding it pay. Here's how five places found out, and what they did about it. Each chapter is a real "Wren".
 
@@ -50,11 +50,12 @@ The cases are in rough chronological order of their "cave", ending with the one 
 - **Minigame, "The emperor's mint":** each year, legions demand pay. Choose how much silver goes into each coin and mint. The prices of grain and soldiers' patience react, and old coins vanish from circulation into hoards. In the final year a button appears: **FIX PRICES BY LAW**. Pressing it empties the market stalls.
 - **Wren moment:** "Wren only got lucky. An emperor can dig the cave himself, and order you not to notice." The law said a bad coin counted as much as a good one, so people spent the bad ones and hid the good (unlike Ulm Hollow, where the better money won).
 
-### 6. Finale: is there money without a cave?
+### 6. Finale: is there money without a cave? · BUILT (see gold.DESIGN.md)
 - **Movie:** one chart with every money from this episode, each line ending in a crash. Then gold. About 3,100 tonnes are mined a year against roughly 200,000 tonnes ever mined, so new supply adds only about 1.5–2% a year. Gold got flooded too, in the rushes of 1849, but only by a few percent a year, and only for a while (Jevons 1863: prices up roughly 9–15%). Nobody has found a cave big enough.
 - **Callback to Yap:** Germany's black crosses on stones that never moved (1899–1914), next to the Banque de France's gold "moving" in 1932 without leaving its vault: the parallel Friedman draws in *The Island of Stone Money* (1991). Moved here from chapter 1 so Yap stays in time order.
 - **Question for EP 03:** "Why can't anyone find gold's cave?" → **EP 03 · Why Gold?**
 - **Final card:** a "Wrens of history" timeline that collects each chapter's Wren as a card.
+- **Minigame, "Wren's last cave" (built):** hold to pour new money from each chapter's cave and let go on the ×2 line; the family's jar halves each time (Yap's only drops 8 → 7). Then gold, 1849: the same hold runs through all twelve years of the rush and the pile reaches only ×1.36 (a game value), while the jar follows real British prices (8 → about 6½ → about 8 by the 1890s). Score out of 600; the last 100 can't be won. The Yap/France 1932 callback lives as a note under the Wren card (cut from the movie).
 
 ## Production
 

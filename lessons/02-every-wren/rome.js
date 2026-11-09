@@ -301,7 +301,7 @@
     x.fillStyle = "#b8c23a"; for (const [a, b, w, h] of [[4, 6, 2, 1], [3, 7, 1, 2], [14, 6, 2, 1], [16, 7, 1, 2]]) x.fillRect(a, b, w, h);
     x.fillStyle = "#ffd23f"; x.fillRect(6, 5, 2, 1); x.fillRect(12, 5, 2, 1);
     const nx = Ep02.next();
-    $("#wren-next").innerHTML = nx ? `Next: <a href="${nx.href}">${nx.name}</a>` : "Next: is there money with no cave? <span class=\"pixel\">(coming soon)</span>";
+    $("#wren-next").innerHTML = nx ? `Next: <a href="${nx.href}">${nx.ch === "gold" ? "Gold: is there money without a cave?" : nx.name} →</a>` : "Next: is there money with no cave? <span class=\"pixel\">(coming soon)</span>";
     Ep02.done("rome");
     $("#wren-card").scrollIntoView({ behavior: "smooth", block: "center" });
   }

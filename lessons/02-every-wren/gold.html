@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold: is there money without a cave? · WTH Is Money?</title>
+<meta name="description" content="Every money in this episode had a Wren. Gold came closest to having none: even the great rushes of the 1850s added only a thin slice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="lesson.css">
+<link rel="stylesheet" href="gold.css">
+</head>
+<body data-ch="gold">
+
+<header class="topbar">
+  <a class="brand pixel" href="../../index.html">WTH IS <span class="gold">MONEY?</span></a>
+  <span class="pixel muted ep">EP 02 · EVERY WREN IN HISTORY</span>
+  <button class="mute pixel" id="mute" title="Sound on/off">♪ ON</button>
+</header>
+
+<nav class="chapters" id="chapters"></nav>
+
+<main class="page">
+  <section class="chapter" id="gold">
+    <p class="kicker pixel">CHAPTER 6 · FINALE</p>
+    <h1>Gold: is there money without a cave?</h1>
+
+    <div class="step">
+      <span class="num pixel">1</span><h2>Watch</h2>
+    </div>
+    <video class="movie" controls playsinline preload="metadata" poster="../../video/ep02/gold/out/poster.jpg" src="../../video/ep02/gold/out/ep02-gold.mp4">
+      <track kind="captions" src="../../video/ep02/gold/out/captions.vtt" srclang="en" label="English" default>
+    </video>
+
+    <div class="step">
+      <span class="num pixel">2</span><h2>Play: Wren's last cave</h2>
+    </div>
+    <p class="lead"><span id="gd-hint">Hold the button (or <b>Space</b>) to pour. Let go on the <b>×2</b> line.</span></p>
+    <div class="gd" id="game">
+      <div class="gd-hud" id="gd-hud" hidden></div>
+      <div class="gd-main">
+        <div class="gd-stage">
+          <canvas id="gd-cv" width="540" height="600"></canvas>
+          <div class="gd-card" id="gd-card" hidden></div>
+        </div>
+        <div class="gd-side">
+          <div class="gd-coach" id="gd-coach" hidden></div>
+          <button class="gd-btn pixel" id="gd-btn" hidden><b class="gd-lbl">HOLD TO POUR</b><small></small></button>
+        </div>
+      </div>
+      <div class="game-ui" id="game-ui"></div>
+    </div>
+
+    <div class="step" id="wren-step" hidden>
+      <span class="num pixel">3</span><h2>Wren moment</h2>
+    </div>
+    <div class="wren-card" id="wren-card" hidden>
+      <canvas id="wren-portrait" class="px" width="20" height="24"></canvas>
+      <div>
+        <p class="big">Every money had a Wren.<br>Gold came closest to having none.</p>
+        <p>From 1849, the whole world dug for twelve years. Prices rose by up to a third, then fell back.</p>
+        <p class="real"><b>In real life:</b> while Britain was on gold, prices swung by up to a third, yet were about the same in 1913 as in 1821. Like €100 still buying the same shopping 92 years later.</p>
+      </div>
+    </div>
+    <div class="gd-after" id="gd-after" hidden>
+      <p class="gd-yap muted"><b>Yap, again:</b> in 1932 France swapped its dollars for gold in New York. To save shipping it, bank staff just marked the drawers as French, and the papers wrote of a “loss of gold”. Money, like Yap's stones, doesn't have to move to change hands. <span class="small">(Friedman, <i>The Island of Stone Money</i>, 1991)</span></p>
+      <p class="pixel gd-wrens-h">THE WRENS OF HISTORY</p>
+      <div class="gd-strip" id="gd-strip"></div>
+      <p class="gd-next"><b>Next: Episode 3 · Why Gold?</b> Why can't anyone find gold's cave? <span class="pixel muted">(coming soon)</span><br><a href="../../index.html">← all episodes</a></p>
+    </div>
+
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li>British prices (the jar in the gold round, the result screen and “In real life”): Bank of England, <a href="https://www.bankofengland.co.uk/statistics/research-datasets"><i>A millennium of macroeconomic data for the UK</i></a> v3.1, sheet A1, consumer price index: 1849 1.112, 1851 1.043, 1856 1.352, 1860 1.292, 1867 1.405, 1873 1.381, 1890s average 1.091, 1821 1.257, 1913 1.244. Loaves = 8 × CPI(1849) ÷ CPI(year): the loaf is our unit, the ratios are real. Britain was on gold from 1821 to 1914.</li>
+        <li>World gold mined a year: <a href="https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Gold"><i>Encyclopaedia Britannica</i> (1911), “Gold”, Table I</a> (Soetbeer's series): about 57 t a year in 1841–50 and about 198 t a year in 1851–60.</li>
+        <li>How much the rush added: W. S. Jevons, <a href="https://archive.org/details/investigationsin00jevo"><i>Investigations in Currency and Finance</i></a> (1884), reprinting <i>A Serious Fall in the Value of Gold Ascertained</i> (1863): a lasting fall in gold's value of “at least” 9%, in his view “nearer 15 per cent”; Newmarch's estimate that the new gold of 1849–60 was “about 50 per cent” of the gold then in use.</li>
+        <li>Prices on gold in the long run: M. D. Bordo, <a href="https://www.econlib.org/library/Enc/GoldStandard.html">“Gold Standard”</a>, <i>Concise Encyclopedia of Economics</i>: low inflation on average, but “highly unstable in the short run”.</li>
+        <li>All the gold ever mined, about 220,000 t (a cube of about 23 m): World Gold Council, <a href="https://www.gold.org/about-gold/gold-supply/gold-mining/how-much-gold-has-been-mined"><i>How much gold has been mined?</i></a></li>
+        <li>The 1932 earmarking: M. Friedman, <a href="https://archive.org/details/IslandOfStoneMoney"><i>The Island of Stone Money</i></a>, Hoover Institution WP E-91-3 (1991). Much of that gold was shipped to France later in 1932; the note claims only the earmarking.</li>
+        <li>The Wrens of history: each chapter's own sources (Yap, beads, wampum, cowries, Rome). Cowries: about 2,000 shells to a silver dollar in the late 1840s, 20,000 in the 1880s (Dahomey). Rome: wheat in Egypt, 8 → 300 drachmas a sack, AD 100 → 293.</li>
+        <li>Game values: the world's pile in 1849 (6,000 t, so the rush adds ×1.36; Newmarch's estimate would give about ×1.5), the 1849/1850 split of the first rush years, the jars in rounds 1–5 (each halves when its pile doubles; Yap's 8 → 7 follows the later accounts that O'Keefe's stones were priced lower, the 7 is ours), the pour speeds, the ×2.6 cut-off and the points.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<script src="../../assets/js/chip.js"></script>
+<script src="../01-barter/art.js"></script>
+<script src="chapters.js"></script>
+<script src="gold.js"></script>
+</body>
+</html>

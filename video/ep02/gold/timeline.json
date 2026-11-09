@@ -1,0 +1,84 @@
+[
+ {
+  "id": "g1",
+  "scene": "gtitle",
+  "t0": 0.0,
+  "t1": 5.829,
+  "voice": 0.6,
+  "speech": 4.679,
+  "text": "Chapter six. Gold: is there money without a cave?",
+  "dip": true
+ },
+ {
+  "id": "g2",
+  "scene": "allwrens",
+  "t0": 5.829,
+  "t1": 21.765,
+  "voice": 5.829,
+  "speech": 14.986,
+  "text": "Every money in this episode had a Wren. A ship on Yap. Glass from Venice. Iron drills. Shells from Zanzibar. A mint in Rome. Each time, money got easier to make. Usually, the savers paid."
+ },
+ {
+  "id": "g3",
+  "scene": "cube",
+  "t0": 21.765,
+  "t1": 33.174,
+  "voice": 21.765,
+  "speech": 11.059,
+  "text": "Now gold. All the gold ever mined would fit in one cube, about twenty-three metres on each side. As tall as a seven-storey building. Almost all of it still exists."
+ },
+ {
+  "id": "g4",
+  "scene": "slice",
+  "t0": 33.174,
+  "t1": 41.54,
+  "voice": 33.174,
+  "speech": 5.816,
+  "text": "Each year, the world's mines add a slice on top, less than half a metre thick. Under two percent."
+ },
+ {
+  "id": "g5",
+  "scene": "rush",
+  "t0": 41.54,
+  "t1": 55.703,
+  "voice": 41.54,
+  "speech": 13.813,
+  "text": "Gold had its rushes. California in eighteen forty-nine, then Australia. In the eighteen-fifties, the world dug over three times as much gold a year as in the forties. Three times a thin slice is still a thin slice."
+ },
+ {
+  "id": "g6",
+  "scene": "rushprices",
+  "t0": 55.703,
+  "t1": 69.776,
+  "voice": 55.703,
+  "speech": 13.123,
+  "text": "Prices rose. In Britain, where money was gold, by up to a third. They stayed high for about twenty years. Then they fell. By the eighteen-nineties, they were lower than in the forties."
+ },
+ {
+  "id": "g7",
+  "scene": "meters",
+  "t0": 69.776,
+  "t1": 88.747,
+  "voice": 69.776,
+  "speech": 17.621,
+  "text": "Compare. Cowries: a silver dollar cost ten times more shells. Rome: wheat cost thirty-seven times more. Gold, in the great rushes: prices up to a third higher, for a while. Gold came closest to money without a cave."
+ },
+ {
+  "id": "g8",
+  "scene": "nocave",
+  "t0": 88.747,
+  "t1": 105.717,
+  "voice": 88.747,
+  "speech": 15.22,
+  "text": "And today? In ten years, gold's price roughly tripled, with big swings. So digging it pays far more. Still, mine output grew under one percent a year. Nobody has found gold's cave."
+ },
+ {
+  "id": "g10",
+  "scene": "question",
+  "t0": 105.717,
+  "t1": 118.16,
+  "voice": 105.717,
+  "speech": 10.493,
+  "text": "Our money today isn't gold. So who is its Wren? First: why is gold so hard to flood? Next episode: why gold."
+ }
+]

@@ -36,7 +36,7 @@
   <section class="hero">
     <p class="eyebrow pixel">INTERACTIVE LESSONS · FROM BARTER TO BITCOIN</p>
     <h1>WTH IS<br><span class="gold">MONEY?</span></h1>
-    <p>Why does everything cost more every year? Why do savings shrink? Start in a village with no money at all and watch money appear by itself. Then watch someone break it, again and again, across history.</p>
+    <p>Why does everything cost more every year? Why do savings shrink? Start in a village with no money at all and watch money appear by itself. Then follow money through history.</p>
     <p class="idea">That money grows out of trading, with nobody inventing it, is Carl Menger's idea (1892). Play it and see if you agree.</p>
     <a class="btn" href="lessons/01-barter/">▶ START EP 01</a>
   </section>
@@ -49,12 +49,12 @@
     </a>
     <a class="ep live" href="lessons/02-every-wren/">
       <span class="n">02</span>
-      <div><h3>Every Wren in History</h3><p>Stone wheels, glass beads, wampum, cowrie shells, Roman coins: five real moneys, and the people who found a cheaper way to make more. A short movie and a game for each.</p></div>
-      <span class="state">▶ 5 CHAPTERS</span>
+      <div id="ep02-card"><h3>Episode 2</h3><p>Stone wheels, glass beads, wampum, cowrie shells, Roman coins and gold: real moneys from history. A short movie and a game for each. Play EP 01 first: this episode gives away its ending.</p></div>
+      <span class="state">▶ 6 CHAPTERS</span>
     </a>
     <div class="ep">
       <span class="n">03</span>
-      <div><h3>Why Gold?</h3><p>The world digs up only about 1.5% more gold each year. Why gold was the money that was hardest to flood.</p></div>
+      <div><h3>Why Gold?</h3><p>The world digs up only about 1.5% more gold each year. Why gold stayed money for so long.</p></div>
       <span class="state">SOON</span>
     </div>
     <div class="ep">
@@ -64,5 +64,10 @@
     </div>
   </div>
 </div>
+<script>
+  // EP 02's title and blurb give away EP 01's twist: show them only once EP 01 is finished.
+  (function () { var done = false; try { done = !!(localStorage.getItem("wth-ep01-done") || localStorage.getItem("wth-ep01-best")); } catch (e) {}
+    if (done) document.getElementById("ep02-card").innerHTML = '<h3>Every Wren in History</h3><p>Stone wheels, glass beads, wampum, cowrie shells, Roman coins: five real moneys, and the people who found a cheaper way to make more. Then gold: is there money without a cave? A short movie and a game for each.</p>'; })();
+</script>
 </body>
 </html>
