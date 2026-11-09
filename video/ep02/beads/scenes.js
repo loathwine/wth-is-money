@@ -324,33 +324,33 @@
     fadeOut(lt, d, 0.3);
   };
 
-  /* ================================================================ b5 · cargo (grave, muted, no people drawn) */
+  /* ================================================================ b5 · cargo (plain and factual, calm, no people drawn) */
   function cloth(x, y) { px(x, y, 10, 6, "#8a3a3a"); for (let i = 0; i < 10; i += 3) px(x + i, y, 1, 6, "#c8a050"); px(x + 9, y + 1, 2, 4, "#6a2a2a"); }
   function ironBar(x, y) { px(x, y + 2, 12, 3, "#6f7480"); px(x, y + 2, 12, 1, "#9aa3b5"); }
   function musket(x, y) { px(x, y + 3, 14, 1, "#3b3b44"); px(x + 9, y + 3, 5, 3, "#5e3b1a"); px(x + 12, y + 5, 2, 1, "#5e3b1a"); }
   function tusk(x, y) { for (let i = 0; i < 12; i++) px(x + i, y + Math.round(Math.pow((i - 6) / 6, 2) * 4) - 4, 2, 2, "#efe6cf"); }
   SC.cargo = (lt, d, t, s) => {
+    // "Ships from Liverpool carried them south, with cloth, iron and guns. They bought some gold and ivory, but mostly enslaved people.
+    //  Glass beads helped pay for the Atlantic slave trade."  Calm documentary register: named plainly, normal colours, no darkening.
     const w = (n) => word(s, n);
-    sky(0, 66, "#4a3e5a", "#9a7a6a");
-    sea(t, 66, { c: "#24304a", c2: "#1c2640", hi: "#3d4f70", speed: 0.25 });
-    for (let x = 180; x < LO_W; x++) px(x, 64 - Math.min(10, (x - 180) * 0.3), 1, 6 + Math.min(10, (x - 180) * 0.3), "#3a3a2a");
+    sky(0, 66, "#5a6a8a", "#c8a48a");
+    sea(t, 66, { c: "#2c3c5a", c2: "#24324e", hi: "#4a6088", speed: 0.25 });
+    for (let x = 180; x < LO_W; x++) px(x, 64 - Math.min(10, (x - 180) * 0.3), 1, 6 + Math.min(10, (x - 180) * 0.3), "#4a4a32");
     const sx = Math.round(lerp(200, 70, lt / d));
     lx.save(); lx.translate(sx * 2, 0); lx.scale(-1, 1); schooner(sx, 92, t); lx.restore();
-    const gone = 1 - seg(lt, w(14), w(14) + 1.2);
-    lx.save(); lx.globalAlpha = gone;
-    const items = [[cloth, w(5), -20], [ironBar, w(6), -4], [musket, w(8), 12]];
+    const items = [[cloth, w(7), -20], [ironBar, w(8), -4], [musket, w(10), 12]];
     for (const [f, at, dx] of items) if (lt > at) f(sx + dx - 5, 80);
-    if (lt > w(11)) goldPile(212, 60, 1);
-    if (lt > w(13)) tusk(222, 58);
-    lx.restore();
-    ctx.filter = "saturate(0.55) brightness(0.85)"; blitLo(); ctx.filter = "none";
-    where("THE ATLANTIC", "1700s", lt, w(14));
-    ["CLOTH", "IRON", "GUNS"].forEach((str, i) => body(str, X(sx + items[i][2]), X(104), 38, C.ink, { alpha: gone * seg(lt, items[i][1], items[i][1] + 0.3) }));
-    body("gold · ivory", X(216), X(46), 36, C.ink, { alpha: gone * seg(lt, w(11), w(11) + 0.3) });
-    const kt = seg(lt, w(20), w(20) + 1.0);
+    if (lt > w(14)) goldPile(212, 60, 1);
+    if (lt > w(16)) tusk(222, 58);
+    blitLo();
+    where("THE ATLANTIC", "1700s", lt, w(21));
+    ["CLOTH", "IRON", "GUNS"].forEach((str, i) => body(str, X(sx + items[i][2]), X(104), 38, C.ink, { alpha: seg(lt, items[i][1], items[i][1] + 0.3) }));
+    body("gold · ivory", X(216), X(46), 36, C.ink, { alpha: seg(lt, w(14), w(14) + 0.3) });
+    const kt = seg(lt, w(21), w(21) + 0.6);
+    if (kt > 0) { ctx.fillStyle = `rgba(18,13,29,${0.55 * kt})`; ctx.fillRect(0, 170, WIDTH, 200); }
     body("Glass beads helped pay for", WIDTH / 2, 230, 60, C.ink, { alpha: kt });
     body("the Atlantic slave trade.", WIDTH / 2, 310, 60, C.ink, { alpha: kt });
-    fadeOut(lt, d, 1.0);
+    fadeOut(lt, d, 0.5);
   };
 
   /* ================================================================ b6 · the felt moment: same string, less food */

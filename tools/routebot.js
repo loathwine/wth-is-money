@@ -1,11 +1,14 @@
-// Can a player who only uses the route finder keep their family fed and healthy, before and after Wren's cave?
-// Each morning: while someone at home is sick, the medicine first (findRoutes offers Gran's jar too),
-// then top up lumfruit to 2 and kettlestone to 1 via findRoutes. With --save, then sell spare bogwool
+// Can a player who only uses the route finder keep their family fed and healthy through EP 01's arc?
+// Gran's first sickness (night 3, before anyone knows about the jar: paid from the pack), the storm (the
+// few at market take only crystals: Gran's jar pays for food), Wren's cave, and Aunt Ola's sickness after it.
+// Each morning: while someone at home is sick, the medicine first (findRoutes offers Gran's jar too, once
+// she has shown it), then top up lumfruit to 2 and kettlestone to 1 via findRoutes (in the storm the jar may pay for food). With --save, then sell spare bogwool
 // (above 3) for the listed goods, the way a saver would. With --paywith=pen, pay Dov for medicine
 // straight from the pack's pentaja when you can. --foodfirst buys food before medicine; --nojar empties the jar.
 // Then go home. Reports how often each villager went hungry, how the sicknesses went, and who died
 // (strength: see sim.js; untreated sickness kills on the 3rd night, the 2nd if hungry too).
 // --lazy: a careless player: one route a day for lumfruit only, never medicine, never the jar.
+// --nojar: Gran's jar turns out to be empty (what the storm is like without savings).
 // --crust=sick|tam|weakest: who gets the last crust on a hungry night (default: the sick one).
 // Usage: node tools/routebot.js [seeds=8] [days=FESTIVAL-1] [--save=zir,pen] [--paywith=pen] [--medfirst] [--nosick]
 //        [--set=you.rate=2] [--sick=NATURAL=4] [--foodfirst] [--nojar] [--lazy] [--crust=tam] [--verbose=SEED]
@@ -30,7 +33,9 @@ const ids = Sim.VILLAGERS.map(v => v.id);
 const want = opt.lazy ? { lum: 1 } : opt.foodfirst ? { lum: 2, dri: 0, ket: 1 } : { dri: 0, lum: 2, ket: 1 };   // dri: the doses still needed
 const deaths = [];                      // { seed, who, night, cause }
 let minHp = Sim.HP, critNights = 0;
-const hungry = { pre: {}, post: {} }, nDays = { pre: 0, post: 0 };
+const hungry = { pre: {}, storm: {}, post: {} }, nDays = { pre: 0, storm: 0, post: 0 };
+const stormDead = new Set(), stormJar = [], stormHungry = [], arc = { money: [], storm: [], cave: [] }, jarShrink = []; let shrunk = 0;
+const phaseOf = w => w.caveDay && w.day >= w.caveDay ? 'post' : Sim.stormNow(w) ? 'storm' : 'pre';
 let ms = 0, calls = 0;
 // sickness: per episode, pre/post cave
 const ep = { pre: [], post: [] };       // { nights, natural, worse, failedDays, price, spent }
@@ -45,10 +50,10 @@ const log = (s, ...a) => { if (verbose === s) console.log(...a); };
 for (let s = 1; s <= seeds; s++) {
   const w = Sim.createWorld({ seed: s, sickness: !opt.nosick, jar: opt.nojar ? 0 : undefined, crust: opt.crust }), you = w.byId.you;
   const spentOn = new Map();   // episode -> { good: n } spent on medicine
-  let hardN = 0;
+  let hardN = 0, stormHungryN = 0, olaJar = null;
   for (let d = 0; d < days; d++) {
     Sim.startDay(w);
-    const sick = w.family.sick, phase = w.caveDay && w.day >= w.caveDay ? 'post' : 'pre';
+    const sick = w.family.sick, phase = w.caveDay && w.day >= w.caveDay ? 'post' : 'pre', stormy = Sim.stormNow(w);
     if ('dri' in want) want.dri = sick ? sick.left : 0;
     const spend = sick ? (spentOn.get(sick) || spentOn.set(sick, {}).get(sick)) : null;
     const before = Object.fromEntries(Sim.IDS.map(g => [g, Sim.count(you, g)])), jar0 = { ...w.family.jar };
@@ -91,7 +96,10 @@ for (let s = 1; s <= seeds; s++) {
     }
     you.present = false;
     Sim.endDay(w);
-    for (const e of w.events) if (e.type === 'died') { deaths.push({ seed: s, who: e.who, night: w.day - 1, cause: e.cause }); log(s, `d${w.day - 1} DIED ${e.name} (${e.cause})`); }
+    for (const e of w.events) if (e.type === 'died') { deaths.push({ seed: s, who: e.who, night: w.day - 1, cause: e.cause }); if (stormy) stormDead.add(s); log(s, `d${w.day - 1} DIED ${e.name} (${e.cause})`); }
+    if (stormy && w.events.some(e => e.type === 'short' && e.g === 'lum')) stormHungryN++;
+    if (w.events.some(e => e.type === 'reveal')) log(s, `d${w.day - 1} Gran shows her jar: ${w.family.jar.pen} pentaja`);
+    if (w.events.some(e => e.type === 'sick' && e.afterCave) && olaJar == null) { const b = Sim.medPriceBefore(w); olaJar = [Math.floor(Sim.JAR * Sim.SICK.DOSES / b), Sim.jarDoses(w, Sim.medTrend(w), { pen: Sim.JAR, zir: 0 })]; }
     for (const id in w.family.hp) if (w.family.hp[id] > 0) minHp = Math.min(minHp, w.family.hp[id]);
     if (Sim.critical(w)) critNights++;
     if (w.caveDay && w.day - 1 >= w.caveDay && (w.events.some(e => e.type === 'short' && e.g === 'lum') || Sim.critical(w) || w.events.some(e => e.type === 'died'))) hardN++;
@@ -100,18 +108,26 @@ for (let s = 1; s <= seeds; s++) {
     if (you.hunger.lum >= 2) tired[phase]++;
     for (const e of w.events) if (e.type === 'sick' || e.type === 'cured' || e.type === 'worse' || e.type === 'nomed' || e.type === 'dose')
       log(s, `d${w.day - 1} ${e.type} ${e.name}${e.price ? ' medicine costs ' + JSON.stringify(e.price) + (e.before != null ? ' (before the cave: ' + e.before + ' pentaja)' : '') : ''}`);
-    const k = w.caveDay && w.day > w.caveDay ? 'post' : 'pre';
+    const k = stormy ? 'storm' : w.caveDay && w.day > w.caveDay ? 'post' : 'pre';
     nDays[k]++;
     for (const id of ids) if (w.byId[id].hunger.lum > 0) hungry[k][id] = (hungry[k][id] || 0) + 1;
   }
   jarEnd.push(w.family.jar.pen + '/' + w.family.jar.zir);
   hard.push(hardN);
+  arc.money.push(w.moneyDay); arc.storm.push(w.storm ? w.storm.from : null); arc.cave.push(w.caveDay);
+  stormJar.push(w.family.stormFood.pen + w.family.stormFood.zir); stormHungry.push(stormHungryN);
+  if (olaJar) { jarShrink.push(olaJar.join('→')); if (3 * olaJar[1] <= olaJar[0]) shrunk++; }
   for (const e of w.family.episodes) (e.afterCave ? ep.post : ep.pre).push({ ...e, spent: spentOn.get(e) || {} });
 }
+const cnt = a => a.reduce((o, v) => (o[v] = (o[v] || 0) + 1, o), {});
 const pct = k => ids.map(id => `${id} ${Math.round(100 * (hungry[k][id] || 0) / Math.max(1, nDays[k]))}%`).join('  ');
 console.log(`save: ${save.join(',') || 'nothing'}${paywith.length ? '  pay medicine with: ' + paywith : ''}  set: ${opt.set || '-'}  sick: ${opt.nosick ? 'off' : JSON.stringify(Sim.SICK)}`);
-console.log(`hungry before the cave: ${pct('pre')}`);
-console.log(`hungry after the cave:  ${pct('post')}`);
+console.log(`arc: money card on day ${JSON.stringify(cnt(arc.money))}, storm from day ${JSON.stringify(cnt(arc.storm))}, cave on day ${JSON.stringify(cnt(arc.cave))}`);
+console.log(`hungry before the storm: ${pct('pre')}`);
+console.log(`hungry in the storm:     ${pct('storm')}`);
+console.log(`hungry after the cave:   ${pct('post')}`);
+console.log(`THE STORM: someone died in it in ${stormDead.size}/${seeds} villages (${[...stormDead].map(s => 's' + s).join(',') || '-'}); hungry storm nights per village ${JSON.stringify(cnt(stormHungry))}; crystals the jar paid for food in it ${JSON.stringify(cnt(stormJar))}`);
+console.log(`the jar (${Sim.JAR} pentaja) in mushrooms before the cave → the night Ola falls sick: a third or less in ${shrunk}/${jarShrink.length}: ${jarShrink.join(' ')}`);
 console.log(`too hungry to work (2 hungry nights running): ${tired.pre} days before the cave, ${tired.post} after; jar at the end (pen/zir): ${jarEnd.join(' ')}`);
 const med = a => { const b = a.filter(x => x != null).sort((x, y) => x - y); return b.length ? b[b.length >> 1] : '-'; };
 for (const k of ['pre', 'post']) {

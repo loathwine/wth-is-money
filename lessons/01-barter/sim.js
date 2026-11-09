@@ -56,12 +56,26 @@ const STOCK_LIMIT = 8;   // stop producing once you hold this many of your own g
 const MONEY_BAR = 2.5;  // exchange value at which a villager 'takes it as payment'
 const MONIES = ['pen', 'zir'];   // the goods whose asking prices the village keeps an eye on (see postAsks)
 
-/* ---------- pacing ----------
-   Wren strikes the cave on the night of day 5-6 (once pentaja has caught on), so the cave
-   opens on day 6 (sometimes 7), and the lesson ends at the harvest festival: the morning of
-   FESTIVAL (day 12), after 11 market days. From the cave on, Wren digs ten a day and spends
-   them at once (a feast of lumfruit, and Dov's medicine), so Mira's and Dov's prices rise first. */
-const FESTIVAL = 12;
+/* ---------- the story arc ----------
+   1. Barter. Gran falls sick on night 3: the medicine has to be paid from the pack.
+   2. The money card (moneyDay): the first morning from day ARC.CARD_MIN on when, on each of the
+      last ARC.RUN evenings, at least half of the villagers with no use for pentaja would take it
+      as payment (stats().moneyness); on day ARC.CARD_MAX it comes anyway (steady: false).
+   3. That evening Gran brings out her jar: JAR pentaja she picked up all her life because they're
+      pretty (they had value as trinkets before anyone used them as money: Mises' regression theorem).
+   4. The storm (nothing hints at it before it hits): ARC.STORM_GAP mornings after the reveal, for
+      ARC.STORM_DAYS market days. The flood spoils the food in your pack and the bogwool pasture is
+      under water (no bogwool on storm nights). Only Mira and Dov come to market, and in the storm
+      nobody takes anything but crystals (pentaja, zirnet). A hungry storm night is cold too: everyone
+      but the one who gets the crust loses ARC.COLD strength, and that can kill. Gran's jar may pay
+      for food in the storm (and for medicine whenever someone is sick).
+   5. Wren's cave: the storm tears open the hillside, and on its last night Wren finds a cave full
+      of pentaja, so the cave opens the morning after the storm. From then on Wren digs ten a day and
+      spends them at once (a feast of lumfruit, and Dov's medicine), so Mira's and Dov's prices rise first.
+   6. Aunt Ola falls sick 2 nights after the cave, when the jar buys far less than it did in the storm.
+   The lesson ends at the harvest festival: the morning of FESTIVAL, after FESTIVAL - 1 market days. */
+const FESTIVAL = 13;
+const ARC = { CARD_MIN: 5, CARD_MAX: 6, RUN: 2, BAR: 0.5, STORM_GAP: 1, STORM_DAYS: 2, COLD: 2, WREN_RATE: 20 };
 
 /* ---------- family sickness ----------
    Now and then someone at home falls ill (at night). While they're sick:
@@ -70,25 +84,25 @@ const FESTIVAL = 12;
      in your pack, up to what's still needed; with all doses taken they're cured that night.
    - two nights in a row with no medicine and it gets worse (no bogwool at all),
    - it never passes by itself (NATURAL is out of reach): medicine cures it, or it kills.
-   When: Gran on night 3 (before the cave, when Gran's jar pays for it easily), Aunt Ola
-   2 nights after the cave (night 8, or 9 when the cave came late; by then the jar buys a
-   third of what it did, or less), and Gran
+   When: Gran on night 3 (before anyone knows about the jar: the medicine comes out of the pack),
+   Aunt Ola 2 nights after the cave (by then the jar buys a third of what it did, or less), and Gran
    once more late for those who keep playing after the festival. Little Tam never falls sick.
    Drawn from its own random stream, so it never shifts the rest of the village.
 
    Strength: each family member has HP (3). Every night, after the medicine and the meal:
    fed and not sick +1 (max 3); sick with no dose tonight -1; hungry (no lumfruit) and not
-   given the crust -1, but hunger alone never takes anyone below 1. At 0 they die. So an
+   given the crust -1, but hunger alone never takes anyone below 1 (except in the storm: cold and
+   hungry costs ARC.COLD, and can kill). At 0 they die. So an
    untreated sickness kills on the 3rd night, or the 2nd if they're starving too.
    Mercy: once the sick one has lost any strength, Dov always comes to market (so a sickness
    that starts at full strength may find Dov away one day, never two), and on their last
    night Dov keeps the medicine back for you even if the morning crowd wanted it all.
 
-   Gran's jar: JAR pentaja kept at home, pretty crystals Gran collected long before anyone
-   used them as money. It isn't in your pack, so it can't pay for everyday swaps: it comes
-   out for emergencies (medicine while someone is sick; crystals in your pack can top it up)
-   and, after the cave, to move savings into zirnet. Not counted in the village's stock
-   (nobody knows it's there). */
+   Gran's jar: nobody knows about it until the evening of the money card. Then it holds JAR
+   pentaja kept at home. It isn't in your pack, so it can't pay for everyday swaps: it comes
+   out for emergencies (medicine while someone is sick, food in the storm; crystals in your pack
+   can top it up) and, after the cave, to move savings into zirnet. Not counted in the village's
+   stock (nobody knows it's there). */
 const FAMILY = [
   { id: 'gran', name: 'Gran' },
   { id: 'tam',  name: 'Little Tam' },
@@ -111,7 +125,9 @@ function createWorld(opts = {}) {
   const w = {
     day: 1, seed, rand: rng(seed),
     playerAuto: opts.playerAuto ?? false,
-    caveDay: null, caveStrikeAt: opts.caveStrikeAt ?? { minDay: 5, maxDay: 6, moneyness: 0.5 },
+    caveDay: null,
+    moneyDay: null, moneySteady: null,   // the morning of the money card; was pentaja steadily taken by then?
+    storm: null,                         // { from, to }: the storm's market days, set the evening of the reveal
     agents: [], byId: {},
     produced: Object.fromEntries(IDS.map(g => [g, []])), // per-day production, last 7 days
     s2f: Object.fromEntries(IDS.map(g => [g, 1])),
@@ -147,7 +163,9 @@ function createWorld(opts = {}) {
     first: roll(SICK.FIRST), afterCave: roll(SICK.AFTER_CAVE), late: roll(SICK.LATE),
     order: SICK_ORDER.slice(), lastCured: -99, sickNights: 0,
     on: opts.sickness ?? true,
-    jar: { pen: opts.jar ?? JAR, zir: 0 },
+    jar: { pen: 0, zir: 0 }, jarFull: opts.jar ?? JAR,   // empty and unknown until Gran's reveal
+    jarShown: false, revealDay: null,
+    stormFood: { pen: 0, zir: 0, lum: 0 },   // what the jar paid for food in the storm, and the lumfruit it bought
     hp: Object.fromEntries(FAMILY.map(f => [f.id, HP])),
     dead: [],            // { who, name, day, cause }
     crust: null,         // who gets the last crust on a hungry night (the UI sets it before endDay)
@@ -226,6 +244,8 @@ function gainOf(w, a, g, n) { let s = count(a, g), G = 0; for (let i = 1; i <= n
 function evalDeal(w, A, B, x, n, y, k, hypothetical = false) {
   if (count(B, x) < n || (!hypothetical && count(A, y) < k)) return null;
   if (k * GOODS[y].size > HAUL || n * GOODS[x].size > HAUL) return null;   // nobody lugs home a mountain of it
+  // the storm: nobody carries anything home but a pocketful of crystals
+  if (w.stormOn && ((A.id !== 'you' && !MONIES.includes(x)) || (B.id !== 'you' && !MONIES.includes(y)))) return null;
   if (load(A) + n * GOODS[x].size - k * GOODS[y].size > CAP + 1e-9) return null;
   if (load(B) + k * GOODS[y].size - n * GOODS[x].size > CAP + 1e-9) return null;
   const gA = gainOf(w, A, x, n) - lossOf(w, A, y, k);
@@ -324,9 +344,22 @@ function refuse(w, A, B, y) {
 /* ---------- the day ---------- */
 function startDay(w) {
   w.events = []; w.trades = [];
+  // the money card: pentaja steadily taken on the last RUN evenings (or it's day CARD_MAX)
+  if (w.moneyDay == null && w.day >= ARC.CARD_MIN) {
+    const H = w.history, steady = H.length > ARC.RUN && H.slice(-ARC.RUN).every(h => h.moneyness.pen >= ARC.BAR);
+    if (steady || w.day >= ARC.CARD_MAX) { w.moneyDay = w.day; w.moneySteady = steady; w.events.push({ type: 'money', steady }); }
+  }
+  // the storm hits in the night: the flood spoils the food in your pack
+  const storm = w.stormOn = stormNow(w);
+  if (storm && w.day === w.storm.from) {
+    const you = w.byId.you, gone = {};
+    for (const g of ['lum', 'snm']) if (count(you, g)) { gone[g] = count(you, g); you.inv[g] = []; }
+    w.events.push({ type: 'storm', gone });
+  }
   const merciful = mercy(w);
   for (const a of w.agents) {
     a.present = a.id === 'you' || w.day === 1 ? true : w.rand() < a.attend;   // everyone turns up on day one
+    if (storm && a.id !== 'you') a.present = a.id === MAKER.lum || a.id === MAKER.dri;   // the storm: only Mira (food) and Dov (medicine) come (after the draw)
     if (a.id === MAKER.dri && merciful) a.present = true;   // someone at home is getting weaker: Dov comes (after the draw, so nothing else shifts)
     if (a.id === MAKER.zir && w.family.jarPlan === 'zir') a.present = true;   // you told Hesk you'd bring Gran's jar: Hesk comes
   }
@@ -443,15 +476,21 @@ function endDay(w) {
   // after the day's work: does anyone fall ill tonight? (Dov has picked fresh driftcap, so his price is tomorrow's)
   fallSick(w, ev);
 
-  // Wren strikes a pentaja vein once pentaja has become the thing everyone takes.
+  // The evening of the money card: Gran brings out her jar. The storm is set for a morning soon after.
+  const F = w.family;
+  if (w.moneyDay === w.day && !F.jarShown) {
+    F.jarShown = true; F.revealDay = w.day; F.jar.pen += F.jarFull;
+    w.storm = { from: w.day + ARC.STORM_GAP, to: w.day + ARC.STORM_GAP + ARC.STORM_DAYS - 1 };
+    ev.push({ type: 'reveal', pen: F.jarFull });
+  }
+  // The last night of the storm: it tore open the hillside, and Wren finds a cave full of pentaja.
   let st = stats(w);
-  const rs = w.caveStrikeAt;
-  if (rs && w.caveDay == null && w.day >= rs.minDay && (st.moneyness.pen >= rs.moneyness || w.day >= rs.maxDay)) {
+  if (w.storm && w.caveDay == null && w.day >= w.storm.to) {
     w.caveDay = w.day + 1;
     // ...and goes on a spree with them: feasts on lumfruit and buys up Dov's medicine, at the old prices.
     // So the new crystals reach Mira and Dov first, and their prices rise first.
     const wren = w.byId.wren;
-    wren.rate = 10; wren.hoard = 60;
+    wren.rate = ARC.WREN_RATE; wren.hoard = 60;
     Object.assign(wren.needs, { lum: 2, dri: 2 }); wren.wants = { ...wren.needs, ...wren.keeps };
     ev.push({ type: 'wren' });
   }
@@ -460,6 +499,9 @@ function endDay(w) {
   w.history.push(st);
   w.day++;
 }
+
+/* ---------- the storm ---------- */
+function stormNow(w) { return !!w.storm && w.day >= w.storm.from && w.day <= w.storm.to; }
 
 /* ---------- family sickness ---------- */
 // Bogwool you'll make tonight: 2 normally, half without tools or after two hungry nights in a row,
@@ -470,6 +512,7 @@ function outputRate(w) {
   if (a.hunger.ket > 0) rate = Math.max(1, Math.floor(rate / 2));   // no tools
   if (a.hunger.lum >= HUNGRY_TIRED) rate = Math.max(1, Math.floor(rate / 2));   // too hungry to work hard
   if (s) rate = Math.min(rate, s.worse ? SICK.WORSE_RATE : SICK.RATE);
+  if (stormNow(w)) rate = 0;   // the pasture is under water
   return rate;
 }
 
@@ -527,13 +570,14 @@ function familyNight(w, ev) {
     const id = f.id; let hp = F.hp[id];
     if (hp <= 0) continue;
     const was = hp, sick = tn.sick === id;
-    if (hungry && crust !== id) hp = Math.max(1, hp - 1);   // hunger alone: weak, never dead
+    const cold = hungry && crust !== id && stormNow(w);
+    if (hungry && crust !== id) hp = cold ? hp - ARC.COLD : Math.max(1, hp - 1);   // hunger alone: weak, never dead (but cold and hungry in the storm can kill)
     if (sick && !tn.dosed) hp -= 1;
     if (!hungry && !sick) hp = Math.min(HP, hp + 1);
     F.hp[id] = Math.max(0, hp);
     if (hp < was) ev.push({ type: 'weak', who: id, name: f.name, hp: F.hp[id] });
     if (hp <= 0) {
-      const cause = hungry && crust !== id ? 'hungry+sick' : 'sick';
+      const cause = cold ? 'storm' : hungry && crust !== id ? 'hungry+sick' : 'sick';
       F.dead.push({ who: id, name: f.name, day: w.day, cause });
       if (F.sick && F.sick.who === id) { F.sick.died = w.day; F.sick = null; F.lastCured = w.day; setMedNeed(you, 0); }
       you.needs.lum = aliveCount(w) / FAMILY.length;   // fewer mouths at the table
@@ -607,6 +651,7 @@ function family(w) {
     jar: { ...J }, med, trend,                  // med: { pen, zir } crystals Dov wants for one medicine today; trend: the same, smoothed
     jarMeds: jarWorth(J, trend),                // about how many medicines the jar buys these days
     jarDoses: jarDoses(w, trend),               // ...the same, in mushrooms (DOSES per medicine)
+    jarShown: w.family.jarShown, storm: stormNow(w),
     hp: { ...w.family.hp }, dead: w.family.dead.slice(), alive: aliveCount(w), critical: critical(w),
     hungryRun: w.family.hungryRun,
   };
@@ -656,11 +701,15 @@ function medPriceNow(w) {
 }
 
 /* ---------- Gran's jar ---------- */
-// What the jar may pay for today: medicine while someone is sick; after the cave, zirnet (moving your savings).
-function jarFor(w, x) { return x === 'dri' ? !!w.family.sick : x === 'zir' ? w.caveDay != null && w.day >= w.caveDay : false; }
-// How many of the k crystals the jar pays (medicine: the jar first, crystals in your pack top it up;
+// What the jar may pay for today (once Gran has shown it): medicine while someone is sick; food in the storm;
+// after the cave, zirnet (moving your savings).
+function jarFor(w, x) {
+  if (!w.family.jarShown) return false;
+  return x === 'dri' ? !!w.family.sick : x === 'lum' ? stormNow(w) : x === 'zir' ? w.caveDay != null && w.day >= w.caveDay : false;
+}
+// How many of the k crystals the jar pays (medicine and food: the jar first, crystals in your pack top it up;
 // zirnet: the jar alone, it's moving your savings).
-function jarShare(w, x, k, y) { return x === 'dri' ? Math.min(w.family.jar[y] || 0, k) : k; }
+function jarShare(w, x, k, y) { return x === 'dri' || x === 'lum' ? Math.min(w.family.jar[y] || 0, k) : k; }
 // Pay k crystals (y: pen or zir) from the jar for n of x at a stall. Zirnet you buy goes into the jar.
 function jarTrade(w, sellerId, x, n, k, y = 'pen') {
   const J = w.family.jar, you = w.byId.you, j = jarShare(w, x, k, y);
@@ -669,6 +718,7 @@ function jarTrade(w, sellerId, x, n, k, y = 'pen') {
   const t = playerTrade(w, sellerId, x, n, y, k);
   if (!t) { take(you, y, j); J[y] += j; return null; }
   if (x === 'zir') { take(you, 'zir', n); J.zir += n; }
+  if (x === 'lum') { const SF = w.family.stormFood; SF[y] += j; SF.lum += n; }
   t.jar = j;
   return t;
 }
@@ -678,6 +728,7 @@ function jarQuote(w, sellerId, x, n) {
   const J = w.family.jar, B = w.byId[sellerId];
   if (!jarFor(w, x) || !B.present) return null;
   n = Math.min(n ?? (x === 'dri' ? w.family.sick.left - count(w.byId.you, 'dri') : 1), count(B, x));
+  if (n < 1) return null;
   for (; n >= 1; n--) {
     let best = null;
     for (const y of ['pen', 'zir']) {
@@ -685,9 +736,23 @@ function jarQuote(w, sellerId, x, n) {
       const p = askPrice(w, w.byId.you, B, x, n, y), j = p && jarShare(w, x, p.k, y);
       if (p && j <= J[y] && p.k - j <= count(w.byId.you, y) && (!best || p.k < best.k)) best = { y, k: p.k, n, ok: true, fromJar: j, fromPack: p.k - j };
     }
-    if (best || x !== 'dri') return best;
+    // food: when the same crystals buy more lumfruit, take them (up to 3: they go mushy after that)
+    if (best && x === 'lum') for (let m = best.n + 1; m <= Math.min(3, count(B, x)); m++) {
+      const p = askPrice(w, w.byId.you, B, x, m, best.y);
+      if (p && p.k === best.k) best.n = m; else break;
+    }
+    if (best || (x !== 'dri' && x !== 'lum')) return best;
   }
   return null;   // nothing (more) needed, nothing on the stall, or the jar can't pay even for one
+}
+
+// For the money card: was pentaja steadily taken, and which other good passed from hand to hand
+// (taken by someone with no use for it) most over the last 3 days, if any did at least twice.
+function moneyNote(w) {
+  const H = w.history.slice(-3), m = {};
+  for (const h of H) for (const g in h.medium) if (g !== 'pen') m[g] = (m[g] || 0) + h.medium[g];
+  const top = Object.keys(m).sort((a, b) => m[b] - m[a])[0];
+  return { steady: !!w.moneySteady, pen: H.reduce((s, h) => s + h.medium.pen, 0), other: top && m[top] >= 2 ? top : null, otherN: top ? m[top] : 0 };
 }
 
 function recomputeS2F(w) {
@@ -846,7 +911,8 @@ function findRoutes(w, target, need = 1, maxHops = 3) {
     return { target, need, steps, spent, cost };
   });
   // while someone is sick, Gran's jar can pay Dov for the medicine straight away (the others only
-  // sell their own driftcap dear: the trade table still lets you, the helper doesn't suggest it)
+  // sell their own driftcap dear: the trade table still lets you, the helper doesn't suggest it);
+  // in the storm it can pay Mira for food
   // When the jar is short, crystals from your pack top it up, and a chain of swaps can get those first.
   if (jarFor(w, target) && target !== 'zir') for (const B of sellers.filter(b => b.id === MAKER[target])) {
     const q = jarQuote(w, B.id, target, need);
@@ -880,7 +946,7 @@ function findRoutes(w, target, need = 1, maxHops = 3) {
 function routeStep(w, st) { return st.jar ? jarTrade(w, st.npc, st.x, st.n, st.k, st.y) : playerTrade(w, st.npc, st.x, st.n, st.y, st.k); }
 
 const Sim = {
-  GOODS, IDS, VILLAGERS, CAP, HAUL, FAMILY, SICK, JAR, HP, FESTIVAL, createWorld, startDay, endDay, stats,
+  GOODS, IDS, VILLAGERS, CAP, HAUL, FAMILY, SICK, JAR, HP, FESTIVAL, ARC, MONIES, createWorld, startDay, endDay, stats, stormNow, moneyNote,
   family, outputRate, medPrice, medPriceBefore, medPriceNow, medTrend, jarWorth, jarDoses, jarFor, jarTrade, jarQuote,
   hungryTonight, critical, aliveCount, defaultCrust,
   count, load, val, planVal, useVal, exchVal, saleability, playerTrade, playerAsk, askPrice, wantUnits,

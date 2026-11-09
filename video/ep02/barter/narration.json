@@ -43,20 +43,14 @@
  {
   "id": "i7",
   "scene": "medicine",
-  "text": "Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die.",
-  "style": "The same storyteller, now quieter and serious, no smile; a steady pace, not slow. Let the last sentence land softly.",
-  "pad": 0.8
- },
- {
-  "id": "i8",
-  "scene": "jar",
-  "text": "Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day.",
-  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses."
+  "text": "Sometimes someone at home gets sick. Then they need medicine: two driftcap mushrooms from Dov.",
+  "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses.",
+  "pad": 0.5
  },
  {
   "id": "i9",
   "scene": "goal",
-  "text": "The harvest festival is on day twelve. Get there with everyone still at the table.",
+  "text": "The harvest festival is coming soon. Get there with everyone still at the table.",
   "style": "Warm, friendly storyteller introducing a cozy game to a newcomer: a smile in the voice, clear and simple. Brisk, lively pace with natural rhythm; no long pauses.",
   "pad": 0.5
  },

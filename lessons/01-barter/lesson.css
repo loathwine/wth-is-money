@@ -47,6 +47,7 @@ body { overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 .sjar .l1 b { font-family: var(--font-pixel); font-weight: 400; color: var(--pen); }
 .sjar .l2 { display: inline-flex; align-items: center; gap: 2px; color: var(--muted); font-size: 13px; white-space: nowrap; }
 .sjar.drop { border-color: var(--bad); animation: shake .4s 3; }
+.sjar.new { border-color: var(--pen); box-shadow: 0 0 0 2px rgba(255, 111, 181, .45); animation: bump .5s 3; }
 .sjar.drop .l2 { color: var(--bad); font-weight: 700; }
 .actionbar { display: flex; align-items: center; gap: 10px; }
 .actionbar .hint { flex: 1; font-size: 14px; }
@@ -421,7 +422,8 @@ body.dusk #world { filter: brightness(.25); }
 .say-line .face { flex: none; margin-top: 1px; }
 .say-line b { color: var(--gold); font-weight: 600; }
 @keyframes lineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.eve-facts { margin: 0; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; }
+.eve-facts { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.eve-facts > span { white-space: nowrap; }
 .eve-facts:empty { display: none; }
 .eve-facts .gi { width: 16px; height: 16px; }
 .eve-actions { display: flex; gap: 10px; }

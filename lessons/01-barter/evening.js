@@ -19,17 +19,45 @@ const TRIGGERS = [
   { id: 'day1', when: c => c.night === 1 && !c.hungry, pool: [
     [{ who: 'gran', text: 'Lumfruit! You found it. Well done.' }, { who: 'tam', text: 'What did {seller} want for it?' }, { who: 'you', text: '{paid}. No money here: everything is a swap.' }],
   ] },
+  // Gran's jar: the evening of the money card, a surprise to everyone (it outranks everything but a death)
+  { id: 'J', when: c => c.reveal && c.alive.gran, pool: [
+    [{ who: 'tam', text: 'Lots of people take pentaja now. You can\'t even eat one!' },
+     { who: 'gran', self: true, text: 'Then look at this. I\'ve picked them up all my life, because they\'re pretty. {jarFull} of them.' },
+     { who: 'ola', text: 'A whole jar, Gran? We never knew!' }],
+  ] },
+  { id: 'J2', when: c => c.reveal && !c.alive.gran, pool: [
+    [{ who: 'ola', text: 'Look what was on Gran\'s shelf: a jar of pentaja. {jarFull} of them.' },
+     { who: 'tam', text: 'Gran picked them up all her life. She said they were pretty.' }],
+  ] },
+  // the storm: the jar saves the day (or tomorrow it must)
+  { id: 'W2', when: c => c.stormNight && c.hungry && !c.stormLast, pool: [
+    [{ who: 'any', text: 'Cold and hungry. Another night like this and someone won\'t wake up.' },
+     { who: 'gran', when: c => c.jarPen > 0, self: true, text: 'Mira takes crystals. Take them from my jar tomorrow. This is what they\'re for.' }],
+  ] },
+  { id: 'W1', when: c => c.stormNight && !c.hungry && c.jarFood && !c.stormLast, pool: [
+    [{ who: 'gran', self: true, text: 'Nobody saw this storm coming. Good thing the crystals were there.' },
+     { who: 'ola', text: 'That\'s what savings are for: the days you can\'t plan for.' }],
+    [{ who: 'tam', text: 'Gran\'s pretty crystals bought our dinner!' },
+     { who: 'gran', self: true, text: 'Nobody can plan for a storm. That\'s why you put something by.' }],
+  ] },
+  { id: 'W3', when: c => c.stormNight && !c.hungry && !c.jarFood && !c.stormLast, pool: [
+    { who: 'tam', text: 'Listen to the rain! Is the bogwool swimming?' },
+    { who: 'ola', text: 'The pasture is a lake. No bogwool until it drains.' },
+  ] },
   { id: 'S1', when: c => c.fellSick && !c.fellSick.afterCave, pool: [
-    [{ who: 'ola', text: '{sick} is burning up. We need medicine: driftcap, the floating mushroom Dov sells. Two of them.' },
-     { who: 'gran', self: true, text: 'Take crystals from my jar for Dov. That\'s what they\'re for.' }],
-    [{ who: 'any', text: '{sick} is burning up. We need medicine: driftcap, the floating mushroom Dov sells. Two of them.' },
-     { who: 'tam', text: 'Gran\'s jar can pay Dov! Can\'t it?' }],
+    [{ who: 'ola', when: c => !c.jarShown, text: '{sick} is burning up. We need medicine: driftcap, the floating mushroom Dov sells. Two of them.' },
+     { who: 'tam', when: c => !c.jarShown, text: 'Dov needs bogwool! We have bogwool!' }],
+    [{ who: 'any', when: c => !c.jarShown, text: '{sick} is burning up. We need medicine: driftcap, the floating mushroom Dov sells. Two of them.' },
+     { who: 'gran', when: c => !c.jarShown && c.sickWho !== 'gran', text: 'Whatever Dov wants for it, find a way.' }],
+    [{ who: 'any', when: c => c.jarShown, text: '{sick} is burning up. Two mushrooms from Dov. Gran\'s jar can pay.' }],
   ] },
   { id: 'S1b', when: c => c.fellSick && c.fellSick.afterCave, pool: [
-    [{ who: 'any', text: '{sick} has the fever. Two mushrooms from Dov... I hope the jar still covers it.' },
-     { who: 'gran', self: true, when: c => c.medLag, text: 'Dov still asks only {med} crystals for the medicine. Go first thing, before Dov catches on.' }],
-    [{ who: 'any', text: '{sick} has the fever. Two mushrooms from Dov... I hope the jar still covers it.' },
-     { who: 'tam', text: 'Gran\'s jar has {jarPen} crystals. Is that still enough?' }],
+    [{ who: 'any', text: '{sick} has the fever. Two mushrooms from Dov.' },
+     { who: 'gran', self: true, when: c => c.stormFed && c.vars.lumNow, text: 'In the storm, {stormK} of my crystals fed us for {stormD}. Today one lumfruit costs {lumNow}.' },
+     { who: 'gran', self: true, when: c => !(c.stormFed && c.vars.lumNow) && c.vars.medBefore, text: 'Before Wren\'s cave, Dov asked {medBefore} crystals for it. Now {med}. My jar has {jarPen}.' }],
+    [{ who: 'any', text: '{sick} has the fever. Two mushrooms from Dov.' },
+     { who: 'tam', when: c => c.stormFed && c.vars.lumNow, text: 'In the storm, {stormK} crystals bought us {stormLum}! Why does one lumfruit cost {lumNow} now?' },
+     { who: 'tam', when: c => !(c.stormFed && c.vars.lumNow) && c.vars.medBefore, text: 'Dov wants {med} crystals for the medicine now? It was {medBefore}!' }],
   ] },
   { id: 'S2', when: c => c.stillSick && c.noMed && c.sickHp === 1, pool: [
     { who: 'any', text: '{sick} won\'t get through another night like this. Medicine. Tomorrow, whatever it costs.' },
@@ -37,7 +65,7 @@ const TRIGGERS = [
   ] },
   // the jar choice sits high up, so it's never crowded out (it comes once, the evening after the inflation card)
   { id: 'Z1', choice: 'jar', when: c => c.jarAsk, pool: [
-    { who: 'ola', text: 'Pentaja buys less every day. Hesk\'s zirnet can\'t be dug up faster. Should we move Gran\'s jar into zirnet?' },
+    { who: 'ola', self: true, text: 'Pentaja buys less every day. Hesk\'s zirnet can\'t be dug up faster. Should we move Gran\'s jar into zirnet?' },
     { who: 'gran', text: 'Hesk finds one zirnet every few days. Nobody can make more. Should my jar go into zirnet?' },
   ] },
   { id: 'S3', when: c => c.stillSick && c.noMed, pool: [
@@ -62,18 +90,18 @@ const TRIGGERS = [
     { who: 'tam', when: c => c.crust !== 'tam', text: 'My tummy is rumbling.' },
   ] },
   { id: 'C1', when: c => c.caveNight, pool: [
-    [{ who: 'tam', text: 'The hill is glowing pink! Hesk says Wren found a cave full of pentaja.' },
+    [{ who: 'tam', text: 'The storm tore open the hill, and it\'s glowing pink! Hesk says Wren found a cave full of pentaja.' },
      { who: 'gran', text: 'A whole cave of them? Hm. Then they\'re not so rare any more.' }],
   ] },
   { id: 'C2', when: c => c.dayAfterCave, pool: [
-    { who: 'gran', text: 'Crystals I waited years for, and Wren digs up ten a day now. Hm.' },
+    { who: 'gran', text: 'Crystals I picked up one by one for years, and Wren digs up {wrenRate} a day now. Hm.' },
     { who: 'tam', text: 'Wren gave me a pentaja for nothing! Wren has a whole sack.' },
   ] },
   { id: 'P1', cool: 2, when: c => c.price && c.price.rise >= 2, pool: [
     { who: 'ola', text: '{priceLine}' },
     [{ who: 'tam', text: 'Why does fruit cost more crystals now? Is the fruit bigger?' }, { who: 'gran', text: 'No, child. There are just more crystals.' }],
   ] },
-  { id: 'P2', cool: 2, when: c => c.jarFell, pool: [
+  { id: 'P2', cool: 2, when: c => c.jarFell && !(c.price && c.price.rise >= 2), pool: [   // one price comparison a night is plenty
     { who: 'gran', text: 'My jar bought {jarBefore} mushrooms before Wren\'s cave. Now {jarNow}. Same crystals.' },
   ] },
   { id: 'Z2', when: c => c.zirToday, pool: [
@@ -86,9 +114,9 @@ const TRIGGERS = [
     [{ who: 'tam', text: 'You got {iGood}? We can\'t even use that!' }, { who: 'you', text: 'It\'s not for us. Someone else takes it for what we need.' }],
   ] },
   { id: 'M', when: c => c.money, pool: [
-    [{ who: 'tam', text: 'Everyone takes pentaja now. You can\'t eat a pentaja! Why?' }, { who: 'gran', text: 'Because they know someone else will take it, child.' }],
+    [{ who: 'tam', text: 'So many people take pentaja now. You can\'t eat a pentaja! Why?' }, { who: 'gran', text: 'Because they know someone else will take it, child.' }],
   ] },
-  { id: 'T', when: c => c.toolsBroke, pool: [
+  { id: 'T', when: c => c.toolsBroke && !c.stormNight, pool: [   // (in the storm the pasture is flooded anyway)
     { who: 'ola', text: 'The tools broke. Without kettlestone from Bob, you\'ll make half the bogwool.' },
     { who: 'gran', text: 'The tools broke again. Bob has kettlestone.' },
   ] },
@@ -122,7 +150,7 @@ function speaker(l, c, spoken) {
 }
 
 function pick(c) {
-  if (c.died) return { death: true, lines: deathLines(c) };
+  if (c.died) { const d = deathLines(c); return { death: true, lines: d.concat(c.reveal ? [revealLine(c, d[0].who)] : []) }; }
   const out = [], spoken = new Set();
   let fired = 0, choice = null;
   for (const T of TRIGGERS) {
@@ -151,11 +179,22 @@ function pick(c) {
   return { lines: out, choice };
 }
 
+// The jar, on a night someone died: one quiet line.
+// (never from whoever just spoke the death line: each speaker talks once a night)
+function revealLine(c, spoke) {
+  const other = ['tam', 'ola'].find(id => c.alive[id] && id !== spoke);
+  if (c.alive.gran && (spoke !== 'gran' || !other)) return { who: 'gran', name: 'Gran', text: fill('There\'s something I never told you. A jar of {jarFull} pentaja: I picked them up all my life, because they\'re pretty.', c) };
+  const who = other || ['tam', 'ola'].find(id => c.alive[id]);
+  if (c.alive.gran) return { who, name: NAME[who], text: fill('Gran showed us a jar of {jarFull} pentaja tonight. She picked them up all her life, because they\'re pretty.', c) };
+  return { who, name: NAME[who], text: fill('On Gran\'s shelf: a jar of {jarFull} pentaja. Gran picked them up all her life, because they\'re pretty.', c) };
+}
+
 // The night someone dies: one line, from the eldest who is left.
 function deathLines(c) {
   const d = c.died;
-  if (d.who === 'gran' && c.alive.ola) return [{ who: 'ola', name: 'Ola', text: 'Gran\'s chair is empty tonight. Her jar is still on the shelf.' }];
+  if (d.who === 'gran' && c.alive.ola) return [{ who: 'ola', name: 'Ola', text: c.jarShown && !c.reveal ? 'Gran\'s chair is empty tonight. Her jar is still on the shelf.' : 'Gran\'s chair is empty tonight.' }];
   if (d.who === 'ola' && c.alive.gran) return [{ who: 'gran', name: 'Gran', text: 'Ola\'s place at the table is empty. We\'ll set it anyway, for a while.' }];
+  if (d.who === 'tam' && (c.alive.gran || c.alive.ola)) { const who = c.alive.gran ? 'gran' : 'ola'; return [{ who, name: NAME[who], text: 'Tam\'s little chair is empty tonight.' }]; }
   return [{ who: 'tam', name: 'Tam', text: 'It\'s just us now.' }];
 }
 

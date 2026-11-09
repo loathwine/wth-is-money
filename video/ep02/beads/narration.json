@@ -24,9 +24,9 @@
  {
   "id": "b5",
   "scene": "cargo",
-  "text": "Ships carried them south, with cloth, iron and guns. They bought gold and ivory. Above all, Liverpool's traders bought people. Glass beads helped pay for the Atlantic slave trade.",
-  "style": "The same narrator, but quiet and grave: no smile, a slower pace, plain and steady. Let the last two sentences land.",
-  "pad": 1.0
+  "text": "Ships from Liverpool carried them south, with cloth, iron and guns. They bought some gold and ivory, but mostly enslaved people. Glass beads helped pay for the Atlantic slave trade.",
+  "style": "The same documentary narrator, calm and matter-of-fact: stating a historical fact plainly, at an even, normal pace. No drama, no heavy pauses, no smile.",
+  "pad": 0.5
  },
  {
   "id": "b6",

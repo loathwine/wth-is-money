@@ -6,9 +6,9 @@
 HEIST = 60 / 112
 HEIST_MEL = [[74, _, 78, 81, _, 78, 76, _], [72, _, 76, 79, _, 76, 72, _], [74, 79, 83, _, 81, 79, 76, _], [76, _, 81, _, 79, 76, 74, _]]
 section(0.0, w("b4", 32), [62, 60, 55, 57], HEIST_MEL, tempo_beat=HEIST)
-section(w("b4", 32), seg["b5"]["t0"], [62, 60, 55, 57], [[74, _, _, _, 72, _, _, _]], tempo_beat=HEIST, style="drone", vol=0.7)
-# b5: the music drops out; a single quiet low D drone that dies at "Above", then silence
-place(music, seg["b5"]["t0"], tone(midi(38), w("b5", 14) - seg["b5"]["t0"], "sine", attack=0.8, decay=3.0), 0.25)
+# b4's hard bargaining and b5 (the slave trade, said plainly): the same gentle pad bed runs on at the same level, with a sparse
+# melody. No drop-out, no silence, no stings: a calm documentary register.
+section(w("b4", 32), seg["b6"]["t0"], [62, 60, 55, 57], [[74, _, _, _, 72, _, _, _], [69, _, _, _, 71, _, _, _]], tempo_beat=HEIST, style="drone", vol=0.7)
 # b6: the same tune in D Dorian at half speed; each bar loses two more notes: the tune "buys less"
 DOR = [74, 76, 77, 81, 79, 77, 76, 74]
 bar, i, tb = 8 * HEIST, 0, seg["b6"]["t0"] + 0.3
@@ -53,7 +53,7 @@ place(sfx, w("b4", 30), chime(72, (0, 4, 7)), 0.25)
 place(sfx, w("b4", 28), pop_(1000), 0.1)
 place(sfx, w("b4", 32) + 0.3, pop_(500), 0.15)
 place(sfx, w("b4", 35), thud(), 0.4)
-# b5: a low ship creak only, at the start. No sound effects from word 14 on.
+# b5: a low ship creak at the start; nothing else (no gamified sounds on this line).
 place(sfx, seg["b5"]["t0"], np.convolve(noise(1.2, 1, seed=9), np.ones(40) / 40, "same").astype(np.float32), 0.25)
 # b6: a soft clink per bead on the string; a quiet horn per ship; a low pop per basket that vanishes
 a, b = w("b6", 4), w("b6", 10)

@@ -58,35 +58,26 @@
   "id": "i7",
   "scene": "medicine",
   "t0": 43.914,
-  "t1": 57.493,
+  "t1": 50.831,
   "voice": 43.914,
-  "speech": 12.43,
-  "text": "Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die."
- },
- {
-  "id": "i8",
-  "scene": "jar",
-  "t0": 57.493,
-  "t1": 64.725,
-  "voice": 57.493,
-  "speech": 6.882,
-  "text": "Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day."
+  "speech": 6.067,
+  "text": "Sometimes someone at home gets sick. Then they need medicine: two driftcap mushrooms from Dov."
  },
  {
   "id": "i9",
   "scene": "goal",
-  "t0": 64.725,
-  "t1": 70.315,
-  "voice": 64.725,
-  "speech": 4.74,
-  "text": "The harvest festival is on day twelve. Get there with everyone still at the table."
+  "t0": 50.831,
+  "t1": 55.864,
+  "voice": 50.831,
+  "speech": 4.183,
+  "text": "The harvest festival is coming soon. Get there with everyone still at the table."
  },
  {
   "id": "i10",
   "scene": "go",
-  "t0": 70.315,
-  "t1": 78.637,
-  "voice": 70.315,
+  "t0": 55.864,
+  "t1": 64.186,
+  "voice": 55.864,
   "speech": 6.372,
   "text": "There is no money in Ulm Hollow. Not yet. Can you keep your family fed until the festival?"
  }

@@ -115,17 +115,6 @@
     const e = easeInOut(k);
     return [lerp(p0[0], p1[0], e), lerp(p0[1], p1[1], e) - Math.sin(Math.PI * e) * hgt];
   }
-  // three strength pips (hi-res)
-  function pips(cx, cy, n, r = 30, flick = 0) {
-    for (let i = 0; i < 3; i++) {
-      const x = cx + (i - 1) * r * 2.6, on = i < n, fl = i === n && flick > 0;
-      ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = on ? "#ff6f8e" : fl ? T.hexA("#ff6f8e", flick) : "rgba(26,16,38,.75)"; ctx.fill();
-      ctx.lineWidth = 7; ctx.strokeStyle = "#1a1026"; ctx.stroke();
-      if (on) { ctx.fillStyle = "#ffc2d1"; ctx.fillRect(x - r * 0.45, cy - r * 0.5, r * 0.35, r * 0.3); }
-    }
-  }
-
   /* ---------------------------------------------------------------- the camera: draw the world on the lo canvas, then blit a window of it */
   function cam(cx, cy, z) {
     const vw = LO_W / z, vh = LO_H / z;
@@ -215,18 +204,6 @@
       lx.restore();
       px(wx + ww / 2 - 1, wy, 2, wh, "#6e4a33"); px(wx, wy + wh / 2 - 1, ww, 2, "#6e4a33");
     }
-  }
-  // Gran's jar: a squat clay jar with a cloth lid, pink crystals peeking out
-  function jar(cx, base, h = 40, open = 0, t = 0) {
-    for (let i = 0; i < h; i++) {
-      const u = i / h, hw = Math.round(u > 0.9 ? 9 : u > 0.78 ? 7 : 8 + 9 * Math.sin(Math.PI * u / 0.78));
-      px(cx - hw, base - i - 1, hw * 2, 1, u > 0.78 && u <= 0.9 ? "#7a3d22" : "#b0603a");
-      px(cx + hw - Math.max(1, Math.round(hw / 3)), base - i - 1, Math.max(1, Math.round(hw / 3)), 1, "#7a3d22");
-      if (u > 0.2 && u < 0.65) px(cx - hw + 2, base - i - 1, 2, 1, "#d68a5a");
-    }
-    for (let i = 0; i < 3; i++) px(cx - 12, base - Math.round(h * 0.42) + i * 3, 24, 1, "#7a3d22");   // painted bands
-    if (open < 1) { px(cx - 10, base - h - 3, 20, 4, "#c77dff"); px(cx - 10, base - h + 1, 20, 1, "#7d3fb8"); px(cx - 1, base - h - 5, 3, 2, "#7d3fb8"); }
-    for (let i = 0; i < 4; i++) { const g = (Math.sin(t * 4 + i * 1.7) + 1) / 2; px(cx - 6 + i * 4, base - h - 1 - (open ? 1 : 0), 2, 2, g > 0.7 ? "#ffffff" : "#ff6fb5"); }
   }
   function bowl(cx, y, w = 22) { for (let i = 0; i < 6; i++) { const hw = Math.round(w / 2 - i * i * 0.35); px(cx - hw, y + i, hw * 2, 1, i < 1 ? "#c49a6c" : "#8a5a2b"); } }
   function table(x0, x1, y) { px(x0, y, x1 - x0, 4, "#8a5a2b"); px(x0, y, x1 - x0, 1, "#b07a45"); px(x0, y + 4, x1 - x0, 1, "#5e3b1a"); px(x0 + 4, y + 5, 3, 20, "#5e3b1a"); px(x1 - 7, y + 5, 3, 20, "#5e3b1a"); }
@@ -449,23 +426,20 @@
   };
 
   /* ================================================================ i7 · medicine */
-  // "Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die."
+  // "Sometimes someone at home gets sick. Then they need medicine: two driftcap mushrooms from Dov."
+  // Plain and factual on purpose: no strength pips, no dimming, no "can die" (the game explains the rest when it happens).
   SC.medicine = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     room(t, { win: "night", moon: true, winAt: [92, 12, 36, 26] });
     // Gran in bed
     px(14, 86, 112, 8, "#6e4a33"); px(14, 94, 4, 22, "#5a3d2b"); px(122, 94, 4, 22, "#5a3d2b"); px(10, 64, 6, 52, "#5a3d2b");   // bed frame + headboard
     px(18, 74, 34, 12, "#f4ecff"); px(18, 84, 34, 2, "#c9bfe0");                                                            // pillow
-    const sickAt = w(4.5), nightK = seg(lt, w(14), w(20) + 0.4);
-    const mood = lt < sickAt ? "ok" : lt < w(19) ? "sick" : "worse";
-    faceS("gran", mood, 36, 72, 3);
+    const sickAt = w(4.5);
+    faceS("gran", lt < sickAt ? "ok" : "sick", 36, 72, 3);
     px(48, 78, 76, 12, "#6c3aa3"); for (let x = 50; x < 124; x += 8) px(x, 78, 4, 12, "#7d3fb8"); px(48, 78, 76, 1, "#b27ae8");   // quilt
-    // nights pass in the window: the moon slides across
-    if (nightK > 0) { const mx = lerp(94, 126, nightK), my = 20 - Math.sin(nightK * Math.PI) * 4; disc(mx, my, 3, "#fff3d0"); }
-    const dark = seg(lt, w(21), w(25) + 0.4);
     candle(140, 100, t);
-    // the medicine panel (right): Dov's driftcap, floating
-    const kp = seg(lt, w(6), w(6) + 0.5) * (1 - seg(lt, w(14), w(14) + 0.5));
+    // the medicine panel (right): Dov's driftcap
+    const kp = seg(lt, w(6), w(6) + 0.5);
     if (kp > 0) {
       lx.save(); lx.globalAlpha = kp;
       px(140, 6, 96, 116, "#120d1d"); px(140, 6, 96, 2, "#3a2d5c"); px(140, 120, 96, 2, "#3a2d5c"); px(140, 6, 2, 116, "#3a2d5c"); px(234, 6, 2, 116, "#3a2d5c");
@@ -476,72 +450,26 @@
     blitLo();
     if (kp > 0) {
       const bobY = (i) => Math.sin(t * 2.4 + i * 1.3) * 18;
-      const two = seg(lt, w(9), w(9) + 0.35);
+      const two = seg(lt, w(10), w(10) + 0.35);
       ctx.save(); ctx.globalAlpha = kp;
       const mx = X(166), my = 560;
       glow(mx, my + bobY(0), 190, "#c77dff", 0.9);
       hico("dri", mx - (two > 0 ? 100 * easeOut(two) : 0), my + bobY(0), 220);
       if (two > 0) { glow(mx + 100, my + bobY(1), 190, "#c77dff", 0.9 * two); hico("dri", mx + 100, my + bobY(1), 220 * pop(two)); }
       ctx.restore();
-      label("MEDICINE", X(188), 150, { k: seg(lt, w(8), w(8) + 0.35) * kp, size: 64, bg: "#ecc8ff" });
-      body("driftcap mushrooms", X(188), 270, 56, C.ink, { alpha: seg(lt, w(10), w(10) + 0.4) * kp });
+      label("MEDICINE", X(188), 150, { k: seg(lt, w(9), w(9) + 0.35) * kp, size: 64, bg: "#ecc8ff" });
+      body("driftcap mushrooms", X(188), 270, 56, C.ink, { alpha: seg(lt, w(11), w(11) + 0.4) * kp });
       if (two > 0) text("× 2", X(166), 760, 80, C.gold, { alpha: kp * two });
-      tag("Dov", X(210), 990, seg(lt, w(13), w(13) + 0.3) * kp, { size: 56, bg: "#c77dff", color: "#1a1026" });
+      tag("Dov", X(210), 990, seg(lt, w(14), w(14) + 0.3) * kp, { size: 56, bg: "#c77dff", color: "#1a1026" });
     }
-    tag("Gran", X(36), 400, seg(lt, 0.3, 0.7) * (1 - dark), { size: 58 });
-    if (lt > sickAt) tag("sick", X(36) + 190, 400, seg(lt, sickAt, sickAt + 0.3) * (1 - dark), { size: 58, bg: "#b7c86a", color: "#1a1026" });
-    // strength: 3 pips; one is lost each night without medicine
-    const n = lt < w(16) ? 3 : lt < w(19.5) ? 2 : 1;
-    const ks = seg(lt, sickAt, sickAt + 0.4);
-    if (ks > 0) {
-      ctx.save(); ctx.globalAlpha = ks;
-      text("STRENGTH", X(70), 840, 56, C.ink);
-      pips(X(70), 940, n, 34, 0); ctx.restore();
-      const lost = (at) => { const k = seg(lt, at, at + 0.9); if (k > 0 && k < 1) text("−1", X(70) + 260, 940 - k * 60, 64, C.bad, { alpha: 1 - k }); };
-      lost(w(16)); lost(w(19.5));
-      const kn = seg(lt, w(14) + 0.3, w(14) + 0.7) * (1 - dark);
-      if (kn > 0) { text("EACH NIGHT WITHOUT", 1320, 420, 64, C.ink, { alpha: kn }); text("MEDICINE: −1", 1320, 520, 64, "#ff8a9a", { alpha: kn }); }
-    }
-    // dark: the room dims to the candle; the last pip flickers
-    if (dark > 0) {
-      ctx.fillStyle = `rgba(6,3,12,${0.78 * dark})`; ctx.fillRect(0, 0, WIDTH, H);
-      glow(X(140), X(97), 420, C.gold, dark * (0.8 + 0.1 * Math.sin(t * 11)));
-      const fl = lt > w(24) ? Math.max(0, 1 - (lt - w(24)) / 1.2) * (0.5 + 0.5 * Math.sin(t * 20)) : 1;
-      pips(X(70), 940, 0, 34, fl);
-      text("STRENGTH", X(70), 840, 56, C.muted, { alpha: dark });
-    }
-    fadeOut(lt, d, 0.6);
-  };
-
-  /* ================================================================ i8 · jar */
-  // "Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day."
-  SC.jar = (lt, d, t, s) => {
-    const w = (n) => word(s, n);
-    const rain = lt > w(12.5);
-    room(t, { win: rain ? "rain" : "night", winAt: [170, 14, 50, 40] });
-    px(40, 96, 120, 5, "#8a5a2b"); px(40, 96, 120, 1, "#b07a45"); px(46, 101, 4, 8, "#5e3b1a"); px(150, 101, 4, 8, "#5e3b1a");   // the shelf
-    const ko = seg(lt, w(2), w(3));
-    jar(78, 96, 44, ko, t);
-    sitter("gran", "ok", 200, 78, 3, t);
-    blitLo();
-    // eight crystals rise out of the jar into an arc, glinting
-    const kc = seg(lt, w(3), w(6));
-    for (let i = 0; i < 8; i++) {
-      const k = seg(kc, i / 10, i / 10 + 0.25); if (k <= 0) continue;
-      const a = Math.PI * (1 - i / 7), tx = X(78) + Math.cos(a) * 360, ty = 470 - Math.sin(a) * 230;
-      const x = lerp(X(78), tx, easeOut(k)), y = lerp(X(52), ty, easeOut(k)) + Math.sin(t * 2 + i) * 8;
-      glow(x, y, 90, "#ff6fb5", 0.6 + 0.4 * Math.sin(t * 5 + i * 1.3));
-      hico("pen", x, y, 110);
-    }
-    tag("Gran's jar", X(78), 990, seg(lt, w(0), w(0) + 0.35), { size: 60 });
-    label("8 PENTAJA", X(78), 350, { k: seg(lt, w(3), w(3) + 0.4), size: 64, bg: "#ffb3d9" });
-    body("pretty, not much use", X(78), 880, 56, C.ink, { alpha: seg(lt, w(7), w(7) + 0.4) });
-    label("FOR A RAINY DAY", 1080, 700, { k: seg(lt, w(13), w(13) + 0.4), size: 56, bg: "#c4d4ff" });
-    fadeOut(lt, d, 0.35);
+    tag("Gran", X(36), 400, seg(lt, 0.3, 0.7), { size: 58 });
+    if (lt > sickAt) tag("sick", X(36) + 190, 400, seg(lt, sickAt, sickAt + 0.3), { size: 58, bg: "#b7c86a", color: "#1a1026" });
+    fadeOut(lt, d, 0.4);
   };
 
   /* ================================================================ i9 · goal */
-  // "The harvest festival is on day twelve. Get there with everyone still at the table."
+  // "The harvest festival is coming soon. Get there with everyone still at the table."
+  // No day number on purpose: the game's length may change.
   SC.goal = (lt, d, t, s) => {
     const w = (n) => word(s, n);
     skyBands(0, 80, NIGHT); stars(0, 70, t, 1, 60);
@@ -551,7 +479,7 @@
     for (let x = 0; x < LO_W; x++) px(x, 18 + Math.round(Math.sin(x / LO_W * Math.PI * 3) ** 2 * 8), 1, 1, "#5a4a86");
     const lan = [];
     for (let i = 0; i < 12; i++) { const x = 10 + i * 20, y = 18 + Math.round(Math.sin(x / LO_W * Math.PI * 3) ** 2 * 8); px(x - 2, y + 1, 4, 5, cols[i % 6]); px(x - 1, y + 6, 2, 1, "#3a2a1e"); lan.push([x, y + 3, cols[i % 6]]); }
-    const kt = seg(lt, w(7), w(7) + 0.5);
+    const kt = seg(lt, w(6), w(6) + 0.5);
     if (kt > 0) {
       table(36, 204, 110);
       const fam = [["gran", 80], ["tam", 120], ["ola", 160]];
@@ -562,16 +490,14 @@
     }
     blitLo();
     for (const [x, y, c] of lan) glow(X(x), X(y), 90, c, 0.6 + 0.2 * Math.sin(t * 3 + x));
-    text("HARVEST FESTIVAL", WIDTH / 2, 330, 80, C.gold, { alpha: seg(lt, w(1), w(1) + 0.4) * (1 - kt) });
-    // the days tick up to 12
-    const kd = seg(lt, w(4), w(6) + 0.2);
-    if (kd > 0) {
-      const day = Math.max(1, Math.round(easeInOut(kd) * 12));
-      const y = lerp(560, 300, easeInOut(kt));
-      ctx.save(); ctx.translate(WIDTH / 2, y); const sc = lerp(1, 0.6, easeInOut(kt)); ctx.scale(sc, sc);
-      text(`DAY ${day}`, 0, 0, 170, day === 12 ? C.gold : C.ink); ctx.restore();
+    // the title rises to the top as the table appears
+    const ka = seg(lt, w(1), w(1) + 0.4);
+    if (ka > 0) {
+      ctx.save(); ctx.translate(WIDTH / 2, lerp(520, 300, easeInOut(kt))); const sc = lerp(1, 0.7, easeInOut(kt)) * pop(ka); ctx.scale(sc, sc);
+      text("HARVEST FESTIVAL", 0, 0, 120, C.gold); ctx.restore();
+      body("coming soon", WIDTH / 2, 660, 64, C.ink, { alpha: seg(lt, w(4), w(4) + 0.4) * (1 - kt) });
     }
-    if (kt > 0) body("with everyone still at the table", WIDTH / 2, 430, 64, C.ink, { alpha: seg(lt, w(9), w(9) + 0.5) });
+    if (kt > 0) body("with everyone still at the table", WIDTH / 2, 430, 64, C.ink, { alpha: seg(lt, w(8), w(8) + 0.5) });
     fadeOut(lt, d, 0.4);
   };
 

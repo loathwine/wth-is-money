@@ -40,44 +40,44 @@
   "id": "b5",
   "scene": "cargo",
   "t0": 47.435,
-  "t1": 64.92,
+  "t1": 61.907,
   "voice": 47.435,
-  "speech": 16.135,
-  "text": "Ships carried them south, with cloth, iron and guns. They bought gold and ivory. Above all, Liverpool's traders bought people. Glass beads helped pay for the Atlantic slave trade."
+  "speech": 13.622,
+  "text": "Ships from Liverpool carried them south, with cloth, iron and guns. They bought some gold and ivory, but mostly enslaved people. Glass beads helped pay for the Atlantic slave trade."
  },
  {
   "id": "b6",
   "scene": "savings",
-  "t0": 64.92,
-  "t1": 78.93,
-  "voice": 64.92,
+  "t0": 61.907,
+  "t1": 75.918,
+  "voice": 61.907,
   "speech": 13.661,
   "text": "Step off the ship. Imagine your family saved in ordinary beads: years of work, on a string. If every ship brings more beads, each one buys a little less. Same string. Less food."
  },
  {
   "id": "b7",
   "scene": "accorihold",
-  "t0": 78.93,
-  "t1": 89.67,
-  "voice": 78.93,
+  "t0": 75.918,
+  "t1": 86.657,
+  "voice": 75.918,
   "speech": 10.389,
   "text": "Unless the string held an accori. Nobody could copy those. Two hundred years on, a Dutch trader wrote it still traded for its weight in gold."
  },
  {
   "id": "b8",
   "scene": "beadcallback",
-  "t0": 89.67,
-  "t1": 102.616,
-  "voice": 89.67,
+  "t0": 86.657,
+  "t1": 99.603,
+  "voice": 86.657,
   "speech": 12.596,
   "text": "Remember Ulm Hollow? Wren didn't steal. Wren just spent first, and pentaja savers paid the difference. When you're Wren, it feels like winning. Somebody always pays."
  },
  {
   "id": "b9",
   "scene": "nextwampum",
-  "t0": 102.616,
-  "t1": 111.446,
-  "voice": 102.616,
+  "t0": 99.603,
+  "t1": 108.433,
+  "voice": 99.603,
   "speech": 6.98,
   "text": "Next: North America, where shell beads became money... until metal drills arrived."
  }

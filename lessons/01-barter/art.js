@@ -227,8 +227,10 @@ function faceURL(id, mood = 'ok') {
 
 /* ---------- home in the evening ----------
    drawKin: one family member, 16×24, at the table. drawHome: the whole room, 176×132,
-   H = { members: [{ id, mood, hp, alive, inBed }], bowl, crust, dose, jar: { pen, zir }, cave, caveNight,
-         fire, dark, festival, t } */
+   H = { members: [{ id, mood, hp, alive, inBed }], bowl, crust, dose, jar: { pen, zir }, jarShown, jarOut, rain,
+         cave, caveNight, fire, dark, festival, t }
+   jarShown: Gran's jar is on the shelf (nobody knows about it before the reveal); jarOut: the reveal night,
+   the jar is on the table and glowing; rain: the storm, on the window. */
 const HOME_W = 176, HOME_H = 132;
 const SEATS = { gran: 60, tam: 84, ola: 108 };   // x centre of each chair
 function drawKin(ctx, id, mood, x, y) {
@@ -267,25 +269,39 @@ function drawHome(ctx, H) {
   const wx = 64, wy = 12, ww = 40, wh = 32;
   px(wx - 3, wy - 3, ww + 6, wh + 6, '#2a1a12');
   px(wx, wy, ww, wh, H.festival ? '#2a1850' : '#16103a');
-  for (let i = 0; i < 7; i++) px(wx + 2 + Math.floor(hash(i, 11) * (ww - 4)), wy + 2 + Math.floor(hash(i, 13) * (wh - 8)), 1, 1, '#ab9fcb');
+  for (let i = 0; i < 7; i++) px(wx + 2 + Math.floor(hash01(i, 11) * (ww - 4)), wy + 2 + Math.floor(hash01(i, 13) * (wh - 8)), 1, 1, '#ab9fcb');
   px(wx + 27, wy + 5, 6, 6, '#fff3a0'); px(wx + 26, wy + 6, 1, 4, '#fff3a0'); px(wx + 33, wy + 6, 1, 4, '#fff3a0'); px(wx + 30, wy + 6, 3, 3, '#e8d880');
   px(wx, wy + wh - 6, ww, 6, '#1f4a3f'); px(wx + 8, wy + wh - 9, 10, 3, '#1f4a3f'); px(wx + 22, wy + wh - 11, 14, 5, '#173a31');
   if (H.cave) for (let i = 0; i < 5; i++) {   // pentaja glints drifting down from the hill
     const gx = wx + ((t * 6 + i * 9) % ww), gy = wy + 4 + ((i * 7 + t * 3) % (wh - 10));
     px(gx, gy, 1, 1, '#ff6fb5'); if (i % 2) px(gx + 1, gy, 1, 1, '#ffb3d9');
   }
+  if (H.rain) {   // the storm: no moon, grey sky, rain streaking down the glass, now and then a flash
+    px(wx, wy, ww, wh - 6, '#232a44');
+    const flash = (t % 7) < 0.12;
+    if (flash) px(wx, wy, ww, wh, 'rgba(220, 230, 255, .55)');
+    for (let i = 0; i < 16; i++) {
+      const rx = wx + Math.floor(hash01(i, 21) * ww), ry = wy + ((t * 60 + hash01(i, 23) * wh) % wh);
+      px(rx, ry, 1, Math.min(4, wy + wh - ry), '#8fa8d8');
+    }
+    for (let i = 0; i < 3; i++) { const dx = wx + 5 + i * 13, dy = wy + ((t * 9 + i * 11) % (wh - 4)); px(dx, dy, 1, 2, '#c4d4f4'); }   // drops on the pane
+  }
   if (H.caveNight) { ctx.fillStyle = `rgba(255, 111, 181, ${0.25 + 0.25 * Math.max(0, Math.sin(t * 3))})`; ctx.fillRect(wx, wy, ww, wh); }
   if (H.festival) for (let i = 0; i < 5; i++) { const lx = wx + 4 + i * 8; px(lx, wy + 4 + (i % 2) * 2, 4, 5, ['#ffd23f', '#ff6fb5', '#4de1e8', '#8fd16a', '#ff8a3d'][i]); }
   px(wx + ww / 2 - 1, wy, 2, wh, '#2a1a12'); px(wx, wy + wh / 2 - 1, ww, 2, '#2a1a12');
-  // shelf with Gran's jar: one pixel cluster per crystal
+  // the shelf: a pot and a candle stub; after the reveal, Gran's jar (one pixel cluster per crystal)
   px(118, 44, 46, 3, '#9c6c47'); px(118, 47, 46, 1, '#5a3a25'); px(122, 47, 2, 5, '#5a3a25'); px(158, 47, 2, 5, '#5a3a25');
-  const jx = 132, jy = 24;
-  px(jx + 3, jy, 10, 2, '#9c6c47');
-  px(jx, jy + 3, 16, 17, 'rgba(196, 251, 255, .18)'); px(jx, jy + 3, 1, 17, '#c4fbff'); px(jx + 15, jy + 3, 1, 17, '#7fb8c0'); px(jx, jy + 19, 16, 1, '#7fb8c0');
-  px(jx + 2, jy + 2, 12, 1, '#c4fbff');
-  const J = H.jar || { pen: 0, zir: 0 }, crystals = [...Array(Math.min(J.pen, 16)).fill('#ff6fb5'), ...Array(Math.min(J.zir, 8)).fill('#4de1e8')];
-  crystals.forEach((c, i) => { const cx = jx + 2 + (i % 4) * 3, cy = jy + 16 - Math.floor(i / 4) * 3; px(cx, cy, 2, 2, c); px(cx, cy, 1, 1, '#fff'); });
-  if (H.cave && J.pen) { px(jx + 11, jy + 6, 1, 3, '#8a8a8a'); px(jx + 10, jy + 9, 1, 3, '#8a8a8a'); px(jx + 11, jy + 12, 1, 2, '#8a8a8a'); }
+  px(150, 34, 10, 10, '#7a5235'); px(151, 33, 8, 2, '#9c6c47'); px(152, 36, 6, 1, '#5a3a25');   // a clay pot
+  const J = H.jar || { pen: 0, zir: 0 };
+  const drawJar = (jx, jy) => {
+    px(jx + 3, jy, 10, 2, '#9c6c47');
+    px(jx, jy + 3, 16, 17, 'rgba(196, 251, 255, .18)'); px(jx, jy + 3, 1, 17, '#c4fbff'); px(jx + 15, jy + 3, 1, 17, '#7fb8c0'); px(jx, jy + 19, 16, 1, '#7fb8c0');
+    px(jx + 2, jy + 2, 12, 1, '#c4fbff');
+    const crystals = [...Array(Math.min(J.pen, 16)).fill('#ff6fb5'), ...Array(Math.min(J.zir, 8)).fill('#4de1e8')];
+    crystals.forEach((c, i) => { const cx = jx + 2 + (i % 4) * 3, cy = jy + 16 - Math.floor(i / 4) * 3; px(cx, cy, 2, 2, c); px(cx, cy, 1, 1, '#fff'); });
+    if (H.cave && J.pen) { px(jx + 11, jy + 6, 1, 3, '#8a8a8a'); px(jx + 10, jy + 9, 1, 3, '#8a8a8a'); px(jx + 11, jy + 12, 1, 2, '#8a8a8a'); }
+  };
+  if (H.jarShown && !H.jarOut) drawJar(130, 24);
   // hearth: lit when the tools are fine, embers when they broke
   px(4, 46, 40, 50, '#4a3f68'); px(4, 46, 40, 4, '#6c5f93');
   for (let y = 50; y < 96; y += 6) for (let x = 4 + ((y / 6) % 2) * 5; x < 44; x += 10) px(x, y, 1, 6, '#3a3052');
@@ -318,6 +334,11 @@ function drawHome(ctx, H) {
   px(bx - 1, 88, 18, 2, '#e8d0a0'); px(bx, 90, 16, 3, '#b8743a'); px(bx + 2, 93, 12, 1, '#7a4a22');
   if (H.crust && !(H.members.find(m => m.id === H.crust) || {}).inBed) { const cx = SEATS[H.crust]; px(cx - 3, 89, 6, 3, '#a8743a'); px(cx - 2, 88, 4, 1, '#c9945a'); }
   for (const m of H.members) if (!m.alive) drawCandle(ctx, SEATS[m.id] - 1, 80, t);
+  if (H.jarOut) {   // the reveal: Gran's jar on the table, glowing pink
+    ctx.fillStyle = `rgba(255, 111, 181, ${0.18 + 0.1 * Math.sin(t * 4)})`; ctx.beginPath(); ctx.arc(52, 79, 14, 0, 7); ctx.fill();
+    drawJar(44, 69);
+    for (let i = 0; i < 3; i++) { const a = t * 2 + i * 2.1; px(52 + Math.round(Math.cos(a) * 11), 77 + Math.round(Math.sin(a) * 7), 1, 1, '#ffb3d9'); }
+  }
   // you, by the door
   drawAlien(ctx, 22, 124, 'you', t * 0.3);
   // strength: three pips on the floor under each person (in bed: under the bed)
@@ -367,6 +388,7 @@ const TREES = PHONE ? [[200, 300], [212, 352], [140, 336], [112, 306], [130, 296
 const STONE = PHONE ? { x: 112, y: 250 } : { x: 15 * TILE + 8, y: 6 * TILE + 8 };
 
 function hash(x, y) { let h = (x * 374761393 + y * 668265263) >>> 0; h = (h ^ (h >>> 13)) * 1274126177 >>> 0; return (h ^ (h >>> 16)) / 4294967296; }
+function hash01(x, y) { return hash(x, y) + 0.5; }   // hash() lies in (-0.5, 0.5): this one in (0, 1)
 
 function buildBackground() {
   const c = document.createElement('canvas'); c.width = MW * TILE; c.height = MH * TILE;
@@ -442,5 +464,5 @@ function drawStall(ctx, id, goods, open) {
 }
 
 window.Art = { ICONS, iconCanvas, iconURL, LOOKS, drawAlien, drawPortrait, drawFace, faceURL, faceCanvas, buildBackground, drawStall, drawTree,
-  drawKin, drawHome, drawCandle, HOME_W, HOME_H, STALLS, HUT, DOOR, TREES, STONE, TILE, MW, MH, PHONE };
+  drawKin, drawHome, drawCandle, hash01, HOME_W, HOME_H, STALLS, HUT, DOOR, TREES, STONE, TILE, MW, MH, PHONE };
 })();

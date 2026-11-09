@@ -13,7 +13,7 @@ const NPCS = ['mira', 'bob', 'sela', 'dov', 'wren', 'hesk'];
 const params = new URLSearchParams(location.search);
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const NARROW = () => matchMedia('(max-width: 900px)').matches;
-const SEED = +(params.get('seed') ?? 39);   // the default village: Dov away while Gran is sick, lean nights after the cave, a jar that ends up buying 1 mushroom
+const SEED = +(params.get('seed') ?? 39);   // the default village: Dov away the day after Gran falls sick, a hungry night when Gran shows her jar, the jar feeds the family in the storm, and after the cave it buys almost nothing
 // Phone controls (the pack strip and GO HOME under the village, no side panel) on a portrait phone
 // (Art.PHONE: the tall map) and on a phone held sideways (the wide map, the strip as a rail on the right).
 const LANDQ = matchMedia('(pointer: coarse) and (max-height: 500px) and (orientation: landscape)');
@@ -98,13 +98,14 @@ function newGame() {
       S.score.nights++; if (!S.w.events.some(e => e.type === 'short' && e.g === 'lum')) S.score.fed++;
       if (S.w.events.some(e => e.type === 'wren')) S.flags.wrenNight = true;
     }
+    if (params.get('eve')) { S.phase = 'night'; showEvening({ ev: S.w.events.slice(), dosesWas: null }); return; }   // &eve=1: tonight's evening scene (for screenshots)
     S.started = true;
     beginDay();
     while (S.morningReplay.length) { const t = S.morningReplay.shift(); S.w.trades.push(t); showTrade(t); }
     if (params.get('talk')) { openDialog(params.get('talk')); if (params.get('pick') && S.phase === 'dialog') { S.dlg.x = params.get('pick'); renderDialog(); } if (params.get('find') && S.phase === 'dialog') findWay(params.get('find')); }
     if (params.get('plan')) { plan(params.get('plan')); if (params.get('follow') && S.plan) followRoute(S.plan.routes[0]); }
     if (params.get('tab')) { $('#tab-village').hidden = false; showTab(params.get('tab')); }
-    if (params.get('story') !== '1') S.flags = Object.assign(S.flags, { money: true, wren: true, inflation: true, zir: true, end: true });
+    if (params.get('story') !== '1') S.flags = Object.assign(S.flags, { money: true, storm: true, wren: true, inflation: true, zir: true, end: true });
     return;
   }
   showIntro();
@@ -128,7 +129,7 @@ function beginDay() {
   document.body.classList.remove('dusk');
   S.p.x = START.x; S.p.y = START.y; S.p.target = null;
   S.tradedToday = false; S.started = true; S.today = S.morningFlags || {}; S.morningFlags = null;
-  S.jarMorning = { ...S.w.family.jar };
+  S.jarMorning = { ...S.w.family.jar }; S.stormLumMorning = S.w.family.stormFood.lum;
   S.route = null; S.plan = null; renderRoute();
   S.morning = S.w.trades.slice();
   S.w.trades.length = 0;  // re-added as they're replayed, so stats see them
@@ -144,6 +145,7 @@ function beginDay() {
 }
 
 function awayText() {
+  if (Sim.stormNow(S.w)) return `A storm! Only ${NPCS.filter(id => S.w.byId[id].present).map(nm).join(' and ')} came.`;
   const away = NPCS.filter(id => !S.w.byId[id].present).map(nm);
   if (!away.length) return 'Everyone is here today.';
   return `${away.join(' and ')} didn't come today.`;
@@ -341,7 +343,25 @@ function draw(t) {
   drawRoute(t);
   drawHint(t);
   drawFlyers(performance.now());
+  if (Sim.stormNow(w) && S.phase !== 'night') drawRain(t);
   if (S.phase === 'night' || S.phase === 'intro') { ctx.fillStyle = 'rgba(10,4,30,.55)'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+}
+
+// The storm over the market: a grey veil, slanting rain, puddle rings, a flash now and then.
+function drawRain(t) {
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = (t % 9) < 0.1 ? 'rgba(230, 236, 255, .35)' : 'rgba(30, 40, 70, .38)'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(170, 195, 240, .65)';
+  for (let i = 0; i < 140; i++) {
+    const h1 = Art.hash01(i, 5), h2 = Art.hash01(i, 9);
+    const y = (h2 * H + t * 260) % H, x = (h1 * (W + 60) - (y * 0.25)) % W;
+    ctx.fillRect(Math.round(x < 0 ? x + W : x), Math.round(y), 1, 6);
+  }
+  ctx.strokeStyle = 'rgba(190, 210, 250, .5)';
+  for (let i = 0; i < 10; i++) {
+    const h1 = ((i * 0.7548776) % 1), h2 = ((i * 0.5698403) % 1), ph = (t * 1.5 + h1) % 1;
+    ctx.beginPath(); ctx.ellipse(Math.round(h1 * W), Math.round(40 + h2 * (H - 60)), 2 + ph * 6, 1 + ph * 2, 0, 0, 7); ctx.stroke();
+  }
 }
 
 /* ---------- overlay (HTML on top of the canvas) ---------- */
@@ -536,7 +556,8 @@ function renderDialog() {
     } else if (!jq && !rs) {
       nothing = true;
       const wantsIt = IDS.filter(y => Q[x][y] && !Sim.count(you, y));
-      deal += `<p class="nodeal">✗ Nothing in your pack works. ${wantsIt.length ? `${nm(npc)} would take ${wantsIt.slice(0, 4).map(y => icon(y)).join(' ')} for it.` : ''}</p>`;
+      deal += Sim.stormNow(w) ? `<p class="nodeal">🌧 In the storm ${nm(npc)} takes only crystals: ${icon('pen')} ${icon('zir')}.</p>`
+        : `<p class="nodeal">✗ Nothing in your pack works. ${wantsIt.length ? `${nm(npc)} would take ${wantsIt.slice(0, 4).map(y => icon(y)).join(' ')} for it.` : ''}</p>`;
       if (S.dlg.find !== x) deal += `<button class="btn small find" data-find="${x}">🧭 FIND A WAY TO GET ${GN(x).toUpperCase()}</button>`;
     }
   }
@@ -842,7 +863,8 @@ function homeScene(extra = {}) {
     const hp = F.hp[f.id], sick = F.sick && F.sick.who === f.id;
     return { id: f.id, hp, alive: hp > 0, inBed: !!sick, mood: sick ? (F.sick.worse || hp <= 1 ? 'worse' : 'sick') : hp <= 1 ? 'weak' : you.hunger.lum > 0 && F.lastCrust !== f.id ? 'hungry' : 'ok' };
   });
-  return { members, bowl: Sim.count(you, 'lum'), jar: { ...F.jar }, cave: w.caveDay != null && night >= w.caveDay - 1, fire: you.hunger.ket === 0, festival: !!S.fest, ...extra };
+  const st = w.storm, rain = !!st && night >= st.from && night <= st.to && !S.fest;
+  return { members, bowl: Sim.count(you, 'lum'), jar: { ...F.jar }, jarShown: F.jarShown, rain, cave: w.caveDay != null && night >= w.caveDay - 1, fire: you.hunger.ket === 0, festival: !!S.fest, ...extra };
 }
 
 function showEvening(o) {
@@ -855,11 +877,16 @@ function showEvening(o) {
     // before the night: the empty bowl and one crust. The faces are the buttons.
     $('#eve-head').textContent = `NIGHT ${w.day} · NO FOOD`;
     S.eve.scene = homeScene({ before: true, bowl: 0 });
-    q.innerHTML = `No ${icon('lum', 'sm')} lumfruit tonight. There's one crust left. <b>Who gets it?</b><span class="eve-sub">The others go to bed hungry and lose 1 strength.</span>`;
+    const cold = Sim.stormNow(w);
+    q.innerHTML = `No ${icon('lum', 'sm')} lumfruit tonight. There's one crust left. <b>Who gets it?</b><span class="eve-sub">${cold ? 'It\'s cold, too: the others lose <b>2 strength</b>. At 0 strength, they die.' : 'The others go to bed hungry and lose 1 strength.'}</span>`;
     kin.className = 'eve-kin choose';
     kin.innerHTML = Sim.FAMILY.filter(f => F.hp[f.id] > 0).map(f => {
-      const sick = F.sick && F.sick.who === f.id;
-      return `<button data-crust="${f.id}">${face(f.id, sick ? 'sick' : F.hp[f.id] <= 1 ? 'weak' : 'ok', 'big')}<span>${KIN[f.id]}</span>${pipsHTML(F.hp[f.id])}${sick ? '<em>sick</em>' : ''}</button>`;
+      const sick = F.sick && F.sick.who === f.id, hp = F.hp[f.id];
+      // without the crust, would this one die tonight? (cold in the storm; or sick, with no medicine in the pack)
+      // (only when the crust would save them: that's the choice)
+      const ill = sick && !Sim.count(w.byId.you, 'dri') ? 1 : 0, left = (cold ? hp - Sim.ARC.COLD : Math.max(1, hp - 1)) - ill;
+      const tag = [sick ? 'sick' : '', left <= 0 && hp - ill > 0 ? 'could die' : ''].filter(Boolean).join(' · ');
+      return `<button data-crust="${f.id}">${face(f.id, sick ? 'sick' : hp <= 1 ? 'weak' : 'ok', 'big')}<span>${KIN[f.id]}</span>${pipsHTML(hp)}${tag ? `<em>${tag}</em>` : ''}</button>`;
     }).join('');
     kin.querySelectorAll('[data-crust]').forEach(b => b.onclick = () => { sfx('pop'); F.lastCrust = b.dataset.crust; nightFall(b.dataset.crust); });
     S.eve.ready = true;
@@ -871,14 +898,14 @@ function showEvening(o) {
   if (!crustEv) F.lastCrust = null;
   // left: nights still to come before the festival morning (0 tonight = the festival is tomorrow)
   $('#eve-head').textContent = `NIGHT ${night}` + (left > 1 ? ` · ${left} nights to the festival` : left === 1 ? ' · one more night to the festival' : left === 0 ? ' · the festival is tomorrow!' : '');
-  S.eve.scene = homeScene({ caveNight: ev.some(e => e.type === 'wren'), dose: ev.some(e => e.type === 'dose' || (e.type === 'cured' && !e.natural)), crust: crustEv && crustEv.who, dark: died ? 0.35 : 0 });
+  S.eve.scene = homeScene({ caveNight: ev.some(e => e.type === 'wren'), jarOut: ev.some(e => e.type === 'reveal'), dose: ev.some(e => e.type === 'dose' || (e.type === 'cured' && !e.natural)), crust: crustEv && crustEv.who, dark: died ? 0.35 : 0 });
   // names under the picture, at each seat
   kin.className = 'eve-kin';
   kin.innerHTML = S.eve.scene.members.map(m => `<span style="left:${((m.inBed && m.alive ? 150 : { gran: 60, tam: 84, ola: 108 }[m.id]) / Art.HOME_W * 100).toFixed(1)}%" class="${m.alive ? '' : 'gone'}">${m.alive ? KIN[m.id] : '🕯️'}</span>`).join('');
   const c = eveningContext(ev, o);
   const pick = Evening.pick(c);
   S.eve.lines = pick.lines;
-  facts.innerHTML = died ? (died.cause === 'hungry+sick' ? 'Sick, with no medicine, and too little food.' : 'Sick, with no medicine.') : factsLine(ev);
+  facts.innerHTML = died ? (died.cause === 'storm' ? 'Cold and hungry in the storm.' : died.cause === 'hungry+sick' ? 'Sick, with no medicine, and too little food.' : 'Sick, with no medicine.') : factsLine(ev);
   lines.innerHTML = pick.lines.map((l, i) => `<p class="say-line" style="animation-delay:${0.5 + i * 0.5}s">${l.who === 'you' ? `<img class="face sm" src="${youURL()}" alt="You">` : face(l.who, 'ok', 'sm')}<span><b>${l.name}:</b> “${l.text}”</span></p>`).join('');
   if (died) { try { if (window.Chip && !Chip.muted) { Chip.stop(); clearTimeout(S.mournT); S.mournT = setTimeout(() => { if (S.eve) Chip.song(SONGS.mourn); }, 2000); } } catch {} }
   const nextLabel = died ? 'GO ON' : w.day >= FEST && !S.flags.end ? 'TO THE FESTIVAL ▶' : 'NEXT DAY ▶';
@@ -941,7 +968,18 @@ function eveningContext(ev, o) {
   if (S.today.indirect) vars.iGood = gname(S.today.indirect.x, 2).toLowerCase();
   const lost = F.dead.find(d => night - d.day >= 1 && night - d.day <= 2);
   if (lost) vars.dead = short(lost.who);
+  // the reveal, the storm, and the storm vs now
+  const st = w.storm, stormNight = !!st && night >= st.from && night <= st.to;
+  vars.jarFull = F.jarFull; vars.wrenRate = Sim.ARC.WREN_RATE === 20 ? 'twenty' : Sim.ARC.WREN_RATE;
+  const SF = F.stormFood, stormK = SF.pen + SF.zir;
+  if (stormK && st) { vars.stormK = stormK === 1 ? 'one' : stormK; vars.stormD = st.to - st.from + 1 === 2 ? 'two days' : `${st.to - st.from + 1} days`; }
+  vars.medBefore = medBefore;
+  const lumP = carry(H.map(h => h.price.pen)).pop();
+  if (lumP) vars.lumNow = lumP >= 1.5 ? `${Math.round(lumP)} crystals` : lumP >= 0.75 ? 'a crystal' : null;
+  if (SF.lum) vars.stormLum = SF.lum === 1 ? 'one lumfruit' : `${SF.lum} lumfruit`;
   return {
+    reveal: has('reveal'), jarShown: F.jarShown, jarPen: J.pen, stormNight, stormLast: stormNight && night === st.to, jarFood: SF.lum > (S.stormLumMorning || 0),
+    stormFed: !!stormK && cave,
     night, vars, hungry: has('short') && ev.some(e => e.type === 'short' && e.g === 'lum'), hungryRun: F.hungryRun, crust: crust && crust.who,
     alive: Object.fromEntries(Sim.FAMILY.map(f => [f.id, F.hp[f.id] > 0])),
     sickWho: sick ? sick.who : null, fellSick: fell ? { afterCave: fell.afterCave } : null,
@@ -969,9 +1007,11 @@ function factsLine(ev) {
     if (e.type === 'worse') bits.push(`${KIN[e.who]} got worse · no bogwool made while nursing`);
     if (e.type === 'full') bits.push('🎒 pack full');
   }
+  if (ev.some(e => e.type === 'reveal')) bits.push(`🫙 Gran's jar: ${J.pen} ${icon('pen', 'sm')}, kept for emergencies`);
+  if (Sim.stormNow({ ...w, day: w.day - 1 })) bits.push('🌧 pasture flooded: no bogwool');
   const spent = jm.pen - J.pen, gotZir = J.zir - (jm.zir || 0);
   if (spent > 0) bits.push(`🫙 −${spent} ${icon('pen', 'sm')}${gotZir > 0 ? ` +${gotZir} ${icon('zir', 'sm')}` : ''}`);
-  return bits.join(' · ');
+  return bits.map(b => `<span>${b}</span>`).join(' · ');   // each bit stays on one line when the row wraps
 }
 
 /* ---------- side panels (desktop) and the bars ---------- */
@@ -1001,7 +1041,8 @@ function homeNeed() {
       ? { g: 'dri', cls: 'crit', html: `${who} won't last the night without ${n} ${mush} medicine (Dov)`, none: `${mush} ${who} needs medicine tonight · nobody has any today` }
       : { g: 'dri', cls: 'bad', html: `${mush} ${who} is sick: needs ${n} ${mush} medicine (Dov)`, none: `${mush} ${who} is sick · no medicine to be had today` });
   }
-  if (N.lum && !Sim.count(you, 'lum')) list.push({ g: 'lum', cls: 'bad', html: `${icon('lum', 'sm')} Tonight: 1 lumfruit. You have none.`, none: `${icon('lum', 'sm')} No lumfruit to be had today` });
+  const storm = Sim.stormNow(w);
+  if (N.lum && !Sim.count(you, 'lum')) list.push({ g: 'lum', cls: storm ? 'crit' : 'bad', html: storm ? `🌧 Tonight: 1 ${icon('lum', 'sm')} lumfruit. Mira takes only crystals${F.jar.pen ? ': 🫙 Gran\'s jar' : ''}` : `${icon('lum', 'sm')} Tonight: 1 lumfruit. You have none.`, none: storm ? `🌧 Nobody will swap food for what you have` : `${icon('lum', 'sm')} No lumfruit to be had today` });
   if (S.jarPlan === 'zir' && F.jar.pen) list.push({ g: 'jarzir', cls: 'warn', html: `🫙 Take Gran's jar to Hesk for ${icon('zir', 'sm')} zirnet`, none: `🫙 Hesk won't swap zirnet for the jar today` });
   if (N.ket && !Sim.count(you, 'ket')) list.push({ g: 'ket', cls: 'warn', html: `${icon('ket', 'sm')} Tools break tonight: need 1 kettlestone (Bob)`, none: `${icon('ket', 'sm')} Tools break tonight · no kettlestone today` });
   if (Sim.count(you, 'lum') < 2) list.push({ g: 'lum', cls: 'ok', html: `✓ Fed tonight · 1 more ${icon('lum', 'sm')} for tomorrow?` });
@@ -1074,9 +1115,10 @@ function renderStrip() {
   if (!full) S.fullWarned = false;
   const el = $('#strip');
   el.classList.toggle('full', full);
-  el.innerHTML = `<div class="sgs ${many ? 'many' : ''}">${chips}</div><button class="sjar ${drop ? 'drop' : ''}" data-jar aria-label="Gran's jar"><span class="l1">🫙 <b>${J.pen}</b>${icon('pen', 'sm')}${J.zir ? `<b>${J.zir}</b>${icon('zir', 'sm')}` : ''}</span><span class="l2">≈ ${doses} ${icon('dri', 'sm')}</span></button>`;
+  el.innerHTML = `<div class="sgs ${many ? 'many' : ''}">${chips}</div>${F.jarShown ? `<button class="sjar ${drop ? 'drop' : ''} ${S.jarNew ? 'new' : ''}" data-jar aria-label="Gran's jar"><span class="l1">🫙 <b>${J.pen}</b>${icon('pen', 'sm')}${J.zir ? `<b>${J.zir}</b>${icon('zir', 'sm')}` : ''}</span><span class="l2">≈ ${doses} ${icon('dri', 'sm')}</span></button>` : ''}`;
   el.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { if (S.tut && S.tut.step === 3) S.tut.step = 4; const g = b.dataset.g; toast(`${icon(g)} <b>${g === 'dri' ? 'Driftcap medicine' : GOODS[g].name}</b>. ${blurb(g)} You have ${Sim.count(you, g)}.`, 3200); });
-  el.querySelector('[data-jar]').onclick = () => toast(`🫙 <b>Gran's jar</b>: ${J.pen} pentaja${J.zir ? ` and ${J.zir} zirnet` : ''}. Today Dov would give about ${doses} ${icon('dri', 'sm')} medicine for it. Keep it for emergencies.`, 4000);
+  const jb = el.querySelector('[data-jar]');
+  if (jb) jb.onclick = () => { S.jarNew = false; toast(`🫙 <b>Gran's jar</b>: ${J.pen} pentaja${J.zir ? ` and ${J.zir} zirnet` : ''}. Today Dov would give about ${doses} ${icon('dri', 'sm')} medicine for it. It stays at home: it pays for medicine when someone is sick, and in an emergency.`, 4000); };
 }
 function blurb(g) { return g === 'dri' ? 'Dov grows it. Two of them cure a sickness. Wilts after 4 days.' : g === 'lum' ? 'One feeds your family for a night. Goes mushy after 3 days.' : GOODS[g].blurb; }
 
@@ -1104,7 +1146,8 @@ function renderPack() {
 
 function jarHTML() {
   const F = Sim.family(S.w), J = F.jar;
-  const use = F.sick ? `${KIN[F.who]} is sick: the jar can pay Dov for medicine.` : S.w.caveDay && S.w.day >= S.w.caveDay ? 'Hesk may swap zirnet for it.' : 'Only for emergencies, like medicine.';
+  if (!F.jarShown) return '';
+  const use = F.sick ? `${KIN[F.who]} is sick: the jar can pay Dov for medicine.` : F.storm ? 'The storm: the jar can pay Mira for food.' : S.w.caveDay && S.w.day >= S.w.caveDay ? 'Hesk may swap zirnet for it.' : 'Only for emergencies, like medicine.';
   return `<div class="jar-row">🫙 <div><b>Gran's jar</b> · ${J.pen} ${icon('pen', 'sm')}${J.zir ? ` ${J.zir} ${icon('zir', 'sm')}` : ''} · buys about <b>${F.jarDoses}</b> ${icon('dri', 'sm')} medicine mushrooms today<div class="meta">${use}</div></div></div>`;
 }
 
@@ -1263,7 +1306,8 @@ function priceChange(a, b) {
 // Pentaja per lumfruit: a = before the cave (average), b = the last 3 days.
 function lumRise() {
   const H = S.w.history, avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
-  return { a: avg(H.slice(1, S.w.caveDay).map(h => h.price.pen).filter(v => v != null)), b: avg(H.slice(-3).map(h => h.price.pen).filter(v => v != null)) };
+  const st = S.w.storm, calm = h => !st || h.day < st.from || h.day > st.to;   // the storm's scarcity prices aren't "before the cave" prices
+  return { a: avg(H.slice(1, S.w.caveDay).filter(calm).map(h => h.price.pen).filter(v => v != null)), b: avg(H.slice(-3).map(h => h.price.pen).filter(v => v != null)) };
 }
 // The jar in days of food (1 lumfruit a day), before the cave and now, at the basket prices the card just showed.
 function jarFood(a, b) {
@@ -1277,7 +1321,7 @@ function checkStory(then) {
   const w = S.w, f = S.flags, F = w.family;
   const fire = (key, html, ok, after, alt, cls) => {
     f[key] = true;
-    sfx({ refusal: 'nope', indirect: 'tada', money: 'chime', wren: 'thud', inflation: 'sad', zir: 'chime', end: 'fanfare' }[key] || 'pop');
+    sfx({ refusal: 'nope', indirect: 'tada', money: 'chime', storm: 'thud', wren: 'thud', inflation: 'sad', zir: 'chime', end: 'fanfare' }[key] || 'pop');
     // after a card, any other card that's due comes next (so a card on the festival morning can't push the festival back a day)
     const go = fn => () => { renderAll(); if (fn) fn(); if (then) { if (!checkStory(then)) then(); } else checkStory(); };
     music();
@@ -1301,37 +1345,51 @@ function checkStory(then) {
       <p>Your family has no use for ${icon(x)} <b>${GN(x).toLowerCase()}</b>. You took it because ${fans.length ? '<b>' + fans.slice(0, 2).join('</b> and <b>') + '</b>' : 'someone'} will take it for what you really need.</p>
       <p class="big">That's <b class="gold">indirect exchange</b>: taking something not to use, but to trade it on.</p>`);
   }
-  const top = topMoney();
-  if (!f.money && w.day >= 4 && recentMoneyness(top) >= 0.5 && (S.phase === 'market' || S.phase === 'night')) {
+  // Money: the morning the sim says pentaja is steadily taken (Sim's moneyDay). Pentaja isn't the only thing
+  // passing hand to hand, so the card names the runner-up too, from the last 3 days' swaps.
+  if (!f.money && w.moneyDay && w.day >= w.moneyDay && S.phase === 'market') {
+    const top = 'pen', note = Sim.moneyNote(w);
     f.moneyGood = top; todayFlag('money');
     $('#tab-village').hidden = false; $('#tab-village').classList.add('new');
-    const G = GOODS[top];
-    const why = [];
-    if (G.rot === Infinity) why.push('it never rots'); else why.push(`it lasts ${G.rot} days`);
-    if (G.size < 1) why.push('it\'s tiny');
-    if (Sim.VILLAGERS.find(v => v.makes === top).rate < 1) why.push('nobody can make much of it');
-    const liked = Sim.VILLAGERS.some(v => v.keeps && v.keeps[top]) ? ` People already liked owning a few${top === 'pen' ? ', like Gran' : ''}.` : '';
+    const o = note.other, OTHER = {
+      zir: `Hesk's ${icon('zir', 'sm')} <b>zirnet</b> goes from hand to hand too.`,
+      lum: `Even ${icon('lum', 'sm')} <b>lumfruit</b> gets passed on, though it goes mushy in 3 days.`,
+      ket: `${icon('ket', 'sm')} <b>Kettlestone</b> gets passed on too, though it's heavy.`,
+      bog: `Even your ${icon('bog', 'sm')} <b>bogwool</b> gets passed on, though it's bulky.`,
+      dri: `${icon('dri', 'sm')} <b>Driftcap</b> gets passed on too, though it wilts in 4 days.`,
+      snm: `${icon('snm', 'sm')} <b>Snarlmilk</b> gets passed on too, though it sours in 2 days.`,
+    };
     const r = fire('money', `
       <h2>Something is happening in Ulm Hollow</h2>
-      <p>More and more villagers take ${icon(top)} <b>${GN(top).toLowerCase()}</b> with <b>no use for it</b>. They take it because they know <i>others</i> will.</p>
-      ${UI ? `<canvas class="chart inline" id="c-inline" width="680" height="300"></canvas><p class="chart-cap">Villagers who take ${icon(top, 'sm')} ${GN(top).toLowerCase()} as payment, day by day</p>` : ''}
-      <p class="long">Why ${GN(top).toLowerCase()}? ${why.join(', ').replace(/, ([^,]*)$/, ' and $1').replace(/^./, c => c.toUpperCase())}.${liked}</p>
-      <p class="big">A good people take only to trade it on is called <b class="pen">money</b>.</p>
-      <p class="muted">In real life: you can't eat a euro either. You take it because you know the baker will.</p>
-      <p class="quote long">"Money has not been generated by law. In its origin it is a social, and not a state-institution." Carl Menger, <i>On the Origins of Money</i>, 1892</p>`,
+      <p>More and more villagers take ${icon('pen')} <b>pentaja</b> even with <b>no use for it</b>. They take it because they know <i>others</i> will.</p>
+      ${UI ? `<canvas class="chart inline" id="c-inline" width="680" height="300"></canvas><p class="chart-cap">Villagers with no use for ${icon('pen', 'sm')} pentaja who take it as payment, day by day</p>` : ''}
+      ${o ? `<p>${OTHER[o]}</p>` : ''}
+      <p class="big">A good people take only to pass it on is working as <b class="pen">money</b>. Nobody decided it.</p>
+      <p class="muted">In real life: you can't eat a euro either. You take it because you know the baker will.</p>`,
       UI ? 'OK' : 'SHOW ME', UI ? null : () => showTab('village'));
     if (UI) lineChart($('#c-inline'), [{ color: COLORS[top], pts: w.history.map(h => h.moneyness[top]) }], 1, '%');
     return r;
   }
+  // The storm: announced the morning it hits, and not a moment before.
+  if (!f.storm && Sim.stormNow(w) && S.phase === 'market') {
+    const ev = w.events.find(e => e.type === 'storm'), gone = ev ? Object.entries(ev.gone) : [];
+    const here = NPCS.filter(id => w.byId[id].present).map(nm);
+    S.jarNew = true;
+    return fire('storm', `
+      <h2>🌧 A storm!</h2>
+      <p>The river came over its banks in the night. The bogwool pasture is under water: <b>no bogwool</b> until it drains.${gone.length ? ` The flood got into the hut, too: ${gone.map(([g, n]) => `${n} ${icon(g, 'sm')}`).join(' and ')} spoiled.` : ''}</p>
+      <p>Only ${here.join(' and ')} came to market. In this weather they take nothing but crystals you can carry in a pocket.</p>
+      <p>Cold, hungry nights are hard: <b>−2 strength</b>.</p>`, 'OK');
+  }
   if (!f.wren && w.caveDay && w.day >= w.caveDay) {
     return fire('wren', `
       <h2>Wren found a cave full of pentaja</h2>
-      <p>Wren used to dig up one every two days. Now: <b class="pen">ten a day</b>.</p>
+      <p>The storm tore open the hillside. Wren used to dig up one pentaja every two days. Now: <b class="pen">${Sim.ARC.WREN_RATE} a day</b>.</p>
       <p>Wren spends them right away, at the old prices. Soon every pentaja buys less${F.jar.pen ? `, even the ${F.jar.pen} in Gran's jar` : ''}.</p>
       <p class="muted long">Hesk's zirnet can't be found any faster. In an old fable, a wren became king of the birds by riding on the eagle's back. It won without doing the work.</p>`);
   }
-  const rise = w.caveDay && w.day >= w.caveDay + 3 ? lumRise() : null;   // wait (a few days at most) until the rise shows in whole numbers
-  if (!f.inflation && rise && (rise.b > rise.a * 1.25 || w.day >= w.caveDay + 5)) {
+  const rise = w.caveDay && w.day >= w.caveDay + 2 ? lumRise() : null;   // wait (a few days at most) until the rise shows in whole numbers
+  if (!f.inflation && rise && (rise.b > rise.a * 1.25 || w.day >= w.caveDay + 4)) {
     const { a, b } = rise;
     $('#tab-village').classList.add('new');
     return fire('inflation', `
@@ -1375,6 +1433,7 @@ function endScreen() {
   // ...in medicine mushrooms, at Dov's steady prices (as in the strip); ifZir: had it all been in zirnet since before the cave (for the best score)
   const F = Sim.family(w), m = F.trend, mb = { pen: Sim.medPriceBefore(w), zir: Sim.medPriceBefore(w, 'zir') };
   const meds = F.jarDoses, medsBefore = mb.pen && base ? Math.floor(base * D / mb.pen) : null;
+  const keptPen = J.zir && base ? Sim.jarDoses(w, m, { pen: base, zir: 0 }) : null;   // had the jar stayed all pentaja
   const ifZir = mb.pen && mb.zir && m.zir && base ? Math.floor(base / mb.pen * mb.zir * D / m.zir) : null;
   const alive = Sim.FAMILY.length - dead.length;
   const score = sc.fed * 10 + cured * 25 + meds * 5 + alive * 40;
@@ -1389,16 +1448,19 @@ function endScreen() {
   if (dead.length) {
     const names = dead.map(d => KIN[d.who]);
     const bits = dead.map(d => {
+      if (d.cause === 'storm') return `${KIN[d.who]} didn't make it through the cold, hungry nights of the storm.`;
       const e = eps.find(e => e.who === d.who && e.died === d.day);
       if (e && e.afterCave && medsBefore && medsBefore > meds) return `${KIN[d.who]} fell sick after Wren's cave, and the jar that once bought ${medsBefore} mushrooms bought only ${Math.max(meds, 0)}.`;
       if (e && e.afterCave) return `${KIN[d.who]} fell sick after Wren's cave, when every crystal bought less.`;
-      return `${KIN[d.who]} fell sick on night ${e ? e.since : d.day - 1} and didn't get medicine in time.${!e || e.afterCave ? '' : ' The crystals in the jar could have paid Dov for it.'}`;
+      return `${KIN[d.who]} fell sick on night ${e ? e.since : d.day - 1} and didn't get medicine in time.${e && !e.afterCave && w.family.revealDay != null && d.day > w.family.revealDay ? ' The crystals in the jar could have paid Dov for it.' : ''}`;
     });
     memorial = `<p class="memorial">🕯️ ${names.join(' and ')} didn't see the festival. ${bits.join(' ')}</p>`;
   }
-  // the jar, in one sentence: what's in it, and what those crystals bought before the cave and now
-  const jarLine = !J.pen && !J.zir ? `🫙 Gran's jar is empty: its crystals paid Dov for medicine.`
-    : J.zir ? `🫙 You moved Gran's jar into ${icon('zir', 'sm')} zirnet: it holds ${J.zir} zirnet${J.pen ? ` and ${J.pen} pentaja` : ''}.${medsBefore != null ? ` Before Wren's cave, its crystals bought ${mush(medsBefore)} medicine. Now: <b class="zir">${mush(meds)}</b>.` : ` Now it buys ${mush(meds)} medicine.`}`
+  // the jar, in one sentence: what's in it, and what those crystals bought before the cave and now (and in the storm)
+  const SF = w.family.stormFood, sk = SF.pen + SF.zir;
+  const stormLine = sk ? `<p class="cmp jarline">🌧 In the storm, ${sk} crystal${sk === 1 ? '' : 's'} from Gran's jar bought ${SF.lum} ${icon('lum', 'sm')} lumfruit and fed your family.</p>` : '';
+  const jarLine = !J.pen && !J.zir ? `🫙 Gran's jar is empty: its crystals paid for food and medicine.`
+    : J.zir ? `🫙 You moved Gran's jar into ${icon('zir', 'sm')} zirnet: it holds ${J.zir} zirnet${J.pen ? ` and ${J.pen} pentaja` : ''}.${medsBefore != null ? ` Before Wren's cave, its crystals bought ${mush(medsBefore)} medicine. Now: <b class="zir">${mush(meds)}</b>.${keptPen != null && keptPen < meds ? ` Left in pentaja: ${mush(keptPen)}.` : ''}` : ` Now it buys ${mush(meds)} medicine.`}`
     : medsBefore != null ? `🫙 Gran's jar: ${J.pen} ${icon('pen', 'sm')} pentaja. Before Wren's cave: ${mush(medsBefore)} medicine. Now: <b class="pen">${mush(meds)}</b>.`
     : `🫙 Gran's jar: ${J.pen} ${icon('pen', 'sm')} pentaja. Now it buys ${mush(meds)} medicine.`;
   return `<div class="endscreen">
@@ -1409,14 +1471,14 @@ function endScreen() {
       <div class="srow"><span>🍽️ Nights your family ate</span><b>${sc.fed} / ${sc.nights}</b></div>
       <div class="srow"><span>❤️ Made it to the festival</span><b>${alive} / ${Sim.FAMILY.length}</b></div>
       ${eps.length ? `<div class="srow"><span>${icon('dri', 'sm')} Sicknesses cured</span><b>${cured} / ${eps.length}</b></div>` : ''}
-      <p class="cmp jarline">${jarLine}</p>
+      ${stormLine}<p class="cmp jarline">${jarLine}</p>
       <div class="total pixel">SCORE ${score}${isBest && best ? ' <span class="gold">NEW BEST!</span>' : best ? ` <span class="muted">· BEST ${Math.max(best, score)}</span>` : ''}</div>
     </div>
     <h3 class="pixel sub">WHAT YOU SAW</h3>
     <ol class="take">
-      <li>Nobody invented money. People picked the thing that was easiest to pass on.</li>
-      <li>When someone can make lots more of it, each one buys less. That's <b class="pen">inflation</b>.</li>
-      <li>Whoever gets the new money first wins. Savers lose.</li>
+      <li>Nobody invented money. People picked the things that were easiest to pass on. Gran's pretty crystals were worth something before anyone used them as money.</li>
+      <li>Savings are for the days nobody can plan for, like the storm.</li>
+      <li>When someone can make lots more money, each one buys less. That's <b class="pen">inflation</b>. Whoever gets the new money first wins. Savers lose.</li>
     </ol>
     <p class="muted">In real life: euros and dollars aren't dug out of a cave. Central banks and ordinary banks create them, mostly when they lend. When a lot more is made, prices rise and savings buy less.</p>
     <p class="again">Next: <b>EP 02 · Every Wren in History</b>. Or <a href="?seed=${1 + Math.floor(Math.random() * 99)}">🔁 play a new village</a> and beat your score.</p>
@@ -1434,11 +1496,12 @@ const SONGS = {   // calm market; tense after the cave; brighter once the villag
   fest: { bpm: 126, style: 'island', chords: [60, 65, 67, 60], melody: [[72, 74, 76, _, 79, _, 76, _], [77, _, 81, _, 79, 77, 76, _], [74, 76, 77, _, 79, _, 74, _], [72, _, 76, _, 72, _, _, _]] },
 };
 SONGS.mourn = { ...SONGS.sick, bpm: 50 };
+SONGS.storm = { ...SONGS.tense, bpm: 72, arp: [0, 3, 7, 10] };
 const sfx = n => { try { if (window.Chip) Chip.sfx(n); } catch {} };
 // the right loop for this moment (switches only when it changes)
 function music() {
   if (!window.Chip || !S.started || S.eve) return;
-  const w = S.w, s = S.fest ? SONGS.fest : w.family.sick ? SONGS.sick : S.flags.zir ? SONGS.zir : w.caveDay && w.day >= w.caveDay ? SONGS.tense : SONGS.market;
+  const w = S.w, s = S.fest ? SONGS.fest : w.family.sick ? SONGS.sick : Sim.stormNow(w) && S.phase !== 'night' ? SONGS.storm : S.flags.zir ? SONGS.zir : w.caveDay && w.day >= w.caveDay ? SONGS.tense : SONGS.market;
   if (Chip.playing !== s) try { Chip.song(s); } catch {}
 }
 const muteBtn = $('#mute');

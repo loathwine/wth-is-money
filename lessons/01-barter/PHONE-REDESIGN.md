@@ -1,5 +1,7 @@
 # EP 01 · Phone redesign spec
 
+> **Superseded in part (2026-11-09): the jar and storm arc.** The story no longer starts with Gran's jar. Nobody knows about it until the evening of the money card (day 5 or 6), when Gran brings out the pentaja she picked up all her life "because they're pretty". The morning after, a storm hits: no bogwool, the food in the pack spoils, only Mira and Dov come and they take only crystals, and cold hungry nights cost 2 strength. The jar is what gets the family through. Wren's cave comes after the storm, Aunt Ola falls sick 2 nights later, and the festival is on day 13. Gran's first sickness (night 3) is paid from the pack, by barter. Wherever this spec talks about the jar at the start, a festival on day 12 or a cave on day 6, the README EP 01 section and `sim.js` (the ARC constants) are current.
+
 Status: spec, not built yet. Target: 390×844 portrait. Desktop follows wherever it doesn't cost extra.
 Source: the user's own phone playtest ("I didn't finish it"), plus a replay of the same game in phone emulation (`PHONE=1 tools/drive.js`, seed 6). (Note: the game now defaults to seed 39 and the jar numbers changed; see the README EP 01 section for current numbers.)
 

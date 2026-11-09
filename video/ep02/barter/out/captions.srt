@@ -23,18 +23,14 @@ But a swap only works if they want what you have. Today, Mira has lumfruit, but 
 Maybe Sela takes your bogwool for milk, and Mira takes the milk. Find the chain, and dinner is saved.
 
 7
-00:00:43,914 --> 00:00:56,343
-Sometimes someone at home falls sick. They need medicine: two driftcap mushrooms, from Dov. Each night without it, they get weaker. And a person can die.
+00:00:43,914 --> 00:00:49,981
+Sometimes someone at home gets sick. Then they need medicine: two driftcap mushrooms from Dov.
 
 8
-00:00:57,493 --> 00:01:04,375
-Gran's jar holds eight pink pentaja crystals: pretty, not much use. Saved for a rainy day.
+00:00:50,831 --> 00:00:55,014
+The harvest festival is coming soon. Get there with everyone still at the table.
 
 9
-00:01:04,724 --> 00:01:09,464
-The harvest festival is on day twelve. Get there with everyone still at the table.
-
-10
-00:01:10,314 --> 00:01:16,686
+00:00:55,863 --> 00:01:02,235
 There is no money in Ulm Hollow. Not yet. Can you keep your family fed until the festival?
 
